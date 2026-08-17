@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --background: 0 0% 100%; --foreground: 240 10% 3.9%; }
+  .dark { --background: 240 10% 3.9%; --foreground: 0 0% 98%; }
+}
+@layer base {
+  body { @apply bg-white dark:bg-dark-bg text-slate-900 dark:text-slate-50 transition-colors duration-300; }
+}
+@layer utilities {
+  .glass { @apply bg-white/70 dark:bg-dark-surface/70 backdrop-blur-md border border-slate-200 dark:border-dark-border; }
+  .text-gradient { @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-400; }
+}
