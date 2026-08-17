@@ -62,9 +62,12 @@ export function validateOrderForm(data: unknown): {
   }
   
   const errors: Record<string, string> = {};
-  result.error.errors.forEach((err) => {
+  // Gunakan .issues yang kompatibel dengan Zod v3 dan v4
+  result.error.issues.forEach((err) => {
     const field = err.path[0] as string;
-    errors[field] = err.message;
+    if (field) {
+      errors[field] = err.message;
+    }
   });
   
   return { success: false, errors };

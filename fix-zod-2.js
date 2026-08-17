@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const orderValidatorCode = `import { z } from "zod";
+const content = `import { z } from "zod";
 
 /**
  * Zod schema untuk validasi form order
@@ -64,18 +64,21 @@ export function validateOrderForm(data: unknown): {
   }
   
   const errors: Record<string, string> = {};
-  result.error.errors.forEach((err) => {
+  // Gunakan .issues yang kompatibel dengan Zod v3 dan v4
+  result.error.issues.forEach((err) => {
     const field = err.path[0] as string;
-    errors[field] = err.message;
+    if (field) {
+      errors[field] = err.message;
+    }
   });
   
   return { success: false, errors };
 }
 `;
 
-fs.writeFileSync('lib/validators/order.ts', orderValidatorCode, 'utf8');
+fs.writeFileSync('lib/validators/order.ts', content, 'utf8');
 console.log('✅ Fixed: lib/validators/order.ts');
 console.log('\n📌 LANGKAH SELANJUTNYA:');
 console.log('1. git add .');
-console.log('2. git commit -m "fix: Update Zod enum syntax for v4 compatibility"');
+console.log('2. git commit -m "fix: Use Zod .issues instead of .errors for v4 compatibility"');
 console.log('3. git push');
