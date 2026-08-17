@@ -1,15 +1,11 @@
 import { config } from "@/data/config";
+import { gasGet, isGasConfigured } from "@/lib/gas-client";
+import { normalizePortfolio } from "./normalizer";
 import { PortfolioProject, PortfolioCategory } from "@/lib/types/portfolio";
-
-/**
- * Portfolio Repository
- * Abstraction layer untuk data portfolio.
- * Saat ini menggunakan local config, nantinya bisa swap ke Google Apps Script.
- */
 
 export interface PortfolioRepository {
   getAll(): Promise<PortfolioProject[]>;
-  getById(id: number): Promise<PortfolioProject | null>;
+  getById(id: number | string): Promise<PortfolioProject | null>;
   getBySlug(slug: string): Promise<PortfolioProject | null>;
   getFeatured(): Promise<PortfolioProject[]>;
   getCategories(): Promise<PortfolioCategory[]>;
@@ -17,7 +13,6 @@ export interface PortfolioRepository {
   filterByCategory(category: string): Promise<PortfolioProject[]>;
 }
 
-// Helper: generate slug from title
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -25,78 +20,95 @@ export function generateSlug(title: string): string {
     .replace(/^-|-$/g, "");
 }
 
-class LocalPortfolioRepository implements PortfolioRepository {
-  async getAll(): Promise<PortfolioProject[]> {
-    // TODO: Nantinya fetch dari Google Apps Script
-    // const response = await apiClient.get<PortfolioProject[]>("/portfolio");
-    // if (response.success && response.data) return response.data;
-    
-    // Fallback ke local config
-    return config.portfolio.filter(p => p.published);
+/**
+ * Hybrid Repository:
+ * 1. Coba ambil dari Google Apps Script (Google Sheets)
+ * 2. Jika gagal / belum dikonfigurasi → fallback ke data/config.ts
+ */
+class HybridPortfolioRepository implements PortfolioRepository {
+  private async fetchFromGas(): Promise<PortfolioProject[] | null> {
+    if (!isGasConfigured()) return null;
+    try {
+      const res = await gasGet<any[]>("getPortfolio");
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map(normalizePortfolio).filter((p) => p.published);
+      }
+      return null;
+    } catch {
+      return null;
+    }
   }
 
-  async getById(id: number): Promise<PortfolioProject | null> {
+  async getAll(): Promise<PortfolioProject[]> {
+    const remote = await this.fetchFromGas();
+    if (remote) return remote;
+    return config.portfolio.filter((p) => p.published);
+  }
+
+  async getById(id: number | string): Promise<PortfolioProject | null> {
     const all = await this.getAll();
-    return all.find(p => p.id === id) || null;
+    return all.find((p) => String(p.id) === String(id)) || null;
   }
 
   async getBySlug(slug: string): Promise<PortfolioProject | null> {
+    // Coba endpoint khusus dulu (include images gallery)
+    if (isGasConfigured()) {
+      try {
+        const res = await gasGet<any>("getPortfolioBySlug", { slug });
+        if (res.success && res.data) return normalizePortfolio(res.data);
+      } catch {
+        // fallback di bawah
+      }
+    }
     const all = await this.getAll();
-    return all.find(p => generateSlug(p.title) === slug) || null;
+    return all.find((p) => generateSlug(p.title) === slug) || null;
   }
 
   async getFeatured(): Promise<PortfolioProject[]> {
     const all = await this.getAll();
-    return all.filter(p => p.featured).slice(0, 3);
+    return all.filter((p) => p.featured).slice(0, 3);
   }
 
   async getCategories(): Promise<PortfolioCategory[]> {
+    if (isGasConfigured()) {
+      try {
+        const res = await gasGet<PortfolioCategory[]>("getPortfolioCategories");
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
+      } catch {
+        // fallback di bawah
+      }
+    }
     const all = await this.getAll();
-    const categoryMap = new Map<string, number>();
-    
-    all.forEach(p => {
-      categoryMap.set(p.category, (categoryMap.get(p.category) || 0) + 1);
-    });
-
+    const map = new Map<string, number>();
+    all.forEach((p) => map.set(p.category, (map.get(p.category) || 0) + 1));
     const categories: PortfolioCategory[] = [
-      {
-        id: "all",
-        name: "Semua",
-        slug: "all",
-        count: all.length,
-      },
+      { id: "all", name: "Semua", slug: "all", count: all.length },
     ];
-
-    categoryMap.forEach((count, name) => {
-      categories.push({
-        id: generateSlug(name),
-        name,
-        slug: generateSlug(name),
-        count,
-      });
+    map.forEach((count, name) => {
+      categories.push({ id: generateSlug(name), name, slug: generateSlug(name), count });
     });
-
     return categories;
   }
 
   async search(query: string): Promise<PortfolioProject[]> {
     const all = await this.getAll();
-    const lowerQuery = query.toLowerCase();
-    
-    return all.filter(p => 
-      p.title.toLowerCase().includes(lowerQuery) ||
-      p.description.toLowerCase().includes(lowerQuery) ||
-      p.technologies.some(t => t.toLowerCase().includes(lowerQuery)) ||
-      p.category.toLowerCase().includes(lowerQuery)
+    const q = query.toLowerCase();
+    return all.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.technologies.some((t) => t.toLowerCase().includes(q)) ||
+        p.category.toLowerCase().includes(q)
     );
   }
 
   async filterByCategory(category: string): Promise<PortfolioProject[]> {
     const all = await this.getAll();
     if (category === "Semua" || category === "all") return all;
-    return all.filter(p => p.category === category);
+    return all.filter((p) => p.category === category);
   }
 }
 
-// Export singleton instance
-export const portfolioRepository = new LocalPortfolioRepository();
+export const portfolioRepository = new HybridPortfolioRepository();

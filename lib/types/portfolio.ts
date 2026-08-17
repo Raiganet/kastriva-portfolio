@@ -1,9 +1,9 @@
 /**
  * Interface untuk data project portfolio
- * Sesuaikan dengan struktur data di Google Sheets nantinya
+ * Kompatibel dengan local config DAN Google Sheets (GAS)
  */
 export interface PortfolioProject {
-  id: number;
+  id: number | string;
   title: string;
   category: string;
   description: string;
@@ -24,9 +24,6 @@ export interface PortfolioProject {
   updatedAt: string;
 }
 
-/**
- * Interface untuk kategori portfolio
- */
 export interface PortfolioCategory {
   id: string;
   name: string;
@@ -34,9 +31,6 @@ export interface PortfolioCategory {
   count: number;
 }
 
-/**
- * Interface untuk statistik dashboard
- */
 export interface DashboardStats {
   totalPortfolio: number;
   completedProjects: number;

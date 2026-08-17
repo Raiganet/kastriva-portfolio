@@ -1,11 +1,6 @@
 import { OrderFormData } from "@/lib/validators/order";
 import { getWhatsAppLink } from "@/data/config";
-
-/**
- * Order Repository
- * Menangani submission order.
- * Saat ini kirim ke WhatsApp, nantinya bisa simpan ke Google Sheets via GAS.
- */
+import { gasPost, isGasConfigured } from "@/lib/gas-client";
 
 export interface OrderRepository {
   submit(data: OrderFormData): Promise<{
@@ -17,22 +12,18 @@ export interface OrderRepository {
   generateOrderNumber(): Promise<string>;
 }
 
-class LocalOrderRepository implements OrderRepository {
-  /**
-   * Generate order number dengan format: KAS-YYYY-NNNN
-   * Saat ini pakai timestamp, nantinya auto-increment dari Google Sheets
-   */
+/**
+ * Hybrid Order Repository:
+ * 1. Simpan order ke Google Sheets via GAS (jika dikonfigurasi)
+ * 2. Tetap buka WhatsApp dengan pesan terformat (order number dari Sheets)
+ */
+class HybridOrderRepository implements OrderRepository {
   async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
     const timestamp = Date.now().toString().slice(-4);
     return `KAS-${year}-${timestamp}`;
   }
 
-  /**
-   * Submit order
-   * Saat ini: format pesan WhatsApp
-   * Nantinya: POST ke Google Apps Script + kirim WhatsApp
-   */
   async submit(data: OrderFormData): Promise<{
     success: boolean;
     orderNumber?: string;
@@ -40,13 +31,29 @@ class LocalOrderRepository implements OrderRepository {
     error?: string;
   }> {
     try {
-      const orderNumber = await this.generateOrderNumber();
-      
-      // TODO: Nantinya POST ke GAS
-      // const response = await apiClient.post("/orders", { ...data, orderNumber });
-      // if (!response.success) throw new Error(response.error);
+      let orderNumber = "";
 
-      // Format pesan WhatsApp
+      // 1. Coba simpan ke Google Sheets
+      if (isGasConfigured()) {
+        try {
+          const res = await gasPost<{ orderNumber: string; id: string }>({
+            action: "createOrder",
+            ...data,
+          });
+          if (res.success && res.data && res.data.orderNumber) {
+            orderNumber = res.data.orderNumber;
+          }
+        } catch {
+          // GAS gagal → lanjut dengan nomor lokal
+        }
+      }
+
+      // 2. Fallback nomor lokal
+      if (!orderNumber) {
+        orderNumber = await this.generateOrderNumber();
+      }
+
+      // 3. Format pesan WhatsApp
       const message = `Halo Kastriva 👋
 
 Saya ingin berkonsultasi mengenai project.
@@ -71,21 +78,10 @@ ${data.features || "-"}
 
 Terima kasih.`;
 
-      const whatsappUrl = getWhatsAppLink(message);
-
-      // Track event (siap untuk Google Analytics)
-      if (typeof window !== "undefined" && (window as any).trackEvent) {
-        (window as any).trackEvent("order_submitted", {
-          orderNumber,
-          projectType: data.type,
-          budget: data.budget,
-        });
-      }
-
       return {
         success: true,
         orderNumber,
-        whatsappUrl,
+        whatsappUrl: getWhatsAppLink(message),
       };
     } catch (error) {
       return {
@@ -96,4 +92,4 @@ Terima kasih.`;
   }
 }
 
-export const orderRepository = new LocalOrderRepository();
+export const orderRepository = new HybridOrderRepository();

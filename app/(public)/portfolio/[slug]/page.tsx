@@ -2,22 +2,19 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { config } from "@/data/config";
 import PortfolioDetailView from "@/components/portfolio/PortfolioDetailView";
+import { getServerPortfolioBySlug } from "@/lib/server/portfolio.server";
 
-function generateSlug(title: string): string {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
+// Revalidasi tiap 60 detik agar data Sheets tidak stale
+export const revalidate = 60;
 
 interface PortfolioDetailProps {
   params: { slug: string };
 }
 
-// generateMetadata HANYA boleh ada di Server Component
 export async function generateMetadata({
   params,
 }: PortfolioDetailProps): Promise<Metadata> {
-  const project = config.portfolio.find(
-    (p) => generateSlug(p.title) === params.slug
-  );
+  const project = await getServerPortfolioBySlug(params.slug);
 
   if (!project) {
     return { title: "Project Not Found" };
@@ -34,11 +31,10 @@ export async function generateMetadata({
   };
 }
 
-// Page Component (Server) yang me-render Client Component
-export default function PortfolioDetailPage({ params }: PortfolioDetailProps) {
-  const project = config.portfolio.find(
-    (p) => generateSlug(p.title) === params.slug
-  );
+export default async function PortfolioDetailPage({
+  params,
+}: PortfolioDetailProps) {
+  const project = await getServerPortfolioBySlug(params.slug);
 
   if (!project) {
     notFound();
