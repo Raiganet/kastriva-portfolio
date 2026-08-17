@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Package,
   Users,
+  FolderKanban,
   LogOut,
   ExternalLink,
   ShieldCheck,
@@ -15,6 +16,7 @@ import { config } from "@/data/config";
 const menu = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Orders", href: "/admin/orders", icon: Package },
+  { name: "Projects", href: "/admin/projects", icon: FolderKanban },
   { name: "Customers", href: "/admin/customers", icon: Users },
 ];
 
