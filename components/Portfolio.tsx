@@ -1,11 +1,10 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ExternalLink, Calendar, Image as ImageIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePortfolio } from "@/lib/hooks/usePortfolio";
 import { PortfolioService } from "@/lib/services/portfolio.service";
-import { LoadingSpinner, EmptyState, ErrorState } from "@/components/ui";
+import { EmptyState, ErrorState, ImageWithFallback, PortfolioGridSkeleton } from "@/components/ui";
 import { PortfolioProject } from "@/lib/types/portfolio";
 
 function generateSlug(title: string): string {
@@ -37,10 +36,13 @@ export default function Portfolio() {
     return (
       <section id="portfolio" className="py-20 bg-slate-50 dark:bg-dark-surface/50">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center py-20">
-            <LoadingSpinner size="lg" />
-            <p className="mt-4 text-slate-600 dark:text-slate-400">Memuat portfolio...</p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Project yang Pernah Saya Buat</h2>
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Beberapa hasil kerja terbaik yang telah membantu klien mencapai tujuan digital mereka.
+            </p>
           </div>
+          <PortfolioGridSkeleton count={6} />
         </div>
       </section>
     );
@@ -127,18 +129,20 @@ export default function Portfolio() {
                     onClick={() => handleProjectClick(project)}
                     className="block relative h-48 bg-slate-200 dark:bg-slate-800 overflow-hidden"
                   >
-                    <Image
+                    <ImageWithFallback
                       src={project.image}
                       alt={project.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      onError={(e) => {
-                        // Fallback jika image gagal dimuat
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
+                      fallbackIcon={<ImageIcon className="text-slate-400" size={48} />}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {project.featured && (
+                      <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
+                        ⭐ Featured
+                      </div>
+                    )}
                   </Link>
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
