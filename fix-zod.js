@@ -1,4 +1,6 @@
-import { z } from "zod";
+const fs = require('fs');
+
+const orderValidatorCode = `import { z } from "zod";
 
 /**
  * Zod schema untuk validasi form order
@@ -20,7 +22,7 @@ export const orderFormSchema = z.object({
     .string()
     .min(10, "Nomor WhatsApp minimal 10 digit")
     .max(20, "Nomor WhatsApp maksimal 20 digit")
-    .regex(/^[0-9+\-\s]+$/, "Nomor hanya boleh berisi angka"),
+    .regex(/^[0-9+\\-\\s]+$/, "Nomor hanya boleh berisi angka"),
   type: z.enum([
     "Website",
     "Landing Page",
@@ -69,3 +71,11 @@ export function validateOrderForm(data: unknown): {
   
   return { success: false, errors };
 }
+`;
+
+fs.writeFileSync('lib/validators/order.ts', orderValidatorCode, 'utf8');
+console.log('✅ Fixed: lib/validators/order.ts');
+console.log('\n📌 LANGKAH SELANJUTNYA:');
+console.log('1. git add .');
+console.log('2. git commit -m "fix: Update Zod enum syntax for v4 compatibility"');
+console.log('3. git push');
