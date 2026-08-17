@@ -28,3 +28,16 @@ Data Source (Local Config / Google Apps Script)
 
 ### Swap to Google Apps Script:
 Ketika backend GAS sudah siap (Phase 11), cukup ubah implementasi di `lib/repositories/` tanpa mengubah UI.
+
+
+## 🔌 Phase 5: Google Apps Script Backend
+
+Panduan lengkap ada di `google-apps-script/DEPLOYMENT.md`.
+
+Ringkasan setup:
+1. Buat project di script.google.com
+2. Copy semua file .gs dari folder google-apps-script/
+3. Jalankan setupDatabase() → copy SPREADSHEET_ID ke Config.gs
+4. Deploy sebagai Web App (access: Anyone)
+5. Copy Web App URL ke .env.local (NEXT_PUBLIC_GAS_API_URL)
+6. Test: {URL}?action=health
