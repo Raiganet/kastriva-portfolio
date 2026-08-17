@@ -1,21 +1,27 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Send, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
+import { Send, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { config, getWhatsAppLink } from "@/data/config";
+import { config } from "@/data/config";
+import { useOrder } from "@/lib/hooks/useOrder";
+import { OrderFormData } from "@/lib/validators/order";
+import { trackEvent } from "@/lib/analytics";
 
 function OrderFormContent() {
   const searchParams = useSearchParams();
   const portfolioId = searchParams.get("portfolio");
   const serviceType = searchParams.get("service");
-  
-  const portfolioProject = portfolioId 
-    ? config.portfolio.find(p => String(p.id) === portfolioId)
+
+  const portfolioProject = portfolioId
+    ? config.portfolio.find((p) => String(p.id) === portfolioId)
     : null;
 
-  const [loading, setLoading] = useState(false);
+  const { submit, submitting, lastResult, reset } = useOrder();
   const [success, setSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string>("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const [formData, setFormData] = useState({
     name: "",
     business: "",
@@ -24,43 +30,67 @@ function OrderFormContent() {
     type: serviceType || (portfolioProject ? portfolioProject.category : "Website"),
     budget: "",
     deadline: "",
-    description: portfolioProject ? `Saya tertarik dengan konsep project "${portfolioProject.title}" dan ingin membuat website serupa.` : "",
+    description: portfolioProject
+      ? `Saya tertarik dengan konsep project "${portfolioProject.title}" dan ingin membuat website serupa.`
+      : "",
     features: portfolioProject ? portfolioProject.features.join(", ") : "",
     reference: portfolioProject ? portfolioProject.title : "",
+    website: "", // Honeypot field
   });
 
   useEffect(() => {
     if (serviceType) {
-      setFormData(prev => ({ ...prev, type: serviceType }));
+      setFormData((prev) => ({ ...prev, type: serviceType }));
     }
   }, [serviceType]);
 
+  useEffect(() => {
+    trackEvent("order_started", {
+      source: portfolioProject ? "portfolio" : "direct",
+      portfolioId: portfolioId || undefined,
+    });
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const message = `Halo Kastriva, saya ingin memesan jasa pembuatan *${formData.type}*.
-    
-*Detail Project:*
-- Nama: ${formData.name}
-- Bisnis: ${formData.business}
-- Email: ${formData.email}
-- WhatsApp: ${formData.whatsapp}
-- Budget: ${formData.budget || "Belum ditentukan"}
-- Deadline: ${formData.deadline || "Fleksibel"}
-- Referensi: ${formData.reference || "Tidak ada"}
-- Deskripsi: ${formData.description}
-- Fitur Dibutuhkan: ${formData.features || "-"}`;
-    
-    window.open(getWhatsAppLink(message), "_blank");
-    
-    setLoading(false);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 5000);
+    setFieldErrors({});
+    reset();
+
+    const result = await submit(formData);
+
+    if (result.success && result.whatsappUrl && result.orderNumber) {
+      setOrderNumber(result.orderNumber);
+      setSuccess(true);
+      // Buka WhatsApp di tab baru
+      window.open(result.whatsappUrl, "_blank");
+      // Reset form setelah 3 detik
+      setTimeout(() => {
+        setFormData({
+          name: "",
+          business: "",
+          email: "",
+          whatsapp: "",
+          type: "Website",
+          budget: "",
+          deadline: "",
+          description: "",
+          features: "",
+          reference: "",
+          website: "",
+        });
+        setSuccess(false);
+      }, 5000);
+    } else if (result.errors) {
+      setFieldErrors(result.errors);
+    }
   };
 
-  const inputClass = "w-full px-4 py-3 rounded-xl bg-white dark:bg-dark-bg border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm";
+  const inputClass = (field: string) =>
+    `w-full px-4 py-3 rounded-xl bg-white dark:bg-dark-bg border ${
+      fieldErrors[field]
+        ? "border-red-500 focus:ring-red-500"
+        : "border-slate-200 dark:border-slate-700 focus:ring-primary-500"
+    } focus:outline-none focus:ring-2 transition-all text-sm`;
 
   return (
     <div className="container mx-auto px-4 md:px-6 max-w-4xl">
@@ -94,76 +124,185 @@ function OrderFormContent() {
         className="bg-white dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 space-y-5"
       >
         {success && (
-          <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-4 rounded-xl flex items-center gap-3 border border-green-200 dark:border-green-800">
-            <CheckCircle size={20} /> Data berhasil dikirim! Anda akan diarahkan ke WhatsApp.
+          <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-4 rounded-xl flex items-start gap-3 border border-green-200 dark:border-green-800">
+            <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">Order berhasil dikirim!</p>
+              <p className="text-sm mt-1">
+                Nomor Order: <span className="font-mono">{orderNumber}</span>
+              </p>
+              <p className="text-sm">WhatsApp telah dibuka di tab baru.</p>
+            </div>
+          </div>
+        )}
+
+        {lastResult?.error && !success && (
+          <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 border border-red-200 dark:border-red-800">
+            <AlertCircle size={20} />
+            <p>{lastResult.error}</p>
           </div>
         )}
 
         <div className="grid md:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium mb-2">Nama Lengkap *</label>
-            <input required type="text" className={inputClass} value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+            <input
+              required
+              type="text"
+              className={inputClass("name")}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+            {fieldErrors.name && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Nama Bisnis</label>
-            <input type="text" className={inputClass} value={formData.business} onChange={e => setFormData({ ...formData, business: e.target.value })} />
+            <input
+              type="text"
+              className={inputClass("business")}
+              value={formData.business}
+              onChange={(e) => setFormData({ ...formData, business: e.target.value })}
+            />
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium mb-2">Email *</label>
-            <input required type="email" className={inputClass} value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+            <input
+              required
+              type="email"
+              className={inputClass("email")}
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+            {fieldErrors.email && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">WhatsApp *</label>
-            <input required type="tel" className={inputClass} value={formData.whatsapp} onChange={e => setFormData({ ...formData, whatsapp: e.target.value })} />
+            <input
+              required
+              type="tel"
+              className={inputClass("whatsapp")}
+              value={formData.whatsapp}
+              onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+            />
+            {fieldErrors.whatsapp && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.whatsapp}</p>
+            )}
           </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
           <div>
             <label className="block text-sm font-medium mb-2">Jenis Project *</label>
-            <select required className={inputClass} value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}>
-              {["Website", "Landing Page", "Company Profile", "Web App", "Dashboard", "Sistem Informasi", "Android App", "Custom"].map(t => (
-                <option key={t} value={t}>{t}</option>
+            <select
+              required
+              className={inputClass("type")}
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            >
+              {[
+                "Website",
+                "Landing Page",
+                "Company Profile",
+                "Web App",
+                "Dashboard",
+                "Sistem Informasi",
+                "Android App",
+                "Custom",
+              ].map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Budget</label>
-            <select className={inputClass} value={formData.budget} onChange={e => setFormData({ ...formData, budget: e.target.value })}>
+            <select
+              className={inputClass("budget")}
+              value={formData.budget}
+              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+            >
               <option value="">Pilih Range</option>
-              <option value="< 5 Juta">{'<'} 5 Juta</option>
+              <option value="< 5 Juta">{"<"} 5 Juta</option>
               <option value="5 - 15 Juta">5 - 15 Juta</option>
               <option value="15 - 50 Juta">15 - 50 Juta</option>
-              <option value="> 50 Juta">{'>'} 50 Juta</option>
+              <option value="> 50 Juta">{">"} 50 Juta</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Deadline</label>
-            <input type="text" placeholder="Contoh: 1 bulan" className={inputClass} value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} />
+            <input
+              type="text"
+              placeholder="Contoh: 1 bulan"
+              className={inputClass("deadline")}
+              value={formData.deadline}
+              onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+            />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Deskripsi *</label>
-          <textarea required rows={4} className={inputClass} placeholder="Jelaskan kebutuhan Anda..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+          <textarea
+            required
+            rows={4}
+            className={inputClass("description")}
+            placeholder="Jelaskan kebutuhan Anda (minimal 20 karakter)..."
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+          {fieldErrors.description && (
+            <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Fitur yang Dibutuhkan</label>
-          <input type="text" className={inputClass} placeholder="Contoh: Login, Payment Gateway" value={formData.features} onChange={e => setFormData({ ...formData, features: e.target.value })} />
+          <input
+            type="text"
+            className={inputClass("features")}
+            placeholder="Contoh: Login, Payment Gateway"
+            value={formData.features}
+            onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+          />
+        </div>
+
+        {/* Honeypot - hidden from users, trap for bots */}
+        <div style={{ display: "none" }} aria-hidden="true">
+          <label>Website</label>
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={formData.website}
+            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+          />
         </div>
 
         <button
-          disabled={loading}
+          disabled={submitting}
           type="submit"
           className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/20"
         >
-          {loading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
-          {loading ? "Mengirim..." : "Kirim Permintaan Project"}
+          {submitting ? (
+            <Loader2 className="animate-spin" size={20} />
+          ) : (
+            <Send size={20} />
+          )}
+          {submitting ? "Mengirim..." : "Kirim Permintaan Project"}
         </button>
+
+        <p className="text-xs text-center text-slate-500 mt-4">
+          *Data Anda aman. Kami akan membalas dalam waktu 1x24 jam pada hari kerja.
+        </p>
       </motion.form>
     </div>
   );
@@ -171,7 +310,13 @@ function OrderFormContent() {
 
 export default function SmartOrderForm() {
   return (
-    <Suspense fallback={<div className="py-20 text-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="py-20 text-center">
+          <Loader2 className="animate-spin mx-auto" size={32} />
+        </div>
+      }
+    >
       <OrderFormContent />
     </Suspense>
   );
