@@ -1,5 +1,5 @@
 import { config } from "@/data/config";
-import { Instagram, Github, Globe, MessageCircle } from "lucide-react";
+import { Instagram, Github, Globe, MessageCircle, Package } from "lucide-react";
 import Link from "next/link";
 
 export default function Footer() {
@@ -32,10 +32,24 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-4">Kontak</h4>
-            <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-              <li className="flex items-center gap-2"><MessageCircle size={16} /> {config.brand.whatsapp}</li>
-              <li className="flex items-center gap-2"><Globe size={16} /> {config.brand.email}</li>
+            <h4 className="font-bold mb-4">Customer</h4>
+            <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <li>
+                <Link href="/order" className="hover:text-primary-600 transition-colors flex items-center gap-1">
+                  Mulai Project
+                </Link>
+              </li>
+              <li>
+                <Link href="/order/track" className="hover:text-primary-600 transition-colors flex items-center gap-1">
+                  <Package size={14} /> Lacak Order
+                </Link>
+              </li>
+              <li className="flex items-center gap-2 pt-2">
+                <MessageCircle size={14} /> {config.brand.whatsapp}
+              </li>
+              <li className="flex items-center gap-2">
+                <Globe size={14} /> {config.brand.email}
+              </li>
             </ul>
           </div>
         </div>

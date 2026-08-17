@@ -1,0 +1,64 @@
+/**
+ * Router - Handle all API endpoints (UPDATED)
+ */
+
+const Router = {
+  handle: function(action, params, body, method) {
+    // Public endpoints
+    const publicActions = [
+      'getPortfolio',
+      'getPortfolioBySlug',
+      'getPortfolioCategories',
+      'getServices',
+      'getSettings',
+      'createOrder',
+      'getOrderByNumber',  // <-- BARU
+      'health'
+    ];
+    
+    // Protected endpoints
+    const protectedActions = [
+      'getOrders', 'getOrder', 'updateOrderStatus',
+      'getCustomers', 'getCustomer',
+      'getProjects', 'getProject', 'createProjectUpdate',
+      'createQuotation', 'getQuotations',
+      'createInvoice', 'getInvoices',
+      'sendMessage', 'getMessages',
+      'uploadFile',
+      'getNotifications', 'markNotificationRead'
+    ];
+    
+    if (!publicActions.includes(action) && !protectedActions.includes(action)) {
+      return { success: false, error: 'Invalid action: ' + action };
+    }
+    
+    if (protectedActions.includes(action)) {
+      const authResult = Auth.verifyToken(params.token || body.token);
+      if (!authResult.success) {
+        return { success: false, error: 'Unauthorized: ' + authResult.error };
+      }
+    }
+    
+    switch(action) {
+      case 'health':
+        return { success: true, data: { status: 'ok', timestamp: new Date().toISOString() } };
+      case 'getPortfolio':
+        return Portfolio.getAll(params);
+      case 'getPortfolioBySlug':
+        return Portfolio.getBySlug(params.slug);
+      case 'getPortfolioCategories':
+        return Portfolio.getCategories();
+      case 'getServices':
+        return Services.getAll();
+      case 'getSettings':
+        return Settings.getAll();
+      case 'createOrder':
+        return Orders.create(body);
+      case 'getOrderByNumber':  // <-- BARU
+        return Orders.getByOrderNumber(params.orderNumber);
+      // ... (protected endpoints tetap sama)
+      default:
+        return { success: false, error: 'Action not implemented: ' + action };
+    }
+  }
+};

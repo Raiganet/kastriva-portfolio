@@ -1,0 +1,5 @@
+// TAMBAHKAN CASE INI KE SWITCH DI Router.gs, di bagian public actions:
+// case 'getOrderByNumber':
+//   return Orders.getByOrderNumber(params.orderNumber);
+// 
+// JUGA TAMBAHKAN 'getOrderByNumber' KE ARRAY publicActions

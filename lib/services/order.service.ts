@@ -1,10 +1,6 @@
 import { orderRepository } from "@/lib/repositories/order.repo";
 import { OrderFormData, validateOrderForm } from "@/lib/validators/order";
-
-/**
- * Order Service
- * Business logic untuk order system.
- */
+import { OrderTrackingResult } from "@/lib/types/order";
 
 export interface SubmitOrderResult {
   success: boolean;
@@ -15,51 +11,69 @@ export interface SubmitOrderResult {
 }
 
 export class OrderService {
-  /**
-   * Submit order dengan validasi
-   */
   static async submit(data: unknown): Promise<SubmitOrderResult> {
-    // Step 1: Validasi
     const validation = validateOrderForm(data);
     if (!validation.success) {
-      return {
-        success: false,
-        errors: validation.errors,
-      };
+      return { success: false, errors: validation.errors };
     }
 
-    // Step 2: Honeypot check (anti-spam)
+    // Honeypot
     if ((data as any).website && (data as any).website.length > 0) {
-      return {
-        success: false,
-        error: "Spam detected",
-      };
+      return { success: false, error: "Spam detected" };
     }
 
-    // Step 3: Rate limiting (client-side check)
-    const lastSubmit = localStorage.getItem("lastOrderSubmit");
-    const now = Date.now();
-    if (lastSubmit && now - parseInt(lastSubmit) < 30000) {
-      return {
-        success: false,
-        error: "Terlalu cepat. Silakan tunggu 30 detik sebelum mengirim lagi.",
-      };
+    // Rate limit (client-side only, server-side validated di GAS)
+    if (typeof window !== "undefined") {
+      const lastSubmit = localStorage.getItem("lastOrderSubmit");
+      const now = Date.now();
+      if (lastSubmit && now - parseInt(lastSubmit) < 30000) {
+        return {
+          success: false,
+          error: "Terlalu cepat. Silakan tunggu 30 detik.",
+        };
+      }
     }
 
-    // Step 4: Submit ke repository
     const result = await orderRepository.submit(validation.data!);
-    
-    if (result.success) {
-      localStorage.setItem("lastOrderSubmit", now.toString());
+
+    if (result.success && typeof window !== "undefined") {
+      localStorage.setItem("lastOrderSubmit", Date.now().toString());
+      // Simpan order number terakhir untuk quick access
+      if (result.orderNumber) {
+        const history = JSON.parse(
+          localStorage.getItem("orderHistory") || "[]"
+        );
+        history.unshift({
+          orderNumber: result.orderNumber,
+          timestamp: new Date().toISOString(),
+          projectType: validation.data!.type,
+        });
+        localStorage.setItem(
+          "orderHistory",
+          JSON.stringify(history.slice(0, 10))
+        );
+      }
     }
 
     return result;
   }
 
-  /**
-   * Generate order number preview
-   */
-  static async previewOrderNumber(): Promise<string> {
-    return orderRepository.generateOrderNumber();
+  static async trackOrder(
+    orderNumber: string
+  ): Promise<OrderTrackingResult | null> {
+    return orderRepository.getByOrderNumber(orderNumber);
+  }
+
+  static getOrderHistory(): Array<{
+    orderNumber: string;
+    timestamp: string;
+    projectType: string;
+  }> {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("orderHistory") || "[]");
+    } catch {
+      return [];
+    }
   }
 }

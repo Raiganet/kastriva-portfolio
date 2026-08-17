@@ -1,0 +1,9 @@
+/**
+ * PENTING: Update function Orders.create di file Orders.gs Anda
+ * 
+ * TAMBAHKAN baris ini SETELAH insert order berhasil:
+ * 
+ *   Orders.sendConfirmationEmail(orderNumber, data);
+ * 
+ * Letakkan setelah sheet.appendRow([...])
+ */

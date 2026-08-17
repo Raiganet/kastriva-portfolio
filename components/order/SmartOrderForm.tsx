@@ -1,15 +1,16 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Send, Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { Send, Loader2, CheckCircle, AlertCircle, Package } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { config } from "@/data/config";
 import { useOrder } from "@/lib/hooks/useOrder";
-import { OrderFormData } from "@/lib/validators/order";
 import { trackEvent } from "@/lib/analytics";
+import Link from "next/link";
 
 function OrderFormContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const portfolioId = searchParams.get("portfolio");
   const serviceType = searchParams.get("service");
 
@@ -18,8 +19,6 @@ function OrderFormContent() {
     : null;
 
   const { submit, submitting, lastResult, reset } = useOrder();
-  const [success, setSuccess] = useState(false);
-  const [orderNumber, setOrderNumber] = useState<string>("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
@@ -35,14 +34,8 @@ function OrderFormContent() {
       : "",
     features: portfolioProject ? portfolioProject.features.join(", ") : "",
     reference: portfolioProject ? portfolioProject.title : "",
-    website: "", // Honeypot field
+    website: "", // Honeypot
   });
-
-  useEffect(() => {
-    if (serviceType) {
-      setFormData((prev) => ({ ...prev, type: serviceType }));
-    }
-  }, [serviceType]);
 
   useEffect(() => {
     trackEvent("order_started", {
@@ -58,30 +51,18 @@ function OrderFormContent() {
 
     const result = await submit(formData);
 
-    if (result.success && result.whatsappUrl && result.orderNumber) {
-      setOrderNumber(result.orderNumber);
-      setSuccess(true);
-      // Buka WhatsApp di tab baru
-      window.open(result.whatsappUrl, "_blank");
-      // Reset form setelah 3 detik
-      setTimeout(() => {
-        setFormData({
-          name: "",
-          business: "",
-          email: "",
-          whatsapp: "",
-          type: "Website",
-          budget: "",
-          deadline: "",
-          description: "",
-          features: "",
-          reference: "",
-          website: "",
-        });
-        setSuccess(false);
-      }, 5000);
+    if (result.success && result.orderNumber) {
+      // Redirect ke success page dengan order number
+      const params = new URLSearchParams();
+      params.set("orderNumber", result.orderNumber);
+      if (result.whatsappUrl) params.set("wa", result.whatsappUrl);
+      router.push(`/order/success?${params.toString()}`);
     } else if (result.errors) {
       setFieldErrors(result.errors);
+      // Scroll to first error
+      const firstErrorField = Object.keys(result.errors)[0];
+      const el = document.querySelector(`[name="${firstErrorField}"]`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -94,6 +75,16 @@ function OrderFormContent() {
 
   return (
     <div className="container mx-auto px-4 md:px-6 max-w-4xl">
+      {/* Quick Track Link */}
+      <div className="flex justify-end mb-4">
+        <Link
+          href="/order/track"
+          className="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+        >
+          <Package size={16} /> Sudah order? Lacak status di sini
+        </Link>
+      </div>
+
       {portfolioProject && (
         <div className="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
           <div className="flex items-center gap-3">
@@ -123,20 +114,7 @@ function OrderFormContent() {
         onSubmit={handleSubmit}
         className="bg-white dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 space-y-5"
       >
-        {success && (
-          <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 p-4 rounded-xl flex items-start gap-3 border border-green-200 dark:border-green-800">
-            <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Order berhasil dikirim!</p>
-              <p className="text-sm mt-1">
-                Nomor Order: <span className="font-mono">{orderNumber}</span>
-              </p>
-              <p className="text-sm">WhatsApp telah dibuka di tab baru.</p>
-            </div>
-          </div>
-        )}
-
-        {lastResult?.error && !success && (
+        {lastResult?.error && (
           <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 border border-red-200 dark:border-red-800">
             <AlertCircle size={20} />
             <p>{lastResult.error}</p>
@@ -148,6 +126,7 @@ function OrderFormContent() {
             <label className="block text-sm font-medium mb-2">Nama Lengkap *</label>
             <input
               required
+              name="name"
               type="text"
               className={inputClass("name")}
               value={formData.name}
@@ -160,6 +139,7 @@ function OrderFormContent() {
           <div>
             <label className="block text-sm font-medium mb-2">Nama Bisnis</label>
             <input
+              name="business"
               type="text"
               className={inputClass("business")}
               value={formData.business}
@@ -173,6 +153,7 @@ function OrderFormContent() {
             <label className="block text-sm font-medium mb-2">Email *</label>
             <input
               required
+              name="email"
               type="email"
               className={inputClass("email")}
               value={formData.email}
@@ -186,6 +167,7 @@ function OrderFormContent() {
             <label className="block text-sm font-medium mb-2">WhatsApp *</label>
             <input
               required
+              name="whatsapp"
               type="tel"
               className={inputClass("whatsapp")}
               value={formData.whatsapp}
@@ -202,6 +184,7 @@ function OrderFormContent() {
             <label className="block text-sm font-medium mb-2">Jenis Project *</label>
             <select
               required
+              name="type"
               className={inputClass("type")}
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -225,6 +208,7 @@ function OrderFormContent() {
           <div>
             <label className="block text-sm font-medium mb-2">Budget</label>
             <select
+              name="budget"
               className={inputClass("budget")}
               value={formData.budget}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
@@ -239,6 +223,7 @@ function OrderFormContent() {
           <div>
             <label className="block text-sm font-medium mb-2">Deadline</label>
             <input
+              name="deadline"
               type="text"
               placeholder="Contoh: 1 bulan"
               className={inputClass("deadline")}
@@ -252,6 +237,7 @@ function OrderFormContent() {
           <label className="block text-sm font-medium mb-2">Deskripsi *</label>
           <textarea
             required
+            name="description"
             rows={4}
             className={inputClass("description")}
             placeholder="Jelaskan kebutuhan Anda (minimal 20 karakter)..."
@@ -266,6 +252,7 @@ function OrderFormContent() {
         <div>
           <label className="block text-sm font-medium mb-2">Fitur yang Dibutuhkan</label>
           <input
+            name="features"
             type="text"
             className={inputClass("features")}
             placeholder="Contoh: Login, Payment Gateway"
@@ -274,7 +261,7 @@ function OrderFormContent() {
           />
         </div>
 
-        {/* Honeypot - hidden from users, trap for bots */}
+        {/* Honeypot */}
         <div style={{ display: "none" }} aria-hidden="true">
           <label>Website</label>
           <input

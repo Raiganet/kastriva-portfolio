@@ -1,6 +1,7 @@
 import { OrderFormData } from "@/lib/validators/order";
 import { getWhatsAppLink } from "@/data/config";
-import { gasPost, isGasConfigured } from "@/lib/gas-client";
+import { gasPost, gasGet, isGasConfigured } from "@/lib/gas-client";
+import { OrderTrackingResult } from "@/lib/types/order";
 
 export interface OrderRepository {
   submit(data: OrderFormData): Promise<{
@@ -10,13 +11,9 @@ export interface OrderRepository {
     error?: string;
   }>;
   generateOrderNumber(): Promise<string>;
+  getByOrderNumber(orderNumber: string): Promise<OrderTrackingResult | null>;
 }
 
-/**
- * Hybrid Order Repository:
- * 1. Simpan order ke Google Sheets via GAS (jika dikonfigurasi)
- * 2. Tetap buka WhatsApp dengan pesan terformat (order number dari Sheets)
- */
 class HybridOrderRepository implements OrderRepository {
   async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
@@ -43,17 +40,15 @@ class HybridOrderRepository implements OrderRepository {
           if (res.success && res.data && res.data.orderNumber) {
             orderNumber = res.data.orderNumber;
           }
-        } catch {
-          // GAS gagal → lanjut dengan nomor lokal
+        } catch (err) {
+          console.warn("GAS submit failed, using local number:", err);
         }
       }
 
-      // 2. Fallback nomor lokal
       if (!orderNumber) {
         orderNumber = await this.generateOrderNumber();
       }
 
-      // 3. Format pesan WhatsApp
       const message = `Halo Kastriva 👋
 
 Saya ingin berkonsultasi mengenai project.
@@ -88,6 +83,19 @@ Terima kasih.`;
         success: false,
         error: error instanceof Error ? error.message : "Gagal mengirim order",
       };
+    }
+  }
+
+  async getByOrderNumber(orderNumber: string): Promise<OrderTrackingResult | null> {
+    if (!isGasConfigured()) return null;
+    try {
+      const res = await gasGet<OrderTrackingResult>("getOrderByNumber", {
+        orderNumber,
+      });
+      if (res.success && res.data) return res.data;
+      return null;
+    } catch {
+      return null;
     }
   }
 }

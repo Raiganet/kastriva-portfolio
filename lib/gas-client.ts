@@ -1,7 +1,6 @@
 /**
  * Google Apps Script API Client
  * CORS-safe: POST menggunakan Content-Type text/plain
- * untuk menghindari preflight request yang tidak didukung GAS.
  */
 
 const GAS_URL = process.env.NEXT_PUBLIC_GAS_API_URL || "";
@@ -10,15 +9,16 @@ export function isGasConfigured(): boolean {
   return GAS_URL.length > 0;
 }
 
+export function getGasUrl(): string {
+  return GAS_URL;
+}
+
 export interface GasResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
 }
 
-/**
- * GET request ke GAS API
- */
 export async function gasGet<T>(
   action: string,
   params: Record<string, string> = {}
@@ -29,7 +29,7 @@ export async function gasGet<T>(
   try {
     const url = new URL(GAS_URL);
     url.searchParams.set("action", action);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
     const res = await fetch(url.toString(), { method: "GET" });
     return (await res.json()) as GasResponse<T>;
   } catch (error) {
@@ -40,9 +40,6 @@ export async function gasGet<T>(
   }
 }
 
-/**
- * POST request ke GAS API
- */
 export async function gasPost<T>(
   payload: Record<string, unknown>
 ): Promise<GasResponse<T>> {
