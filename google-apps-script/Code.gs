@@ -1,41 +1,42 @@
 /**
  * KASTRIVA - Google Apps Script Backend
  * Main entry point
+ *
+ * FIX Phase 7:
+ * - action sekarang dibaca dari URL query (GET) ATAU JSON body (POST)
  */
 
-// Include semua module
-// Note: Di GAS, kita pakai "include" pattern atau langsung define di file ini
-
-/**
- * Handle GET requests
- */
 function doGet(e) {
   return handleRequest(e, 'GET');
 }
 
-/**
- * Handle POST requests
- */
 function doPost(e) {
   return handleRequest(e, 'POST');
 }
 
-/**
- * Main request handler
- */
 function handleRequest(e, method) {
   try {
-    const action = e.parameter.action || '';
+    // 1. Parse body DULU (untuk POST)
+    let body = {};
+    if (method === 'POST' && e.postData && e.postData.contents) {
+      try {
+        body = JSON.parse(e.postData.contents);
+      } catch (parseError) {
+        body = {};
+      }
+    }
+
+    // 2. Action dari query string (GET) atau dari body (POST)
+    const action = e.parameter.action || body.action || '';
     const params = e.parameter;
-    const body = method === 'POST' && e.postData ? JSON.parse(e.postData.contents) : {};
-    
-    // Router
+
+    // 3. Route ke handler
     const response = Router.handle(action, params, body, method);
-    
+
     return ContentService
       .createTextOutput(JSON.stringify(response))
       .setMimeType(ContentService.MimeType.JSON);
-      
+
   } catch (error) {
     return ContentService
       .createTextOutput(JSON.stringify({

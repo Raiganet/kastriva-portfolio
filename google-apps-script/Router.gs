@@ -1,13 +1,25 @@
 /**
- * Router - Handle all API endpoints
+ * KASTRIVA - Router
+ * Handle semua endpoint API
+ * 
+ * UPDATE Phase 7:
+ * - Tambah endpoint publik: getOrderByNumber (untuk customer tracking)
+ * - Tambah endpoint auth: login / logout
  */
 
 const Router = {
-  /**
-   * Main router handler
-   */
+
   handle: function(action, params, body, method) {
-    // Public endpoints (no auth required)
+
+    // ===== ENDPOINT AUTH (tanpa token) =====
+    if (action === 'login') {
+      return Auth.login(body.email, body.password);
+    }
+    if (action === 'logout') {
+      return Auth.logout(params.token || body.token);
+    }
+
+    // ===== PUBLIC ENDPOINTS (tanpa auth) =====
     const publicActions = [
       'getPortfolio',
       'getPortfolioBySlug',
@@ -15,10 +27,11 @@ const Router = {
       'getServices',
       'getSettings',
       'createOrder',
+      'getOrderByNumber',
       'health'
     ];
-    
-    // Protected endpoints (auth required)
+
+    // ===== PROTECTED ENDPOINTS (wajib token admin) =====
     const protectedActions = [
       'getOrders',
       'getOrder',
@@ -38,103 +51,114 @@ const Router = {
       'getNotifications',
       'markNotificationRead'
     ];
-    
-    // Check if action exists
-    if (!publicActions.includes(action) && !protectedActions.includes(action)) {
+
+    // Validasi action
+    if (publicActions.indexOf(action) === -1 && protectedActions.indexOf(action) === -1) {
       return { success: false, error: 'Invalid action: ' + action };
     }
-    
-    // Check auth for protected actions
-    if (protectedActions.includes(action)) {
+
+    // Cek auth untuk protected endpoints
+    if (protectedActions.indexOf(action) !== -1) {
       const authResult = Auth.verifyToken(params.token || body.token);
       if (!authResult.success) {
         return { success: false, error: 'Unauthorized: ' + authResult.error };
       }
     }
-    
-    // Route to handler
-    switch(action) {
-      // Public
+
+    // ===== ROUTING =====
+    switch (action) {
+
+      // ---------- PUBLIC ----------
       case 'health':
-        return { success: true, data: { status: 'ok', timestamp: new Date().toISOString() } };
-      
+        return {
+          success: true,
+          data: {
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            version: Config.APP_VERSION
+          }
+        };
+
       case 'getPortfolio':
         return Portfolio.getAll(params);
-      
+
       case 'getPortfolioBySlug':
         return Portfolio.getBySlug(params.slug);
-      
+
       case 'getPortfolioCategories':
         return Portfolio.getCategories();
-      
+
       case 'getServices':
         return Services.getAll();
-      
+
       case 'getSettings':
         return Settings.getAll();
-      
+
       case 'createOrder':
         return Orders.create(body);
-      
-      // Protected - Orders
+
+      case 'getOrderByNumber':
+        return Orders.getByOrderNumber(params.orderNumber);
+
+      // ---------- PROTECTED: ORDERS ----------
       case 'getOrders':
         return Orders.getAll(params);
-      
+
       case 'getOrder':
         return Orders.getById(params.id);
-      
+
       case 'updateOrderStatus':
         return Orders.updateStatus(body);
-      
-      // Protected - Customers
+
+      // ---------- PROTECTED: CUSTOMERS ----------
       case 'getCustomers':
         return Customers.getAll(params);
-      
+
       case 'getCustomer':
         return Customers.getById(params.id);
-      
-      // Protected - Projects
+
+      // ---------- PROTECTED: PROJECTS ----------
       case 'getProjects':
         return Projects.getAll(params);
-      
+
       case 'getProject':
         return Projects.getById(params.id);
-      
+
       case 'createProjectUpdate':
         return Projects.createUpdate(body);
-      
-      // Protected - Quotations
+
+      // ---------- PROTECTED: QUOTATIONS ----------
       case 'createQuotation':
         return Quotations.create(body);
-      
+
       case 'getQuotations':
         return Quotations.getAll(params);
-      
-      // Protected - Invoices
+
+      // ---------- PROTECTED: INVOICES ----------
       case 'createInvoice':
         return Invoices.create(body);
-      
+
       case 'getInvoices':
         return Invoices.getAll(params);
-      
-      // Protected - Messages
+
+      // ---------- PROTECTED: MESSAGES ----------
       case 'sendMessage':
         return Messages.send(body);
-      
+
       case 'getMessages':
         return Messages.getAll(params);
-      
-      // Protected - Files
+
+      // ---------- PROTECTED: FILES ----------
       case 'uploadFile':
         return Files.upload(body);
-      
-      // Protected - Notifications
+
+      // ---------- PROTECTED: NOTIFICATIONS ----------
       case 'getNotifications':
         return Notifications.getAll(params);
-      
+
       case 'markNotificationRead':
         return Notifications.markRead(body);
-      
+
       default:
         return { success: false, error: 'Action not implemented: ' + action };
     }
