@@ -7,12 +7,9 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { CheckCircle2, Code2, Layout, Smartphone, Server, Wrench, ArrowRight } from "lucide-react";
 import { config, getWhatsAppLink } from "@/data/config";
+import Section from "@/components/Section"; // <-- Tambahkan baris ini
 
-const Section = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <motion.section initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className={className}>
-    {children}
-  </motion.section>
-);
+
 
 export default function Home() {
   const iconMap: Record<string, any> = { Building2: Layout, MousePointerClick: Code2, Globe: Server, Database: Server, Smartphone: Smartphone, Wrench: Wrench };
