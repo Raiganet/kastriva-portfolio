@@ -1,43 +1,107 @@
-# Kastriva Portfolio
+#  Kastriva — Professional Digital Service Platform
 
-Professional Digital Service Platform.
+Website portfolio + sistem bisnis lengkap untuk jasa pembuatan website, web app,
+sistem informasi, dan aplikasi Android.
 
+## ✨ Fitur
 
-## 🏗️ Phase 3: Architecture (Repository Pattern)
+### Public Website
+- Landing page premium (dark/light mode, animasi halus)
+- Portfolio engine: filter, search, detail page, lightbox gallery
+- Order system: validasi Zod, honeypot anti-spam, nomor order unik (KAS-YYYY-NNNN)
+- Order tracking publik dengan timeline visual
+- FAQ + Testimonial (data-driven, placeholder jujur)
+- SEO: sitemap.xml, robots.txt, JSON-LD schema.org, OpenGraph
 
-Website ini menggunakan **3-layer architecture** untuk maintainability dan scalability:
+### Backend (Google Apps Script + Google Sheets)
+- 18 sheet database (setup otomatis via setupDatabase())
+- API router dengan 3 tier auth: public / admin / customer
+- Email otomatis: notifikasi admin, konfirmasi customer, update project, quotation
+- Order → Customer auto-create → Project → Updates → Quotation
+
+### Admin Dashboard (/admin)
+- Login aman (token session server-side, expire 24 jam)
+- Statistik dashboard real-time dari Sheets
+- Order management (search, filter, ubah status)
+- Project management (convert order, kirim update progress)
+- Quotation builder (items, diskon, pajak, total server-side)
+- Customer management
+
+### Customer Dashboard (/customer)
+- Login dengan Email + Nomor Order
+- Pantau orders, projects + timeline progress
+- Approve/reject quotation
+
+## 🛠️ Tech Stack
+Next.js 14 (App Router) • TypeScript • Tailwind CSS • Framer Motion •
+Lucide React • next-themes • Zod • Google Apps Script • Google Sheets
+
+## 📦 Instalasi
+
+```bash
+npm install
+npm run dev
+```
+
+## ⚙️ Environment Variables
 
 ```
-UI Components
-    ↓
-Service Layer (business logic)
-    ↓
-Repository Layer (data source)
-    ↓
-Data Source (Local Config / Google Apps Script)
+NEXT_PUBLIC_GAS_API_URL=https://script.google.com/macros/s/XXXX/exec
+NEXT_PUBLIC_SITE_URL=https://domain-anda.com
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXX   # opsional
 ```
 
-### File Structure:
-- `lib/api-client.ts` - HTTP client abstraction
-- `lib/validators/` - Zod validation schemas
-- `lib/repositories/` - Data source abstraction
-- `lib/services/` - Business logic
-- `lib/hooks/` - Custom React hooks
-- `lib/analytics.ts` - Analytics tracking
-- `components/ui/` - Reusable UI components (Loading, Empty, Error states)
+Set di `.env.local` DAN Vercel (Settings → Environment Variables).
 
-### Swap to Google Apps Script:
-Ketika backend GAS sudah siap (Phase 11), cukup ubah implementasi di `lib/repositories/` tanpa mengubah UI.
+## 🔌 Setup Google Apps Script
 
+1. Buat project di [script.google.com](https://script.google.com)
+2. Copy semua file `.gs` dari folder `google-apps-script/`
+3. Jalankan `setupDatabase()` → copy SPREADSHEET_ID ke `Config.gs`
+4. Ganti `ADMIN_PASSWORD` di `Config.gs`
+5. Deploy → Web app → Execute as: Me → Who has access: **Anyone**
+6. Copy URL `/exec` ke env variable
 
-## 🔌 Phase 5: Google Apps Script Backend
+## 🔐 Kredensial
 
-Panduan lengkap ada di `google-apps-script/DEPLOYMENT.md`.
+- **Admin**: `ADMIN_EMAIL` / `ADMIN_PASSWORD` di Config.gs → login di `/admin`
+- **Customer**: email + nomor order → login di `/customer`
 
-Ringkasan setup:
-1. Buat project di script.google.com
-2. Copy semua file .gs dari folder google-apps-script/
-3. Jalankan setupDatabase() → copy SPREADSHEET_ID ke Config.gs
-4. Deploy sebagai Web App (access: Anyone)
-5. Copy Web App URL ke .env.local (NEXT_PUBLIC_GAS_API_URL)
-6. Test: {URL}?action=health
+## 🗂️ Struktur Data Layer
+
+```
+UI → Service → Repository → API Client → Google Apps Script → Sheets
+```
+
+Repository memiliki fallback ke `data/config.ts` jika GAS belum dikonfigurasi,
+sehingga website tidak pernah blank.
+
+## 📄 Route Map
+
+| Route | Fungsi |
+|---|---|
+| `/` | Homepage |
+| `/portfolio`, `/portfolio/[slug]` | Portfolio + detail |
+| `/order` | Form order |
+| `/order/track` | Lacak order |
+| `/order/success` | Konfirmasi order |
+| `/services`, `/process`, `/about`, `/contact` | Halaman statis |
+| `/admin` | Admin dashboard (protected) |
+| `/customer` | Customer dashboard (protected) |
+
+## 🚀 Deployment (Vercel)
+
+1. Push ke GitHub
+2. Import project di Vercel
+3. Set environment variables
+4. Deploy
+
+## 📝 Mengelola Konten
+
+- **Portfolio/Services/Pricing/FAQ**: edit `data/config.ts` & `data/content.ts`
+  (atau langsung di Google Sheets untuk portfolio setelah GAS aktif)
+- **Brand/WhatsApp/Social**: `data/config.ts` + sheet Settings
+
+---
+
+© 2026 Kastriva. All rights reserved.
