@@ -133,21 +133,33 @@ export default function LoginPageClient() {
 
           {/* Logo */}
           <div className="relative z-10">
-            {logoError ? (
-              <div className="flex items-center gap-3">
-                <img src="/android-chrome-192x192.png" alt="Kastriva" className="w-14 h-14 rounded-2xl" />
-                <span className={`text-2xl font-extrabold tracking-widest ${isAdmin ? "text-white" : "text-slate-900"}`}>
-                  KASTRIVA
-                </span>
-              </div>
-            ) : (
-              <img
-                src="/logo-kastriva.png"
-                alt="Kastriva – Web Developer"
-                className="h-16 lg:h-20 w-auto object-contain"
-                onError={() => setLogoError(true)}
-              />
-            )}
+            <div
+              className={`inline-block p-4 lg:p-5 rounded-2xl transition-all duration-700 ${
+                isAdmin
+                  ? "bg-white/5 border border-white/10"
+                  : "bg-[#050B18] shadow-xl shadow-blue-900/25 ring-1 ring-blue-500/20"
+              }`}
+            >
+              {logoError ? (
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/android-chrome-192x192.png"
+                    alt="Kastriva"
+                    className="w-12 h-12 rounded-xl"
+                  />
+                  <span className="text-2xl font-extrabold tracking-widest text-white">
+                    KASTRIVA
+                  </span>
+                </div>
+              ) : (
+                <img
+                  src="/logo-kastriva.png"
+                  alt="Kastriva – Web Developer"
+                  className="h-12 lg:h-16 w-auto object-contain"
+                  onError={() => setLogoError(true)}
+                />
+              )}
+            </div>
           </div>
 
           <div className="relative z-10 space-y-4">
