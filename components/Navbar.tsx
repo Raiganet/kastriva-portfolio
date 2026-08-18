@@ -44,8 +44,15 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold tracking-tight text-gradient">
-          {config.brand.name}
+        <Link href="/" className="flex items-center gap-2.5">
+          <img
+            src="/android-chrome-192x192.png"
+            alt="Logo Kastriva"
+            className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
+          />
+          <span className="text-xl font-bold tracking-tight text-gradient">
+            {config.brand.name}
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
