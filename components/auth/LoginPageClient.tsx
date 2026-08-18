@@ -136,7 +136,7 @@ export default function LoginPageClient() {
             <div
               className={`inline-block p-4 lg:p-5 rounded-2xl backdrop-blur-xl transition-all duration-700 ${
                 isAdmin
-                  ? "bg-white/5 border border-[#00D9FF]/25 shadow-[0_0_35px_rgba(0,102,255,0.25)]"
+                  ? "bg-transparent border border-transparent"
                   : "bg-[#050B18]/70 border border-[#00D9FF]/40 shadow-[0_0_45px_rgba(0,217,255,0.35)]"
               }`}
             >
