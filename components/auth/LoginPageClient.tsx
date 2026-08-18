@@ -134,10 +134,10 @@ export default function LoginPageClient() {
           {/* Logo */}
           <div className="relative z-10">
             <div
-              className={`inline-block p-4 lg:p-5 rounded-2xl transition-all duration-700 ${
+              className={`inline-block p-4 lg:p-5 rounded-2xl backdrop-blur-xl transition-all duration-700 ${
                 isAdmin
-                  ? "bg-white/5 border border-white/10"
-                  : "bg-[#050B18] shadow-xl shadow-blue-900/25 ring-1 ring-blue-500/20"
+                  ? "bg-white/5 border border-[#00D9FF]/25 shadow-[0_0_35px_rgba(0,102,255,0.25)]"
+                  : "bg-[#050B18]/70 border border-[#00D9FF]/40 shadow-[0_0_45px_rgba(0,217,255,0.35)]"
               }`}
             >
               {logoError ? (
