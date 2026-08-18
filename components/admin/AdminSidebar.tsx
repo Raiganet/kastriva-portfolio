@@ -6,6 +6,7 @@ import {
   Package,
   Users,
   FolderKanban,
+  FileText,
   LogOut,
   ExternalLink,
   ShieldCheck,
@@ -17,6 +18,7 @@ const menu = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Orders", href: "/admin/orders", icon: Package },
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
+  { name: "Quotations", href: "/admin/quotations", icon: FileText },
   { name: "Customers", href: "/admin/customers", icon: Users },
 ];
 
@@ -40,7 +42,6 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white dark:bg-dark-surface border-r border-slate-200 dark:border-slate-800 z-40">
         <div className="p-6 border-b border-slate-200 dark:border-slate-800">
           <Link href="/admin" className="flex items-center gap-2">
@@ -75,22 +76,15 @@ export default function AdminSidebar() {
           <div className="px-4 py-2 text-xs text-slate-500 truncate">
             {session ? session.email : ""}
           </div>
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
+          <Link href="/" className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <ExternalLink size={16} /> Lihat Website
           </Link>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-          >
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
             <LogOut size={16} /> Logout
           </button>
         </div>
       </aside>
 
-      {/* Mobile Top Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-dark-surface border-b border-slate-200 dark:border-slate-800 z-40 flex items-center justify-between px-4">
         <Link href="/admin" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
@@ -103,21 +97,13 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`p-2 rounded-lg ${
-                isActive(item.href)
-                  ? "bg-primary-600 text-white"
-                  : "text-slate-600 dark:text-slate-400"
-              }`}
+              className={`p-2 rounded-lg ${isActive(item.href) ? "bg-primary-600 text-white" : "text-slate-600 dark:text-slate-400"}`}
               aria-label={item.name}
             >
               <item.icon size={18} />
             </Link>
           ))}
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg text-red-600"
-            aria-label="Logout"
-          >
+          <button onClick={handleLogout} className="p-2 rounded-lg text-red-600" aria-label="Logout">
             <LogOut size={18} />
           </button>
         </nav>
