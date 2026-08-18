@@ -8,19 +8,18 @@ export default function CustomerGuard({ children }: { children: React.ReactNode 
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
-  const isLoginPage = pathname === "/customer/login";
 
   useEffect(() => {
-    if (isLoginPage) {
+    if (pathname === "/customer/login") {
       setChecking(false);
       return;
     }
     if (!CustomerAuthService.isLoggedIn()) {
-      router.replace("/customer/login");
+      router.replace("/login");
     } else {
       setChecking(false);
     }
-  }, [router, pathname, isLoginPage]);
+  }, [router, pathname]);
 
   if (checking) {
     return (

@@ -1,4 +1,8 @@
-"use client";
+const fs = require('fs');
+
+console.log('\n🧭 Step 3: Navbar + tombol Login di kanan atas...\n');
+
+const navbar = `"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -54,9 +58,9 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={\`fixed top-0 left-0 right-0 z-50 transition-all duration-300 \${
         scrolled ? "glass shadow-sm py-3" : "bg-transparent py-5"
-      }`}
+      }\`}
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
@@ -75,22 +79,22 @@ export default function Navbar() {
             <Link
               key={link.name}
               href={link.href}
-              className={`text-sm font-medium transition-colors ${
+              className={\`text-sm font-medium transition-colors \${
                 isActive(link.href)
                   ? "text-primary-600 dark:text-primary-400"
                   : "text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
-              }`}
+              }\`}
             >
               {link.name}
             </Link>
           ))}
           <Link
             href="/order/track"
-            className={`text-sm font-medium transition-colors flex items-center gap-1 ${
+            className={\`text-sm font-medium transition-colors flex items-center gap-1 \${
               pathname.startsWith("/order/track")
                 ? "text-primary-600 dark:text-primary-400"
                 : "text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
-            }`}
+            }\`}
           >
             <Package size={14} /> Lacak Order
           </Link>
@@ -161,9 +165,9 @@ export default function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-base font-medium py-2 border-b border-slate-100 dark:border-slate-800 ${
+                  className={\`text-base font-medium py-2 border-b border-slate-100 dark:border-slate-800 \${
                     isActive(link.href) ? "text-primary-600" : ""
-                  }`}
+                  }\`}
                 >
                   {link.name}
                 </Link>
@@ -202,3 +206,20 @@ export default function Navbar() {
     </header>
   );
 }
+`;
+
+fs.writeFileSync('components/Navbar.tsx', navbar, 'utf8');
+console.log('✅ Updated: components/Navbar.tsx');
+
+console.log('\n🎉 Step 3 selesai! Semua langkah login premium complete.');
+console.log('');
+console.log('📌 TEST SEKARANG:');
+console.log('1. npm run dev');
+console.log('2. Buka http://localhost:3000/login');
+console.log('   → Toggle Admin/Customer: tema berubah smooth tanpa reload');
+console.log('   → Admin: email + password | Customer: email + nomor order');
+console.log('3. Buka http://localhost:3000 → kanan atas ada tombol "Login"');
+console.log('   → Setelah login, tombol berubah jadi "Dashboard"');
+console.log('');
+console.log(' DEPLOY:');
+console.log('git add . && git commit -m "Premium split-screen login + navbar login" && git push');

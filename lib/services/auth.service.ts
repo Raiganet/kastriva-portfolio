@@ -8,40 +8,44 @@ export interface AdminSession {
   expiresAt: number;
 }
 
-/**
- * Admin Auth Service
- * Token diverifikasi SERVER-SIDE oleh GAS di setiap request protected.
- * localStorage hanya menyimpan token (bukan role), sehingga aman.
- */
+function store(key: string, value: string, remember: boolean) {
+  if (typeof window === "undefined") return;
+  if (remember) window.localStorage.setItem(key, value);
+  else window.sessionStorage.setItem(key, value);
+}
+
+function read(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(key) || window.sessionStorage.getItem(key);
+}
+
+function clearKey(key: string) {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(key);
+  window.sessionStorage.removeItem(key);
+}
+
 export class AdminAuthService {
   static async login(
     email: string,
-    password: string
+    password: string,
+    remember = true
   ): Promise<{ success: boolean; error?: string }> {
-    const res = await gasPost<AdminSession>({
-      action: "login",
-      email,
-      password,
-    });
-
+    const res = await gasPost<AdminSession>({ action: "login", email, password });
     if (res.success && res.data && res.data.token) {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(TOKEN_KEY, JSON.stringify(res.data));
-      }
+      store(TOKEN_KEY, JSON.stringify(res.data), remember);
       return { success: true };
     }
-
     return { success: false, error: res.error || "Email atau password salah" };
   }
 
   static getSession(): AdminSession | null {
-    if (typeof window === "undefined") return null;
     try {
-      const raw = localStorage.getItem(TOKEN_KEY);
+      const raw = read(TOKEN_KEY);
       if (!raw) return null;
       const session = JSON.parse(raw) as AdminSession;
       if (!session.token || Date.now() > session.expiresAt) {
-        localStorage.removeItem(TOKEN_KEY);
+        clearKey(TOKEN_KEY);
         return null;
       }
       return session;
@@ -51,8 +55,8 @@ export class AdminAuthService {
   }
 
   static getToken(): string | null {
-    const session = this.getSession();
-    return session ? session.token : null;
+    const s = this.getSession();
+    return s ? s.token : null;
   }
 
   static isLoggedIn(): boolean {
@@ -61,11 +65,7 @@ export class AdminAuthService {
 
   static logout(): void {
     const token = this.getToken();
-    if (token) {
-      gasPost({ action: "logout", token }).catch(() => {});
-    }
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(TOKEN_KEY);
-    }
+    if (token) gasPost({ action: "logout", token }).catch(() => {});
+    clearKey(TOKEN_KEY);
   }
 }

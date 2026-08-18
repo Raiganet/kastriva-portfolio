@@ -8,19 +8,18 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
-  const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
-    if (isLoginPage) {
+    if (pathname === "/admin/login") {
       setChecking(false);
       return;
     }
     if (!AdminAuthService.isLoggedIn()) {
-      router.replace("/admin/login");
+      router.replace("/login");
     } else {
       setChecking(false);
     }
-  }, [router, pathname, isLoginPage]);
+  }, [router, pathname]);
 
   if (checking) {
     return (
