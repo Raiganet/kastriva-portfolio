@@ -9,7 +9,6 @@ import {
   FileText,
   LogOut,
   ExternalLink,
-  ShieldCheck,
 } from "lucide-react";
 import { AdminAuthService } from "@/lib/services/auth.service";
 import { config } from "@/data/config";
@@ -45,9 +44,11 @@ export default function AdminSidebar() {
       <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white dark:bg-dark-surface border-r border-slate-200 dark:border-slate-800 z-40">
         <div className="p-6 border-b border-slate-200 dark:border-slate-800">
           <Link href="/admin" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center">
-              <ShieldCheck size={20} className="text-white" />
-            </div>
+            <img
+              src="/android-chrome-192x192.png"
+              alt="Logo Kastriva"
+              className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
+            />
             <div>
               <div className="font-bold text-gradient">{config.brand.name}</div>
               <div className="text-xs text-slate-500">Admin Panel</div>
@@ -87,9 +88,11 @@ export default function AdminSidebar() {
 
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-dark-surface border-b border-slate-200 dark:border-slate-800 z-40 flex items-center justify-between px-4">
         <Link href="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
-            <ShieldCheck size={16} className="text-white" />
-          </div>
+          <img
+            src="/android-chrome-192x192.png"
+            alt="Logo Kastriva"
+            className="w-8 h-8 rounded-lg"
+          />
           <span className="font-bold text-gradient">Admin</span>
         </Link>
         <nav className="flex items-center gap-1">

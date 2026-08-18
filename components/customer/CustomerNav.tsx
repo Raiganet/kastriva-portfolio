@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { UserCircle2, LogOut, ExternalLink, Home } from "lucide-react";
+import { LogOut, ExternalLink, Home } from "lucide-react";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
 import { config } from "@/data/config";
 
@@ -22,9 +22,11 @@ export default function CustomerNav() {
     <div className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-dark-surface border-b border-slate-200 dark:border-slate-800 z-40">
       <div className="container mx-auto px-4 md:px-6 h-full flex items-center justify-between">
         <Link href="/customer" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
-            <UserCircle2 size={18} className="text-white" />
-          </div>
+          <img
+            src="/android-chrome-192x192.png"
+            alt="Logo Kastriva"
+            className="w-8 h-8 rounded-lg"
+          />
           <div>
             <div className="font-bold text-gradient leading-none">{config.brand.name}</div>
             <div className="text-xs text-slate-500">Customer Area</div>
