@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Moon, Sun, ArrowRight, Package } from "lucide-react";
+import { Menu, X, Moon, Sun, ArrowRight, Package, UserCircle2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { config } from "@/data/config";
 import Link from "next/link";
@@ -37,6 +37,13 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  const linkClass = (active: boolean) =>
+    `text-sm font-medium transition-colors flex items-center gap-1 ${
+      active
+        ? "text-primary-600 dark:text-primary-400"
+        : "text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
+    }`;
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -44,18 +51,11 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <img
-            src="/android-chrome-192x192.png"
-            alt="Logo Kastriva"
-            className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
-          />
-          <span className="text-xl font-bold tracking-tight text-gradient">
-            {config.brand.name}
-          </span>
+        <Link href="/" className="text-2xl font-bold tracking-tight text-gradient">
+          {config.brand.name}
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-5">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -69,15 +69,11 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
-          <Link
-            href="/order/track"
-            className={`text-sm font-medium transition-colors flex items-center gap-1 ${
-              pathname.startsWith("/order/track")
-                ? "text-primary-600 dark:text-primary-400"
-                : "text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
-            }`}
-          >
+          <Link href="/order/track" className={linkClass(pathname.startsWith("/order/track"))}>
             <Package size={14} /> Lacak Order
+          </Link>
+          <Link href="/customer/login" className={linkClass(pathname.startsWith("/customer"))}>
+            <UserCircle2 size={14} /> Customer
           </Link>
         </nav>
 
@@ -139,6 +135,14 @@ export default function Navbar() {
                 }`}
               >
                 <Package size={16} /> Lacak Order
+              </Link>
+              <Link
+                href="/customer/login"
+                className={`text-base font-medium py-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 ${
+                  pathname.startsWith("/customer") ? "text-primary-600" : ""
+                }`}
+              >
+                <UserCircle2 size={16} /> Login Customer
               </Link>
               <Link
                 href="/order"
