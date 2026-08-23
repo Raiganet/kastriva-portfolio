@@ -133,33 +133,47 @@ export default function LoginPageClient() {
 
           {/* Logo */}
           <div className="relative z-10">
-            <div
-              className={`inline-block p-4 lg:p-5 rounded-2xl backdrop-blur-xl transition-all duration-700 ${
-                isAdmin
-                  ? "bg-transparent border border-transparent"
-                  : "bg-[#050B18]/70 border border-[#00D9FF]/40 shadow-[0_0_45px_rgba(0,217,255,0.35)]"
-              }`}
-            >
-              {logoError ? (
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/android-chrome-192x192.png"
-                    alt="Kastriva"
-                    className="w-12 h-12 rounded-xl"
-                  />
-                  <span className="text-2xl font-extrabold tracking-widest text-white">
-                    KASTRIVA
-                  </span>
-                </div>
-              ) : (
+            {logoError ? (
+              <div className="flex items-center gap-3">
                 <img
-                  src="/logo-kastriva.png"
-                  alt="Kastriva – Web Developer"
-                  className="h-12 lg:h-16 w-auto object-contain"
-                  onError={() => setLogoError(true)}
+                  src="/android-chrome-192x192.png"
+                  alt="Kastriva"
+                  className="w-12 h-12 rounded-xl"
                 />
-              )}
-            </div>
+                <span
+                  className={`text-2xl font-extrabold tracking-widest transition-colors duration-700 ${
+                    isAdmin ? "text-white" : "text-slate-900"
+                  }`}
+                >
+                  KASTRIVA
+                </span>
+              </div>
+            ) : (
+              <div className="relative h-14 lg:h-20 w-[240px] lg:w-[320px]">
+                {/* Logo dark: tampil saat panel gelap (Admin) */}
+                <img
+                  src="/logo-dark.png"
+                  alt="Kastriva – WebApp & Android Development"
+                  onError={() => setLogoError(true)}
+                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-700 ${
+                    isAdmin
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-95 pointer-events-none"
+                  }`}
+                />
+                {/* Logo light: tampil saat panel terang (Customer) */}
+                <img
+                  src="/logo-light.png"
+                  alt="Kastriva – WebApp & Android Development"
+                  onError={() => setLogoError(true)}
+                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-700 ${
+                    isAdmin
+                      ? "opacity-0 scale-95 pointer-events-none"
+                      : "opacity-100 scale-100"
+                  }`}
+                />
+              </div>
+            )}
           </div>
 
           <div className="relative z-10 space-y-4">
