@@ -24,6 +24,7 @@ const Router = {
       'getDashboardStats', 'getOrders', 'getOrder', 'updateOrderStatus',
       'getCustomers', 'getCustomer',
       'getProjects', 'getProject', 'createProject', 'createProjectUpdate',
+      'getPortfolioAdmin', 'createPortfolio', 'updatePortfolio', 'deletePortfolio',
       'createQuotation', 'getQuotations',
       'createInvoice', 'getInvoices',
       'sendMessage', 'getMessages', 'uploadFile',
@@ -77,6 +78,10 @@ const Router = {
       case 'getProject': return Projects.getById(params.id);
       case 'createProject': return Projects.create(body);
       case 'createProjectUpdate': return Projects.createUpdate(body);
+      case 'getPortfolioAdmin': return Portfolio.getAllAdmin(params);
+      case 'createPortfolio': return Portfolio.create(body);
+      case 'updatePortfolio': return Portfolio.update(body);
+      case 'deletePortfolio': return Portfolio.remove(body);
       case 'createQuotation': return Quotations.create(body);
       case 'getQuotations': return Quotations.getAll(params);
 

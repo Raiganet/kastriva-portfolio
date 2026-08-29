@@ -7,6 +7,7 @@ import {
   Users,
   FolderKanban,
   FileText,
+  Images,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -19,6 +20,7 @@ const menu = [
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
   { name: "Quotations", href: "/admin/quotations", icon: FileText },
   { name: "Customers", href: "/admin/customers", icon: Users },
+  { name: "Portfolio CMS", href: "/admin/portfolio", icon: Images },
 ];
 
 export default function AdminSidebar() {

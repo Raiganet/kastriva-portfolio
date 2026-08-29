@@ -66,301 +66,149 @@ export default function LoginPageClient() {
     else setError(res.error || "Login gagal");
   };
 
-  const RoleToggle = ({ floating }: { floating?: boolean }) => (
-    <div
-      className={
-        floating
-          ? "hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
-          : "flex lg:hidden justify-center mb-8"
-      }
-    >
-      <div className="flex rounded-full p-1.5 bg-white/95 backdrop-blur border border-slate-200 shadow-2xl shadow-black/20">
-        {(["admin", "customer"] as Role[]).map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => switchRole(r)}
-            aria-pressed={role === r}
-            className={`relative px-6 lg:px-8 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 ${
-              role === r ? "text-white" : "text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            {role === r && (
-              <motion.span
-                layoutId={floating ? "pill-float" : "pill-mobile"}
-                className={`absolute inset-0 rounded-full ${
-                  r === "admin"
-                    ? "bg-gradient-to-r from-[#0066FF] to-[#00D9FF] shadow-lg shadow-blue-500/40"
-                    : "bg-slate-900 shadow-lg shadow-slate-900/30"
-                }`}
-                transition={{ type: "spring", stiffness: 350, damping: 32 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-2">
-              {r === "admin" ? <ShieldCheck size={16} /> : <UserCircle2 size={16} />}
-              {r === "admin" ? "Admin" : "Customer"}
-            </span>
-          </button>
-        ))}
-      </div>
+  const RoleToggle = () => (
+    <div className="inline-flex rounded-2xl bg-slate-100 p-1 border border-slate-200 shadow-inner">
+      {(["admin", "customer"] as Role[]).map((r) => (
+        <button
+          key={r}
+          type="button"
+          onClick={() => switchRole(r)}
+          aria-pressed={role === r}
+          className={`relative min-w-[132px] px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+            role === r
+              ? r === "admin"
+                ? "bg-gradient-to-r from-[#0066FF] to-[#00B8FF] text-white shadow-lg shadow-blue-500/25"
+                : "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          <span className="flex items-center justify-center gap-2">
+            {r === "admin" ? <ShieldCheck size={16} /> : <UserCircle2 size={16} />}
+            {r === "admin" ? "Admin" : "Customer"}
+          </span>
+        </button>
+      ))}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#02040A] flex items-center justify-center p-4 lg:p-8 relative overflow-hidden">
-      <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#0066FF]/15 blur-[140px]" />
-      <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#7C3AED]/15 blur-[140px]" />
+    <main className="min-h-screen bg-[#02040A] relative overflow-hidden flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute -top-48 -left-32 h-[520px] w-[520px] rounded-full bg-blue-600/20 blur-[130px]" />
+      <div className="pointer-events-none absolute -bottom-56 -right-32 h-[560px] w-[560px] rounded-full bg-violet-600/20 blur-[140px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,.07),transparent_35%)]" />
 
-      <div className="relative w-full max-w-6xl rounded-[24px] overflow-hidden grid lg:grid-cols-2 shadow-2xl shadow-blue-900/30 border border-white/5">
-        <RoleToggle floating />
+      <section className="relative w-full max-w-5xl overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-2xl shadow-black/50 lg:grid lg:grid-cols-[0.95fr_1.05fr]">
+        {/* Brand panel */}
+        <div className={`relative min-h-[330px] overflow-hidden p-7 sm:p-10 lg:min-h-[700px] lg:p-12 flex flex-col justify-between transition-colors duration-500 ${isAdmin ? "bg-[#061126]" : "bg-slate-50"}`}>
+          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="absolute -bottom-28 -left-20 h-80 w-80 rounded-full bg-violet-500/10 blur-3xl" />
 
-        {/* LEFT PANEL */}
-        <div
-          className={`relative p-8 lg:p-12 flex flex-col gap-8 transition-colors duration-700 ${
-            isAdmin ? "bg-[#050B18]" : "bg-[#F5F7FA]"
-          }`}
-        >
-          <div
-            className={`absolute top-0 left-0 w-72 h-72 rounded-full blur-[110px] transition-opacity duration-700 ${
-              isAdmin ? "bg-[#0066FF]/25 opacity-100" : "bg-[#0066FF]/10 opacity-60"
-            }`}
-          />
-          <div
-            className={`absolute bottom-0 right-0 w-72 h-72 rounded-full blur-[110px] transition-opacity duration-700 ${
-              isAdmin ? "bg-[#7C3AED]/20 opacity-100" : "bg-[#7C3AED]/10 opacity-50"
-            }`}
-          />
-
-          {/* Logo */}
           <div className="relative z-10">
-            {logoError ? (
-              <div className="flex items-center gap-3">
-                <img
-                  src="/android-chrome-192x192.png"
-                  alt="Kastriva"
-                  className="w-12 h-12 rounded-xl"
-                />
-                <span
-                  className={`text-2xl font-extrabold tracking-widest transition-colors duration-700 ${
-                    isAdmin ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  KASTRIVA
-                </span>
-              </div>
-            ) : (
-              <div className="relative h-14 lg:h-20 w-[240px] lg:w-[320px]">
-                {/* Logo dark: tampil saat panel gelap (Admin) */}
-                <img
-                  src="/logo-dark.png"
-                  alt="Kastriva – WebApp & Android Development"
-                  onError={() => setLogoError(true)}
-                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-700 ${
-                    isAdmin
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 scale-95 pointer-events-none"
-                  }`}
-                />
-                {/* Logo light: tampil saat panel terang (Customer) */}
-                <img
-                  src="/logo-light.png"
-                  alt="Kastriva – WebApp & Android Development"
-                  onError={() => setLogoError(true)}
-                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-700 ${
-                    isAdmin
-                      ? "opacity-0 scale-95 pointer-events-none"
-                      : "opacity-100 scale-100"
-                  }`}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="relative z-10 space-y-4">
-            <h1 className={`text-3xl lg:text-4xl font-bold transition-colors duration-700 ${isAdmin ? "text-white" : "text-slate-900"}`}>
-              Code. Build.{" "}
-              <span className="bg-gradient-to-r from-[#00D9FF] to-[#7C3AED] bg-clip-text text-transparent">
-                Solution.
-              </span>
-            </h1>
-            <p className={`max-w-md leading-relaxed transition-colors duration-700 ${isAdmin ? "text-slate-400" : "text-slate-600"}`}>
-              Kastriva hadir untuk membantu Anda membangun solusi digital yang modern, cepat, dan terpercaya.
-            </p>
-          </div>
-
-          <div
-            className={`relative z-10 p-4 rounded-2xl border max-w-sm backdrop-blur transition-colors duration-700 ${
-              isAdmin ? "bg-[#0A1428]/80 border-blue-500/20" : "bg-white/80 border-slate-200"
-            }`}
-          >
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#0066FF] to-[#00D9FF] shadow-lg shadow-blue-600/30">
-                <Code2 size={18} className="text-white" />
-              </div>
-              <p className={`text-sm ${isAdmin ? "text-slate-300" : "text-slate-600"}`}>
-                We craft <span className="text-[#00D9FF] font-semibold">clean code</span> and powerful{" "}
-                <span className="text-[#7C3AED] font-semibold">digital experience</span>.
-              </p>
+              <img src={isAdmin ? "/logo-dark.png" : "/logo-light.png"} alt="Kastriva" className="h-12 w-auto max-w-[210px] object-contain" onError={() => setLogoError(true)} />
+              {logoError && <span className={`text-xl font-black tracking-[.22em] ${isAdmin ? "text-white" : "text-slate-900"}`}>KASTRIVA</span>}
             </div>
           </div>
 
-          <div className="relative z-10 grid grid-cols-4 gap-3 mt-auto hidden sm:grid">
-            {features.map((f) => (
-              <div key={f.label} className="flex flex-col items-center gap-2">
-                <div
-                  className={`p-3 rounded-2xl border transition-colors duration-700 ${
-                    isAdmin ? "bg-[#0A1428]/80 border-blue-500/20" : "bg-white border-slate-200"
-                  }`}
-                >
-                  <f.icon size={20} className={isAdmin ? "text-[#00D9FF]" : "text-[#0066FF]"} />
+          <div className="relative z-10 mt-10 lg:mt-0">
+            <p className={`mb-3 text-xs font-bold uppercase tracking-[.28em] ${isAdmin ? "text-cyan-300" : "text-blue-600"}`}>Digital Studio</p>
+            <h1 className={`max-w-xl text-4xl font-black leading-[1.05] sm:text-5xl ${isAdmin ? "text-white" : "text-slate-900"}`}>
+              Code. Build. <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 bg-clip-text text-transparent">Solution.</span>
+            </h1>
+            <p className={`mt-5 max-w-lg text-sm leading-7 sm:text-base ${isAdmin ? "text-slate-300" : "text-slate-600"}`}>
+              Kelola project, portfolio, dan layanan Kastriva dari satu tempat dengan tampilan yang sederhana dan profesional.
+            </p>
+
+            <div className={`mt-8 rounded-2xl border p-4 backdrop-blur ${isAdmin ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"}`}>
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-gradient-to-br from-blue-600 to-cyan-400 p-3 shadow-lg shadow-blue-500/30"><Code2 size={19} className="text-white" /></div>
+                <div>
+                  <p className={`text-sm font-semibold ${isAdmin ? "text-white" : "text-slate-900"}`}>Modern. Fast. Reliable.</p>
+                  <p className={`text-xs mt-0.5 ${isAdmin ? "text-slate-400" : "text-slate-500"}`}>Digital experience yang dibuat dengan detail.</p>
                 </div>
-                <span className={`text-xs font-medium transition-colors duration-700 ${isAdmin ? "text-slate-400" : "text-slate-600"}`}>
-                  {f.label}
-                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10 mt-8 hidden grid-cols-4 gap-3 sm:grid">
+            {features.map((f) => (
+              <div key={f.label} className="text-center">
+                <div className={`mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl border ${isAdmin ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"}`}>
+                  <f.icon size={18} className={isAdmin ? "text-cyan-300" : "text-blue-600"} />
+                </div>
+                <span className={`text-[11px] font-medium ${isAdmin ? "text-slate-400" : "text-slate-500"}`}>{f.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div className="relative bg-white p-8 lg:p-12 flex flex-col justify-center">
-          <RoleToggle />
-
-          <div className="text-center mb-8">
-            <h2 className="text-2xl lg:text-3xl font-bold text-slate-900">Welcome Back!</h2>
-            <p className="text-slate-500 mt-2 text-sm">Login to access your Kastriva dashboard</p>
+        {/* Form panel */}
+        <div className="bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12 flex flex-col justify-center">
+          <div className="mb-8 flex flex-col items-center text-center">
+            <RoleToggle />
+            <motion.div key={role} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .25 }} className="mt-7">
+              <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${isAdmin ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-700"}`}>
+                {isAdmin ? <ShieldCheck size={25} /> : <UserCircle2 size={25} />}
+              </div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-900">Welcome Back!</h2>
+              <p className="mt-2 text-sm text-slate-500">{isAdmin ? "Masuk ke dashboard admin Kastriva" : "Lacak dan kelola project Anda"}</p>
+            </motion.div>
           </div>
 
-          <motion.div
-            key={role}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className="w-full max-w-md mx-auto"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className={`p-2.5 rounded-xl transition-colors duration-500 ${isAdmin ? "bg-blue-50 text-[#0066FF]" : "bg-slate-100 text-slate-700"}`}>
-                {isAdmin ? <ShieldCheck size={20} /> : <UserCircle2 size={20} />}
-              </div>
+          <motion.div key={`form-${role}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .25 }} className="mx-auto w-full max-w-md">
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5">
+              <div className={`rounded-xl p-2 ${isAdmin ? "bg-blue-100 text-blue-600" : "bg-slate-200 text-slate-700"}`}>{isAdmin ? <ShieldCheck size={18} /> : <UserCircle2 size={18} />}</div>
               <div>
-                <h3 className={`font-bold transition-colors duration-500 ${isAdmin ? "text-[#0066FF]" : "text-slate-900"}`}>
-                  {isAdmin ? "Admin Login" : "Customer Login"}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {isAdmin ? "Sign in to continue to the admin dashboard" : "Sign in to continue to your account"}
-                </p>
+                <p className="text-sm font-bold text-slate-900">{isAdmin ? "Admin Login" : "Customer Login"}</p>
+                <p className="text-xs text-slate-500">{isAdmin ? "Akses pengelolaan website & CMS" : "Gunakan email dan nomor order"}</p>
               </div>
             </div>
 
-            {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
-                <AlertCircle size={16} /> {error}
-              </div>
-            )}
+            {error && <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600"><AlertCircle size={17} className="mt-0.5 shrink-0" />{error}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Email Address
-                </label>
+                <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">Email Address</label>
                 <div className="relative">
                   <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={isAdmin ? "admin@kastriva.com" : "email@anda.com"}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-[#F5F7FA]/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0066FF]/60 focus:border-[#0066FF] focus:bg-white transition-all"
-                  />
+                  <input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={isAdmin ? "admin@kastriva.com" : "email@anda.com"} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
                 </div>
               </div>
 
               {isAdmin ? (
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Password
-                  </label>
+                  <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-slate-700">Password</label>
                   <div className="relative">
                     <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-11 pr-12 py-3 rounded-xl border border-slate-200 bg-[#F5F7FA]/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0066FF]/60 focus:border-[#0066FF] focus:bg-white transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
-                      aria-label="Toggle password visibility"
-                    >
-                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                    </button>
+                    <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-12 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700" aria-label="Toggle password visibility">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <label htmlFor="orderNumber" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Nomor Order
-                  </label>
+                  <label htmlFor="orderNumber" className="mb-1.5 block text-sm font-semibold text-slate-700">Nomor Order</label>
                   <div className="relative">
                     <Package size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="orderNumber"
-                      type="text"
-                      value={orderNumber}
-                      onChange={(e) => setOrderNumber(e.target.value.toUpperCase())}
-                      placeholder="KAS-2026-0001"
-                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-[#F5F7FA]/60 text-slate-900 placeholder-slate-400 font-mono focus:outline-none focus:ring-2 focus:ring-[#0066FF]/60 focus:border-[#0066FF] focus:bg-white transition-all"
-                    />
+                    <input id="orderNumber" type="text" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value.toUpperCase())} placeholder="KAS-2026-0001" className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 font-mono text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
                   </div>
-                  <p className="text-xs text-slate-400 mt-1.5">Nomor order ada di email konfirmasi Anda.</p>
+                  <p className="mt-1.5 text-xs text-slate-400">Nomor order ada di email konfirmasi Anda.</p>
                 </div>
               )}
 
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 text-slate-600 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
-                    className="w-4 h-4 rounded accent-[#0066FF]"
-                  />
-                  Remember me
-                </label>
-                <a
-                  href={getWhatsAppLink("Halo Kastriva, saya butuh bantuan untuk login.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#0066FF] hover:underline font-medium"
-                >
-                  Forgot password?
-                </a>
+              <div className="flex items-center justify-between pt-1 text-sm">
+                <label className="flex cursor-pointer select-none items-center gap-2 text-slate-600"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 rounded accent-blue-600" /> Remember me</label>
+                <a href={getWhatsAppLink("Halo Kastriva, saya butuh bantuan untuk login.")} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">Butuh bantuan?</a>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full py-3.5 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all duration-500 disabled:opacity-60 ${
-                  isAdmin
-                    ? "bg-gradient-to-r from-[#0066FF] to-[#00D9FF] shadow-lg shadow-blue-600/40 hover:shadow-blue-600/60 hover:-translate-y-0.5"
-                    : "bg-slate-900 shadow-lg shadow-slate-900/30 hover:bg-slate-800 hover:-translate-y-0.5"
-                }`}
-              >
+              <button type="submit" disabled={loading} className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-bold text-white transition-all disabled:cursor-not-allowed disabled:opacity-60 ${isAdmin ? "bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 hover:shadow-blue-500/40" : "bg-slate-900 shadow-lg shadow-slate-900/20 hover:-translate-y-0.5 hover:bg-slate-800"}`}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
-                {loading ? "Memverifikasi..." : isAdmin ? "Login as Admin" : "Login as Customer"}
+                {loading ? "Memverifikasi..." : isAdmin ? "Masuk sebagai Admin" : "Masuk sebagai Customer"}
               </button>
             </form>
           </motion.div>
-
-          <p className="text-center text-xs text-slate-400 mt-10">© 2026 Kastriva. All rights reserved.</p>
+          <p className="mt-8 text-center text-xs text-slate-400">© 2026 Kastriva · Secure Access</p>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
