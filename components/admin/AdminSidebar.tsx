@@ -34,8 +34,8 @@ export default function AdminSidebar() {
     return pathname.startsWith(href);
   };
 
-  const handleLogout = () => {
-    AdminAuthService.logout();
+  const handleLogout = async () => {
+    if (!(await AdminAuthService.logout())) { alert("Logout belum berhasil. Periksa koneksi lalu coba lagi."); return; }
     router.push("/admin/login");
   };
 

@@ -14,11 +14,15 @@ export default function CustomerGuard({ children }: { children: React.ReactNode 
       setChecking(false);
       return;
     }
-    if (!CustomerAuthService.isLoggedIn()) {
-      router.replace("/login");
-    } else {
-      setChecking(false);
-    }
+    let active = true;
+    setChecking(true);
+    const expire = () => { setChecking(true); router.replace("/login?role=customer"); };
+    window.addEventListener("kastriva-session-expired", expire);
+    CustomerAuthService.refresh().then(ok => {
+      if (!active) return;
+      if (ok) setChecking(false); else expire();
+    });
+    return () => { active = false; window.removeEventListener("kastriva-session-expired", expire); };
   }, [router, pathname]);
 
   if (checking) {

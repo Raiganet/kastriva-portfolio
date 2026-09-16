@@ -1,10 +1,12 @@
+> Pembaruan keamanan: ikuti `PANDUAN-TAHAP-1.md` di root proyek untuk deployment dan login. Jangan menggunakan kembali konfigurasi autentikasi atau endpoint publik dari panduan lama di bawah ini.
+
 # Kastriva Portfolio CMS
 
 CMS portfolio sekarang menggunakan Google Sheets sebagai sumber data sehingga project dapat ditambah/edit tanpa mengubah kode Next.js.
 
 ## 1. Update Google Apps Script
 
-Di project Apps Script yang digunakan oleh `NEXT_PUBLIC_GAS_API_URL`, update file berikut:
+Di project Apps Script yang digunakan oleh `GAS_API_URL`, update file berikut:
 
 - `google-apps-script/Router.gs`
 - `google-apps-script/Portfolio.gs`
@@ -63,6 +65,6 @@ Setelah GAS dideploy, deploy ulang Next.js/Vercel agar versi CMS dan redesign lo
 
 Pastikan environment:
 
-`NEXT_PUBLIC_GAS_API_URL=<URL Web App GAS>`
+`GAS_API_URL=<URL Web App GAS>`
 
 Tetap sama seperti deployment sebelumnya.

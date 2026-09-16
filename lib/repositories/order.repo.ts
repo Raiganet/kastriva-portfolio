@@ -39,14 +39,16 @@ class HybridOrderRepository implements OrderRepository {
           });
           if (res.success && res.data && res.data.orderNumber) {
             orderNumber = res.data.orderNumber;
+          } else {
+            return { success: false, error: res.error || "Order belum tersimpan. Silakan coba kembali." };
           }
         } catch (err) {
-          console.warn("GAS submit failed, using local number:", err);
+          return { success: false, error: "Order belum tersimpan. Periksa koneksi dan coba kembali." };
         }
       }
 
       if (!orderNumber) {
-        orderNumber = await this.generateOrderNumber();
+        return { success: false, error: "Layanan pemesanan belum tersedia." };
       }
 
       const message = `Halo Kastriva 👋

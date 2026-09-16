@@ -1,3 +1,9 @@
+# Pembaruan terbaru: keamanan tahap 1
+
+**Mulai dari [PANDUAN-TAHAP-1.md](PANDUAN-TAHAP-1.md).** Frontend dan GAS wajib dipasang bersama. Login pelanggan memakai OTP email; admin memakai hash scrypt di environment server; sesi memakai cookie HttpOnly.
+
+Panduan berikut merupakan dokumentasi fitur awal. Untuk konfigurasi autentikasi, environment, dan deployment, panduan tahap 1 menjadi acuan.
+
 #  Kastriva — Professional Digital Service Platform
 
 Website portfolio + sistem bisnis lengkap untuk jasa pembuatan website, web app,
@@ -28,7 +34,7 @@ sistem informasi, dan aplikasi Android.
 - Customer management
 
 ### Customer Dashboard (/customer)
-- Login dengan Email + Nomor Order
+- Login dengan Email + kode OTP
 - Pantau orders, projects + timeline progress
 - Approve/reject quotation
 
@@ -46,7 +52,7 @@ npm run dev
 ## ⚙️ Environment Variables
 
 ```
-NEXT_PUBLIC_GAS_API_URL=https://script.google.com/macros/s/XXXX/exec
+GAS_API_URL=https://script.google.com/macros/s/XXXX/exec
 NEXT_PUBLIC_SITE_URL=https://domain-anda.com
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXX   # opsional
 ```
@@ -58,14 +64,14 @@ Set di `.env.local` DAN Vercel (Settings → Environment Variables).
 1. Buat project di [script.google.com](https://script.google.com)
 2. Copy semua file `.gs` dari folder `google-apps-script/`
 3. Jalankan `setupDatabase()` → copy SPREADSHEET_ID ke `Config.gs`
-4. Ganti `ADMIN_PASSWORD` di `Config.gs`
+4. Ikuti konfigurasi rahasia dan hash password di `PANDUAN-TAHAP-1.md`
 5. Deploy → Web app → Execute as: Me → Who has access: **Anyone**
 6. Copy URL `/exec` ke env variable
 
 ## 🔐 Kredensial
 
-- **Admin**: `ADMIN_EMAIL` / `ADMIN_PASSWORD` di Config.gs → login di `/admin`
-- **Customer**: email + nomor order → login di `/customer`
+- **Admin**: email dan password yang dikonfigurasi melalui setup keamanan server → login di `/admin`
+- **Customer**: kode OTP yang dikirim ke email → login di `/customer`
 
 ## 🗂️ Struktur Data Layer
 

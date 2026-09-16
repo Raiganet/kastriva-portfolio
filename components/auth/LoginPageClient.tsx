@@ -24,7 +24,10 @@ export default function LoginPageClient() {
   const [role, setRole] = useState<Role>("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [orderNumber, setOrderNumber] = useState("");
+  const [code, setCode] = useState("");
+  const [challengeId, setChallengeId] = useState("");
+  const [notice, setNotice] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
@@ -35,32 +38,40 @@ export default function LoginPageClient() {
   const isAdmin = role === "admin";
 
   useEffect(() => {
-    if (AdminAuthService.isLoggedIn()) router.replace("/admin");
-    else if (CustomerAuthService.isLoggedIn()) router.replace("/customer");
-  }, [router]);
+    const requested = new URLSearchParams(window.location.search).get("role");
+    if (requested === "customer" || window.location.pathname === "/customer/login") setRole("customer");
+    // Clear legacy browser credentials; a fresh login rotates the server session.
+    import("@/lib/services/session-client").then(m => m.clearLegacyCredentials());
+  }, []);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const switchRole = (r: Role) => {
-    setRole(r);
-    setError("");
+    setRole(r); setError(""); setNotice(""); setCode(""); setChallengeId(""); setPassword("");
   };
-
-  const validate = (): string => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Format email tidak valid";
-    if (isAdmin && password.length < 6) return "Password minimal 6 karakter";
-    if (!isAdmin && !/^KAS-\d{4}-\d{4}$/.test(orderNumber.trim().toUpperCase()))
-      return "Format nomor order: KAS-2026-0001";
-    return "";
+  const requestCode = async () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError("Format email tidak valid"); return; }
+    setLoading(true); setError("");
+    const res = await CustomerAuthService.requestCode(email.trim());
+    setLoading(false);
+    if (res.success && res.data) {
+      setChallengeId(res.data.challengeId); setCode(""); setCooldown(res.data.retryAfter);
+      setNotice(res.message || "Jika email terdaftar, kode telah dikirim. Periksa inbox dan spam. Kode berlaku 10 menit.");
+    } else setError(res.error || "Tidak dapat meminta kode.");
   };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const v = validate();
-    if (v) { setError(v); return; }
-    setError("");
-    setLoading(true);
+    if (loading) return;
+    if (!isAdmin && !challengeId) { await requestCode(); return; }
+    if (!isAdmin && !/^\d{8}$/.test(code)) { setError("Masukkan 8 digit kode verifikasi."); return; }
+    if (isAdmin && (!email.trim() || !password)) { setError("Email dan password wajib diisi."); return; }
+    setError(""); setLoading(true);
     const res = isAdmin
-      ? await AdminAuthService.login(email, password, remember)
-      : await CustomerAuthService.login(email, orderNumber.trim().toUpperCase(), remember);
+      ? await AdminAuthService.login(email.trim(), password, remember)
+      : await CustomerAuthService.login(challengeId, code, remember);
     setLoading(false);
     if (res.success) router.push(isAdmin ? "/admin" : "/customer");
     else setError(res.error || "Login gagal");
@@ -72,6 +83,7 @@ export default function LoginPageClient() {
         <button
           key={r}
           type="button"
+          disabled={loading}
           onClick={() => switchRole(r)}
           aria-pressed={role === r}
           className={`relative min-w-[132px] px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
@@ -160,18 +172,19 @@ export default function LoginPageClient() {
               <div className={`rounded-xl p-2 ${isAdmin ? "bg-blue-100 text-blue-600" : "bg-slate-200 text-slate-700"}`}>{isAdmin ? <ShieldCheck size={18} /> : <UserCircle2 size={18} />}</div>
               <div>
                 <p className="text-sm font-bold text-slate-900">{isAdmin ? "Admin Login" : "Customer Login"}</p>
-                <p className="text-xs text-slate-500">{isAdmin ? "Akses pengelolaan website & CMS" : "Gunakan email dan nomor order"}</p>
+                <p className="text-xs text-slate-500">{isAdmin ? "Akses pengelolaan website & CMS" : "Masuk dengan kode verifikasi email"}</p>
               </div>
             </div>
 
-            {error && <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600"><AlertCircle size={17} className="mt-0.5 shrink-0" />{error}</div>}
+            {notice && <p role="status" className="mb-4 rounded-xl bg-blue-50 p-3 text-sm text-blue-800">{notice}</p>}
+            {error && <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600"><AlertCircle size={17} className="mt-0.5 shrink-0" />{error}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div>
                 <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">Email Address</label>
                 <div className="relative">
                   <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={isAdmin ? "admin@kastriva.com" : "email@anda.com"} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
+                  <input id="email" type="email" autoComplete="email" value={email} disabled={loading || !!challengeId} onChange={(e) => setEmail(e.target.value)} placeholder={isAdmin ? "admin@kastriva.com" : "email@anda.com"} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
                 </div>
               </div>
 
@@ -184,16 +197,16 @@ export default function LoginPageClient() {
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700" aria-label="Toggle password visibility">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
                   </div>
                 </div>
-              ) : (
+              ) : challengeId ? (
                 <div>
-                  <label htmlFor="orderNumber" className="mb-1.5 block text-sm font-semibold text-slate-700">Nomor Order</label>
-                  <div className="relative">
-                    <Package size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input id="orderNumber" type="text" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value.toUpperCase())} placeholder="KAS-2026-0001" className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 font-mono text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
+                  <label htmlFor="otp" className="mb-1.5 block text-sm font-semibold text-slate-700">Kode verifikasi email</label>
+                  <input id="otp" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={8} value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ""))} placeholder="8 digit kode" className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 font-mono text-slate-900" />
+                  <div className="mt-3 flex justify-between text-xs text-blue-700">
+                    <button type="button" disabled={loading || cooldown > 0} onClick={requestCode} className="disabled:text-slate-400">{cooldown > 0 ? `Kirim ulang (${cooldown}s)` : "Kirim ulang kode"}</button>
+                    <button type="button" disabled={loading} onClick={() => { setChallengeId(""); setCode(""); setNotice(""); setError(""); }}>Ganti email</button>
                   </div>
-                  <p className="mt-1.5 text-xs text-slate-400">Nomor order ada di email konfirmasi Anda.</p>
                 </div>
-              )}
+              ) : <p className="text-sm text-slate-500">Gunakan email yang digunakan saat memesan. Kode akan dikirim ke email tersebut.</p>}
 
               <div className="flex items-center justify-between pt-1 text-sm">
                 <label className="flex cursor-pointer select-none items-center gap-2 text-slate-600"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 rounded accent-blue-600" /> Remember me</label>
@@ -202,7 +215,7 @@ export default function LoginPageClient() {
 
               <button type="submit" disabled={loading} className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-bold text-white transition-all disabled:cursor-not-allowed disabled:opacity-60 ${isAdmin ? "bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 hover:shadow-blue-500/40" : "bg-slate-900 shadow-lg shadow-slate-900/20 hover:-translate-y-0.5 hover:bg-slate-800"}`}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
-                {loading ? "Memverifikasi..." : isAdmin ? "Masuk sebagai Admin" : "Masuk sebagai Customer"}
+                {loading ? "Memverifikasi..." : isAdmin ? "Masuk sebagai Admin" : challengeId ? "Verifikasi & Masuk" : "Kirim kode ke email"}
               </button>
             </form>
           </motion.div>

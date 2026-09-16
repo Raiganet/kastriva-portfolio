@@ -5,15 +5,11 @@
 
 const Config = {
   // Spreadsheet ID (akan diisi setelah setup)
-  SPREADSHEET_ID: '',
+  SPREADSHEET_ID: PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '',
   
-  // Admin credentials
-  ADMIN_EMAIL: 'admin@kastriva.com',
-  ADMIN_PASSWORD: 'change-this-password',
-  
-  // JWT Secret untuk session
-  JWT_SECRET: 'your-secret-key-change-this-' + new Date().getTime(),
-  
+  // Notification email only; login credentials live in server environment variables.
+  ADMIN_EMAIL: PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || '',
+
   // Session duration (24 hours)
   SESSION_DURATION: 24 * 60 * 60 * 1000,
   

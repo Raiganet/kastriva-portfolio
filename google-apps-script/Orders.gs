@@ -98,7 +98,7 @@ const Orders = {
     const values = sheet.getDataRange().getValues();
 
     for (let i = 1; i < values.length; i++) {
-      if (String(values[i][2]).toLowerCase() === String(data.email).toLowerCase()) {
+      if (String(values[i][2]).trim().toLowerCase() === String(data.email).trim().toLowerCase()) {
         // Customer sudah ada → update lastActivity (kolom I)
         sheet.getRange(i + 1, 9).setValue(new Date().toISOString());
         return values[i][0];
@@ -224,9 +224,9 @@ const Orders = {
    * Get order by NOMOR ORDER (PUBLIK - untuk customer tracking)
    * Include: order + project terkait + update timeline
    */
-  getByOrderNumber: function(orderNumber) {
+  getByOrderNumber: function(orderNumber, customerId) {
     try {
-      if (!orderNumber || !/^KAS-\d{4}-\d{4}$/.test(String(orderNumber))) {
+      if (!customerId || !orderNumber || !/^KAS-\d{4}-\d{4,}$/.test(String(orderNumber))) {
         return { success: false, error: 'Format nomor order tidak valid' };
       }
 
@@ -236,7 +236,7 @@ const Orders = {
       const rows = data.slice(1);
 
       for (let i = 0; i < rows.length; i++) {
-        if (String(rows[i][1]).toUpperCase() === String(orderNumber).toUpperCase()) {
+        if (String(rows[i][1]).toUpperCase() === String(orderNumber).toUpperCase() && String(rows[i][2]) === String(customerId)) {
 
           // Build order object
           const order = {};
@@ -369,7 +369,7 @@ const Orders = {
         '',
         '🔗 LACAK STATUS ORDER:',
         'Anda dapat melacak status order kapan saja di website kami',
-        'menggunakan nomor order di atas.',
+        'setelah login menggunakan kode verifikasi yang dikirim ke email Anda.',
         '',
         '━━━━━━━━━━━━━━━━━━━━━━━━',
         '',

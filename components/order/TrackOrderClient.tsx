@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, Calendar, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { OrderService } from "@/lib/services/order.service";
@@ -8,7 +8,19 @@ import OrderStatusBadge from "@/components/order/OrderStatusBadge";
 import OrderTimeline from "@/components/order/OrderTimeline";
 import { LoadingSpinner } from "@/components/ui";
 
+import Link from "next/link";
+import { CustomerAuthService } from "@/lib/services/customer-auth.service";
+
 export default function TrackOrderClient() {
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  useEffect(() => {
+    let active = true;
+    CustomerAuthService.refresh().then(ok => { if (active) setAuthenticated(ok); });
+    const expire = () => { setAuthenticated(false); setResult(null); };
+    window.addEventListener("kastriva-session-expired", expire);
+    setOrderNumber(new URLSearchParams(window.location.search).get("orderNumber") || "");
+    return () => { active = false; window.removeEventListener("kastriva-session-expired", expire); };
+  }, []);
   const [orderNumber, setOrderNumber] = useState("");
   const [result, setResult] = useState<OrderTrackingResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -16,11 +28,12 @@ export default function TrackOrderClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!authenticated) return;
     setError("");
     setResult(null);
 
     const trimmed = orderNumber.trim().toUpperCase();
-    if (!/^KAS-\d{4}-\d{4}$/.test(trimmed)) {
+    if (!/^KAS-\d{4}-\d{4,}$/.test(trimmed)) {
       setError("Format nomor order tidak valid. Contoh: KAS-2026-0001");
       return;
     }
@@ -42,6 +55,8 @@ export default function TrackOrderClient() {
 
   const history = OrderService.getOrderHistory();
 
+  if (authenticated === null) return <div className="pt-32 pb-20 text-center"><LoadingSpinner /></div>;
+  if (!authenticated) return <div className="pt-32 pb-20 px-6 text-center"><h1 className="text-2xl font-bold mb-4">Login untuk melacak order</h1><p className="mb-6">Verifikasi email Anda untuk melihat order dan progres proyek dengan aman.</p><Link href="/login?role=customer" className="rounded-xl bg-primary-600 px-6 py-3 text-white">Masuk sebagai pelanggan</Link></div>;
   return (
     <div className="pt-32 pb-20 min-h-screen bg-slate-50 dark:bg-dark-surface/50">
       <div className="container mx-auto px-4 md:px-6 max-w-4xl">

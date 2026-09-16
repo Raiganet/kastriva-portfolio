@@ -13,8 +13,8 @@ export default function CustomerNav() {
 
   const session = CustomerAuthService.getSession();
 
-  const handleLogout = () => {
-    CustomerAuthService.logout();
+  const handleLogout = async () => {
+    if (!(await CustomerAuthService.logout())) { alert("Logout belum berhasil. Periksa koneksi lalu coba lagi."); return; }
     router.push("/customer/login");
   };
 

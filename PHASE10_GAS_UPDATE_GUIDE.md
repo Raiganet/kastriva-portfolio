@@ -1,3 +1,5 @@
+> Pembaruan keamanan: ikuti `PANDUAN-TAHAP-1.md` di root proyek untuk deployment dan login. Jangan menggunakan kembali konfigurasi autentikasi atau endpoint publik dari panduan lama di bawah ini.
+
 # 🚀 Phase 10: Update Google Apps Script
 
 ## File BARU (buat di Apps Script):

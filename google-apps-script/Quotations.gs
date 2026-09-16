@@ -121,7 +121,7 @@ const Quotations = {
         '',
         data.notes || '',
         '',
-        'Anda dapat MENYETUJUI atau MENOLAK penawaran ini melalui Customer Dashboard di website kami (menu Customer → login dengan email & nomor order).',
+        'Anda dapat MENYETUJUI atau MENOLAK penawaran ini melalui Customer Dashboard di website kami (menu Customer → login dengan kode verifikasi email).',
         '',
         'Salam,',
         'Tim ' + Config.APP_NAME

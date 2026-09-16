@@ -1,88 +1,69 @@
-/**
- * KASTRIVA - Customer Authentication (Phase 10)
- * Login dengan Email + Nomor Order (pair credential yang hanya dimiliki customer)
- */
-
+/** Email OTP. Order numbers are identifiers, never credentials. */
 const CustomerAuth = {
-
-  login: function(email, orderNumber) {
-    try {
-      if (!email || !orderNumber) {
-        return { success: false, error: 'Email dan nomor order wajib diisi' };
+  request: function(email) {
+    email = String(email || '').trim().toLowerCase();
+    if (email.length > 254 || !Utils.isValidEmail(email)) return { success: false, error: 'Format email tidak valid.' };
+    var delivery = null;
+    const result = Security.locked(function() {
+      Security.cleanup();
+      if (!Security.consume('otp-global', 60, 3600000) ||
+          !Security.consume('otp-mail-hour:' + email, 5, 3600000) ||
+          !Security.consume('otp-mail-minute:' + email, 1, 60000))
+        return { success: false, error: 'Permintaan terlalu sering. Tunggu sebelum mencoba kembali.', code: 'RATE_LIMIT' };
+      const data = Config.getSheet('Customers').getDataRange().getValues();
+      const customer = data.slice(1).find(function(r) { return String(r[2]).trim().toLowerCase() === email; });
+      const challengeId = Security.random();
+      const code = ('00000000' + (parseInt(Security.random().slice(0, 12), 16) % 100000000)).slice(-8);
+      const emailHash = Security.hash(email);
+      const previous = Security.read('latest_' + emailHash);
+      if (previous) Security.remove('otp_' + previous.challengeId);
+      const expiresAt = Date.now() + 10 * 60000;
+      Security.write('otp_' + challengeId, {
+        customerId: customer ? String(customer[0]) : '', email: email,
+        name: customer ? String(customer[1]) : '', codeHash: Security.mac(challengeId + ':' + code),
+        attempts: 0, expiresAt: expiresAt
+      });
+      Security.write('latest_' + emailHash, { challengeId: challengeId, expiresAt: expiresAt });
+      if (customer) delivery = { email: email, code: code, challengeId: challengeId };
+      return { success: true, data: { challengeId: challengeId, expiresAt: expiresAt, retryAfter: 60 },
+        message: 'Jika email terdaftar, kode verifikasi telah dikirim. Periksa inbox dan folder spam.' };
+    });
+    if (delivery) {
+      try {
+        GmailApp.sendEmail(delivery.email, 'Kode login Kastriva',
+          'Kode login Anda: ' + delivery.code + '\n\nBerlaku 10 menit dan hanya dapat dipakai sekali. Jangan bagikan kode ini kepada siapa pun.\nJika Anda tidak meminta login, abaikan email ini.', { name: Config.APP_NAME });
+      } catch (e) {
+        Security.remove('otp_' + delivery.challengeId);
+        // Keep the same public response to avoid revealing registered addresses.
+        Logger.log('OTP delivery failed. Check Gmail authorization/quota.');
       }
-
-      const sheet = Config.getSheet('Orders');
-      const data = sheet.getDataRange().getValues();
-
-      for (var i = 1; i < data.length; i++) {
-        if (String(data[i][1]).toUpperCase() === String(orderNumber).toUpperCase()) {
-          const orderEmail = String(data[i][5]).toLowerCase();
-
-          if (orderEmail !== String(email).toLowerCase()) {
-            return { success: false, error: 'Email tidak cocok dengan order ini' };
-          }
-
-          const customerId = data[i][2];
-          const customerName = data[i][3];
-          const token = Utilities.base64Encode('cust:' + customerId + ':' + Date.now() + ':' + Math.random());
-
-          const sessions = this.getSessions();
-          sessions[token] = {
-            customerId: customerId,
-            email: orderEmail,
-            name: customerName,
-            createdAt: Date.now(),
-            expiresAt: Date.now() + Config.SESSION_DURATION
-          };
-          this.saveSessions(sessions);
-
-          Utils.logAudit('customer_login', customerId, { orderNumber: orderNumber });
-
-          return {
-            success: true,
-            data: { token: token, customerId: customerId, name: customerName }
-          };
-        }
+    }
+    return result;
+  },
+  verifyCode: function(data) {
+    return Security.locked(function() {
+      if (!Security.consume('otp-verify-global', 100, 60000))
+        return { success: false, error: 'Terlalu banyak percobaan. Coba lagi nanti.', code: 'RATE_LIMIT' };
+      const failure = { success: false, error: 'Kode salah, sudah dipakai, atau kedaluwarsa. Minta kode baru bila diperlukan.' };
+      if (!/^[a-f0-9]{64}$/.test(String(data.challengeId || ''))) return failure;
+      const key = 'otp_' + data.challengeId;
+      const otp = Security.read(key);
+      if (!otp) return failure;
+      otp.attempts++;
+      const valid = /^\d{8}$/.test(String(data.code || '')) && Security.equal(otp.codeHash, Security.mac(data.challengeId + ':' + data.code));
+      if (!valid || !otp.customerId) {
+        if (otp.attempts >= 5) Security.remove(key); else Security.write(key, otp);
+        return failure;
       }
-
-      return { success: false, error: 'Order tidak ditemukan' };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+      // Confirm the account still owns this address before creating a session.
+      const rows = Config.getSheet('Customers').getDataRange().getValues();
+      const exists = rows.slice(1).some(function(r) { return String(r[0]) === otp.customerId && String(r[2]).trim().toLowerCase() === otp.email; });
+      Security.remove(key);
+      if (!exists) return failure;
+      if (data.previousToken) Security.logout(data.previousToken);
+      return Security.newSession('customer', { customerId: otp.customerId, email: otp.email, name: otp.name }, data.remember === true);
+    });
   },
-
-  verify: function(token) {
-    if (!token) return { success: false, error: 'No token provided' };
-
-    const sessions = this.getSessions();
-    const session = sessions[token];
-
-    if (!session) return { success: false, error: 'Invalid token' };
-
-    if (Date.now() > session.expiresAt) {
-      delete sessions[token];
-      this.saveSessions(sessions);
-      return { success: false, error: 'Token expired' };
-    }
-
-    return { success: true, data: session };
-  },
-
-  logout: function(token) {
-    const sessions = this.getSessions();
-    delete sessions[token];
-    this.saveSessions(sessions);
-    return { success: true };
-  },
-
-  getSessions: function() {
-    const props = PropertiesService.getScriptProperties();
-    const json = props.getProperty('customerSessions');
-    return json ? JSON.parse(json) : {};
-  },
-
-  saveSessions: function(sessions) {
-    const props = PropertiesService.getScriptProperties();
-    props.setProperty('customerSessions', JSON.stringify(sessions));
-  }
+  verify: function(token) { return Security.verifySession(token, 'customer'); },
+  logout: function(token) { return Security.logout(token); }
 };

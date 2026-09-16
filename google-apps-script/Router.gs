@@ -8,15 +8,19 @@ const Router = {
   handle: function(action, params, body, method) {
 
     // ===== AUTH ENDPOINTS =====
-    if (action === 'login') return Auth.login(body.email, body.password);
+    if (action === '__adminAttempt') return Auth.attempt();
+    if (action === 'login') return Auth.login(body);
+    if (action === 'adminSession') return Auth.verifyToken(body.token);
+    if (action === 'customerSession') return CustomerAuth.verify(body.token);
     if (action === 'logout') return Auth.logout(params.token || body.token);
-    if (action === 'customerLogin') return CustomerAuth.login(body.email, body.orderNumber);
+    if (action === 'requestCustomerOtp') return CustomerAuth.request(body.email);
+    if (action === 'verifyCustomerOtp') return CustomerAuth.verifyCode(body);
     if (action === 'customerLogout') return CustomerAuth.logout(params.token || body.token);
 
     // ===== PUBLIC =====
     const publicActions = [
       'getPortfolio', 'getPortfolioBySlug', 'getPortfolioCategories',
-      'getServices', 'getSettings', 'createOrder', 'getOrderByNumber', 'health'
+      'getServices', 'getSettings', 'createOrder', 'health'
     ];
 
     // ===== ADMIN PROTECTED =====
@@ -32,7 +36,7 @@ const Router = {
     ];
 
     // ===== CUSTOMER PROTECTED =====
-    const customerActions = ['getMyDashboard', 'respondQuotation'];
+    const customerActions = ['getMyDashboard', 'respondQuotation', 'getOrderByNumber'];
 
     if (publicActions.indexOf(action) === -1 &&
         adminActions.indexOf(action) === -1 &&
@@ -64,8 +68,11 @@ const Router = {
       case 'getPortfolioCategories': return Portfolio.getCategories();
       case 'getServices': return Services.getAll();
       case 'getSettings': return Settings.getAll();
-      case 'createOrder': return Orders.create(body);
-      case 'getOrderByNumber': return Orders.getByOrderNumber(params.orderNumber);
+      case 'createOrder':
+        var allowed = Security.locked(function() { return Security.consume('order-global', 30, 3600000) && Security.consume('order-email:' + String(body.email || '').trim().toLowerCase(), 5, 3600000); });
+        if (!allowed) return { success: false, error: 'Terlalu banyak permintaan. Coba lagi nanti.', code: 'RATE_LIMIT' };
+        return Orders.create(body);
+      case 'getOrderByNumber': return Orders.getByOrderNumber(params.orderNumber, customerSession.customerId);
 
       // ADMIN
       case 'getDashboardStats': return Stats.getDashboard();

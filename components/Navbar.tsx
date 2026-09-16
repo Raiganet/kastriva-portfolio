@@ -33,9 +33,13 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false);
-    if (AdminAuthService.isLoggedIn()) setAuth({ role: "admin" });
-    else if (CustomerAuthService.isLoggedIn()) setAuth({ role: "customer" });
-    else setAuth(null);
+    let active = true;
+    (async () => {
+      const admin = await AdminAuthService.refresh();
+      const customer = admin ? false : await CustomerAuthService.refresh();
+      if (active) setAuth(admin ? { role: "admin" } : customer ? { role: "customer" } : null);
+    })();
+    return () => { active = false; };
   }, [pathname]);
 
   const navLinks = [

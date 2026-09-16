@@ -1,3 +1,5 @@
+> Pembaruan keamanan: ikuti `PANDUAN-TAHAP-1.md` di root proyek untuk deployment dan login. Jangan menggunakan kembali konfigurasi autentikasi atau endpoint publik dari panduan lama di bawah ini.
+
 # 🚀 Google Apps Script Deployment Guide
 
 ## Step 1: Setup Google Apps Script Project
@@ -56,7 +58,7 @@ Copy SEMUA file `.gs` dari folder `google-apps-script/` ke Apps Script editor:
 2. Isi dengan URL web app Anda:
 
 ```
-NEXT_PUBLIC_GAS_API_URL=https://script.google.com/macros/s/XXXX/exec
+GAS_API_URL=https://script.google.com/macros/s/XXXX/exec
 ```
 
 3. Restart dev server (`npm run dev`)
@@ -108,6 +110,6 @@ Cek Gmail admin → email notifikasi order baru ✅
 
 ## Catatan Keamanan
 
-- Ganti `ADMIN_PASSWORD` di Config.gs sebelum production
+- Konfigurasikan hash password admin dan secret gateway sesuai `PANDUAN-TAHAP-1.md` sebelum production
 - Endpoint publik terbuka, endpoint admin dilindungi token session
 - Session disimpan server-side (PropertiesService), bukan di frontend
