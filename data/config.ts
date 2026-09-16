@@ -1,5 +1,4 @@
-import { PortfolioProject, PortfolioCategory, DashboardStats } from "@/lib/types/portfolio";
-import { OrderStatus } from "@/lib/types/order";
+import { projects } from "@/data/projects";
 
 export const config = {
   brand: {
@@ -22,8 +21,8 @@ export const config = {
     badges: ["Responsive", "Modern Design", "Custom Development", "SEO Friendly", "Fast Performance"]
   },
   stats: [
-    { label: "Project Selesai", value: "0" },
-    { label: "Website & Web App", value: "0" },
+    { label: "Project Selesai", value: String(projects.filter((p) => p.status === "Completed").length) },
+    { label: "Website & Web App", value: String(projects.length) },
     { label: "Client", value: "0" },
     { label: "Teknologi", value: "0" }
   ] as { label: string; value: string }[],
@@ -72,56 +71,7 @@ export const config = {
     isActive: boolean;
     sortOrder: number;
   }[],
-  portfolio: [
-    {
-      id: 1,
-      title: "Sistem Manajemen Inventaris",
-      category: "Sistem Informasi",
-      description: "Aplikasi web untuk mengelola stok barang, pemasukan, dan pengeluaran secara real-time dengan laporan otomatis.",
-      image: "/portfolio/inventory.png",
-      images: [
-        "/portfolio/inventory-1.png",
-        "/portfolio/inventory-2.png",
-        "/portfolio/inventory-3.png"
-      ],
-      technologies: ["Next.js", "TypeScript", "PostgreSQL", "Tailwind"],
-      demoUrl: "https://demo.kastriva.com/inventory",
-      githubUrl: "https://github.com/kastriva/inventory",
-      year: "2025",
-      status: "Completed",
-      featured: true,
-      problemSolved: "Menggantikan pencatatan manual yang rawan error dengan sistem terdigitalisasi.",
-      solution: "Membangun sistem berbasis web dengan fitur manajemen stok, laporan harian, dan notifikasi low stock.",
-      features: ["Manajemen Stok", "Laporan Otomatis", "Notifikasi Low Stock", "Multi-User"],
-      myRole: "Fullstack Developer & UI/UX Designer",
-      published: true,
-      createdAt: "2025-01-15",
-      updatedAt: "2025-03-10"
-    },
-    {
-      id: 2,
-      title: "Landing Page Produk Skincare",
-      category: "Landing Page",
-      description: "Landing page dengan animasi smooth dan integrasi WhatsApp untuk meningkatkan konversi penjualan.",
-      image: "/portfolio/skincare.png",
-      images: [
-        "/portfolio/skincare-1.png",
-        "/portfolio/skincare-2.png"
-      ],
-      technologies: ["React", "Framer Motion", "Vercel"],
-      demoUrl: "https://demo.kastriva.com/skincare",
-      year: "2026",
-      status: "Completed",
-      featured: false,
-      problemSolved: "Meningkatkan tingkat konversi pengunjung menjadi pembeli sebesar 40%.",
-      solution: "Membangun landing page dengan CTA yang strategis dan integrasi WhatsApp untuk konversi tinggi.",
-      features: ["Animasi Smooth", "WhatsApp Integration", "Mobile Optimized", "A/B Testing Ready"],
-      myRole: "Frontend Developer",
-      published: true,
-      createdAt: "2026-01-05",
-      updatedAt: "2026-01-20"
-    }
-  ] as PortfolioProject[],
+  portfolio: projects,
   pricing: [
     { 
       name: "Landing Page", 

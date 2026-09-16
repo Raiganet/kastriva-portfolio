@@ -1,11 +1,11 @@
 import { MetadataRoute } from "next";
-import { config } from "@/data/config";
+import { getServerPortfolio } from "@/lib/server/portfolio.server";
 
 function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://kastriva-portfolio.vercel.app";
 
@@ -20,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/contact", priority: 0.6 },
   ];
 
-  const portfolioRoutes = config.portfolio
+  const portfolioRoutes = (await getServerPortfolio())
     .filter((p) => p.published)
     .map((p) => ({
       url: baseUrl + "/portfolio/" + generateSlug(p.title),

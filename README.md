@@ -105,3 +105,9 @@ sehingga website tidak pernah blank.
 ---
 
 © 2026 Kastriva. All rights reserved.
+
+## Project portfolio lokal
+
+Lima project selesai disimpan di `data/projects.ts`. Ubah judul, deskripsi, dan `demoUrl` di sana. Gambar saat ini memakai logo Kastriva; ganti `image` dengan screenshot di `public/portfolio/` bila tersedia. Tahun, teknologi, dan studi kasus yang belum dikonfirmasi dibiarkan kosong.
+
+Daftar publik menggabungkan project CMS dengan project lokal. Entri CMS diprioritaskan jika ID, slug judul, atau URL demo sama (garis miring terakhir diabaikan). Entri CMS yang tidak dipublikasikan menyembunyikan padanan lokalnya. Kategori, halaman detail, project unggulan, dan sitemap memakai repository yang sama.

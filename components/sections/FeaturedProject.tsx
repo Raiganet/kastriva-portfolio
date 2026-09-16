@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
-import { config } from "@/data/config";
+import { usePortfolio } from "@/lib/hooks/usePortfolio";
 import { ImageWithFallback } from "@/components/ui";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 
@@ -11,7 +11,8 @@ function generateSlug(title: string): string {
 }
 
 export default function FeaturedProject() {
-  const featuredProjects = config.portfolio.filter((p) => p.featured).slice(0, 2);
+  const { projects } = usePortfolio();
+  const featuredProjects = projects.filter((p) => p.featured && p.published).slice(0, 2);
 
   if (featuredProjects.length === 0) return null;
 

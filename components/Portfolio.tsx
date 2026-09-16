@@ -150,7 +150,7 @@ export default function Portfolio() {
                         {project.category}
                       </span>
                       <span className="text-xs text-slate-500 flex items-center gap-1">
-                        <Calendar size={12} /> {project.year}
+                        <Calendar size={12} /> {project.year || "Selesai"}
                       </span>
                     </div>
                     <h3 className="text-xl font-bold mb-2 group-hover:text-primary-600 transition-colors">

@@ -31,7 +31,7 @@ class HybridPortfolioRepository implements PortfolioRepository {
     try {
       const res = await gasGet<any[]>("getPortfolio");
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        return res.data.map(normalizePortfolio).filter((p) => p.published);
+        return res.data.map(normalizePortfolio);
       }
       return null;
     } catch {
@@ -41,8 +41,13 @@ class HybridPortfolioRepository implements PortfolioRepository {
 
   async getAll(): Promise<PortfolioProject[]> {
     const remote = await this.fetchFromGas();
-    if (remote) return remote;
-    return config.portfolio.filter((p) => p.published);
+    const local = config.portfolio;
+    const remoteProjects = remote || [];
+    const key = (url: string) => url.replace(/\/$/, "");
+    return [...remoteProjects, ...local.filter((p) => !remoteProjects.some((r) =>
+      String(r.id) === String(p.id) || generateSlug(r.title) === generateSlug(p.title) ||
+      (r.demoUrl && key(r.demoUrl) === key(p.demoUrl))
+    ))].filter((p) => p.published);
   }
 
   async getById(id: number | string): Promise<PortfolioProject | null> {
@@ -55,7 +60,10 @@ class HybridPortfolioRepository implements PortfolioRepository {
     if (isGasConfigured()) {
       try {
         const res = await gasGet<any>("getPortfolioBySlug", { slug });
-        if (res.success && res.data) return normalizePortfolio(res.data);
+        if (res.success && res.data) {
+          const project = normalizePortfolio(res.data);
+          return project.published ? project : null;
+        }
       } catch {
         // fallback di bawah
       }
@@ -70,16 +78,6 @@ class HybridPortfolioRepository implements PortfolioRepository {
   }
 
   async getCategories(): Promise<PortfolioCategory[]> {
-    if (isGasConfigured()) {
-      try {
-        const res = await gasGet<PortfolioCategory[]>("getPortfolioCategories");
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          return res.data;
-        }
-      } catch {
-        // fallback di bawah
-      }
-    }
     const all = await this.getAll();
     const map = new Map<string, number>();
     all.forEach((p) => map.set(p.category, (map.get(p.category) || 0) + 1));

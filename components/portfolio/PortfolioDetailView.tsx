@@ -78,7 +78,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
               <CheckCircle2 size={14} /> {project.status}
             </span>
             <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold flex items-center gap-1">
-              <Calendar size={14} /> {project.year}
+              <Calendar size={14} /> {project.year || "Belum dicantumkan"}
             </span>
             {project.featured && (
               <span className="px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold flex items-center gap-1">
@@ -102,7 +102,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                 Masalah yang Diselesaikan
               </h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                {project.problemSolved}
+                {project.problemSolved || "Informasi studi kasus belum ditambahkan."}
               </p>
             </div>
 
@@ -112,7 +112,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                 Solusi yang Diberikan
               </h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                {project.solution}
+                {project.solution || project.description}
               </p>
             </div>
 
@@ -173,6 +173,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                     <Code2 size={12} /> Teknologi
                   </div>
                   <div className="flex flex-wrap gap-1.5">
+                    {project.technologies.length === 0 && <span className="text-sm text-slate-500">Belum dicantumkan</span>}
                     {project.technologies.map((tech, i) => (
                       <span
                         key={i}

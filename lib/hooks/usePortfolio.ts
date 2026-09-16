@@ -49,9 +49,12 @@ export function usePortfolio(): UsePortfolioReturn {
 
   // Filter ketika category atau search berubah
   useEffect(() => {
-    PortfolioService.filterAndSearch(activeCategory, searchQuery)
-      .then(setFilteredProjects)
-      .catch(err => setError(err.message));
+    const query = searchQuery.trim().toLowerCase();
+    setFilteredProjects(projects.filter((project) =>
+      (activeCategory === "Semua" || activeCategory === "all" || project.category === activeCategory) &&
+      (!query || [project.title, project.description, project.category, ...project.technologies]
+        .some((value) => value.toLowerCase().includes(query)))
+    ));
   }, [activeCategory, searchQuery, projects]);
 
   const setCategory = useCallback((category: string) => {
