@@ -5,8 +5,8 @@ import { verifyAdminPassword } from '@/lib/server/admin-password';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const publicActions = new Set(['getPortfolio', 'getPortfolioBySlug', 'getPortfolioCategories', 'getServices', 'getSettings', 'getSiteContent', 'createOrder', 'health', 'requestCustomerOtp']);
-const adminActions = new Set(['getDashboardStats', 'getOrders', 'getOrder', 'updateOrderStatus', 'getCustomers', 'getCustomer', 'getProjects', 'getProject', 'createProject', 'createProjectUpdate', 'getPortfolioAdmin', 'createPortfolio', 'updatePortfolio', 'deletePortfolio', 'getSiteContentAdmin', 'updateSiteContentSection', 'createQuotation', 'getQuotations', 'createInvoice', 'getInvoices', 'updateInvoicePayment', 'getRevisions', 'updateRevision', 'createHandover', 'getHandovers', 'adminSession', 'logout']);
+const publicActions = new Set(['getPortfolio', 'getPortfolioBySlug', 'getPortfolioCategories', 'getServices', 'getSettings', 'createOrder', 'health', 'requestCustomerOtp']);
+const adminActions = new Set(['getDashboardStats', 'getOrders', 'getOrder', 'updateOrderStatus', 'getCustomers', 'getCustomer', 'getProjects', 'getProject', 'createProject', 'createProjectUpdate', 'getPortfolioAdmin', 'createPortfolio', 'updatePortfolio', 'deletePortfolio', 'createQuotation', 'getQuotations', 'createInvoice', 'getInvoices', 'updateInvoicePayment', 'getRevisions', 'updateRevision', 'createHandover', 'getHandovers', 'adminSession', 'logout']);
 const customerActions = new Set(['getMyDashboard', 'respondQuotation', 'requestRevision', 'respondHandover', 'getOrderByNumber', 'customerSession', 'customerLogout']);
 const secure = process.env.NODE_ENV === 'production';
 const cookieName = (role: string) => `${secure ? '__Host-' : ''}kastriva_${role}_session`;

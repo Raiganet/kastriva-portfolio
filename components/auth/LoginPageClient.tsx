@@ -9,8 +9,7 @@ import {
 } from "lucide-react";
 import { AdminAuthService } from "@/lib/services/auth.service";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
-import { useSiteContent } from "@/components/cms/SiteContentProvider";
-import { buildWhatsAppLink } from "@/lib/contact";
+import { getWhatsAppLink } from "@/data/config";
 
 type Role = "admin" | "customer";
 
@@ -35,7 +34,6 @@ export default function LoginPageClient() {
   const [loading, setLoading] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const router = useRouter();
-  const site = useSiteContent();
 
   const isAdmin = role === "admin";
 
@@ -165,7 +163,7 @@ export default function LoginPageClient() {
                 {isAdmin ? <ShieldCheck size={25} /> : <UserCircle2 size={25} />}
               </div>
               <h2 className="text-3xl font-black tracking-tight text-slate-900">Welcome Back!</h2>
-              <p className="mt-2 text-sm text-slate-500">{isAdmin ? `Masuk ke dashboard admin ${site.brand.name}` : "Lacak dan kelola project Anda"}</p>
+              <p className="mt-2 text-sm text-slate-500">{isAdmin ? "Masuk ke dashboard admin Kastriva" : "Lacak dan kelola project Anda"}</p>
             </motion.div>
           </div>
 
@@ -212,7 +210,7 @@ export default function LoginPageClient() {
 
               <div className="flex items-center justify-between pt-1 text-sm">
                 <label className="flex cursor-pointer select-none items-center gap-2 text-slate-600"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 rounded accent-blue-600" /> Remember me</label>
-                <a href={buildWhatsAppLink(site.brand.whatsapp, `Halo ${site.brand.name}, saya butuh bantuan untuk login.`)} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">Butuh bantuan?</a>
+                <a href={getWhatsAppLink("Halo Kastriva, saya butuh bantuan untuk login.")} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">Butuh bantuan?</a>
               </div>
 
               <button type="submit" disabled={loading} className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-bold text-white transition-all disabled:cursor-not-allowed disabled:opacity-60 ${isAdmin ? "bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 hover:shadow-blue-500/40" : "bg-slate-900 shadow-lg shadow-slate-900/20 hover:-translate-y-0.5 hover:bg-slate-800"}`}>
@@ -221,7 +219,7 @@ export default function LoginPageClient() {
               </button>
             </form>
           </motion.div>
-          <p className="mt-8 text-center text-xs text-slate-400">© {new Date().getFullYear()} {site.brand.name} · Secure Access</p>
+          <p className="mt-8 text-center text-xs text-slate-400">© 2026 Kastriva · Secure Access</p>
         </div>
       </section>
     </main>

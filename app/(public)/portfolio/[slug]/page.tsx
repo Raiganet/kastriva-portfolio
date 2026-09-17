@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { getSiteContent } from "@/lib/server/site-content.server";
+import { config } from "@/data/config";
 import PortfolioDetailView from "@/components/portfolio/PortfolioDetailView";
 import { getServerPortfolioBySlug } from "@/lib/server/portfolio.server";
 
@@ -14,14 +14,14 @@ interface PortfolioDetailProps {
 export async function generateMetadata({
   params,
 }: PortfolioDetailProps): Promise<Metadata> {
-  const [project, site] = await Promise.all([getServerPortfolioBySlug(params.slug), getSiteContent()]);
+  const project = await getServerPortfolioBySlug(params.slug);
 
   if (!project) {
     return { title: "Project Not Found" };
   }
 
   return {
-    title: `${project.title} - ${site.brand.name}`,
+    title: `${project.title} - Portfolio`,
     description: project.description,
     alternates: { canonical: `/portfolio/${params.slug}` },
     openGraph: {
@@ -43,7 +43,7 @@ export async function generateMetadata({
 export default async function PortfolioDetailPage({
   params,
 }: PortfolioDetailProps) {
-  const [project, site] = await Promise.all([getServerPortfolioBySlug(params.slug), getSiteContent()]);
+  const project = await getServerPortfolioBySlug(params.slug);
 
   if (!project) {
     notFound();
@@ -57,7 +57,7 @@ export default async function PortfolioDetailPage({
     description: project.description,
     image: project.image,
     url: `${siteUrl}/portfolio/${params.slug}`,
-    creator: { "@type": "Organization", name: site.brand.name },
+    creator: { "@type": "Organization", name: config.brand.name },
     keywords: project.technologies.join(", "),
   };
 

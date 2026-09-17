@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, ExternalLink, MessageCircle, Search, Copy, Check } from "lucide-react";
 import Link from "next/link";
+import { getWhatsAppLink } from "@/data/config";
 
 function SuccessContent() {
   const searchParams = useSearchParams();

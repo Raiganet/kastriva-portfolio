@@ -14,6 +14,7 @@ import {
   PROJECT_TYPES,
   getPortfolioReference,
   inferPortfolioProjectType,
+  type ProjectType,
 } from "@/lib/order/portfolio-reference";
 
 function OrderFormContent() {
@@ -339,7 +340,9 @@ function OrderFormContent() {
               name="type"
               className={inputClass("type")}
               value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, type: e.target.value as ProjectType })
+              }
             >
               {PROJECT_TYPES.map((t) => (
                 <option key={t} value={t}>

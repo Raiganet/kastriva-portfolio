@@ -1,12 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getSiteContent } from "@/lib/server/site-content.server";
 
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const site = await getSiteContent();
+export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: `${site.brand.name} - Jasa Website & Aplikasi`,
-    short_name: site.brand.name,
-    description: site.seo.description,
+    name: "Kastriva - Jasa Website & Aplikasi",
+    short_name: "Kastriva",
+    description: "Portfolio, layanan, pemesanan, dan dashboard project Kastriva.",
     start_url: "/?source=pwa",
     scope: "/",
     display: "standalone",
@@ -20,9 +18,9 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       { src: "/maskable-icon-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: site.navigation.startProjectLabel, short_name: "Order", url: "/order?source=pwa-shortcut" },
-      { name: site.portfolio.title, short_name: "Portfolio", url: "/portfolio?source=pwa-shortcut" },
-      { name: site.navigation.trackOrderLabel, short_name: "Tracking", url: "/order/track?source=pwa-shortcut" },
+      { name: "Mulai Project", short_name: "Order", url: "/order?source=pwa-shortcut" },
+      { name: "Lihat Portfolio", short_name: "Portfolio", url: "/portfolio?source=pwa-shortcut" },
+      { name: "Lacak Order", short_name: "Tracking", url: "/order/track?source=pwa-shortcut" },
     ],
   };
 }
