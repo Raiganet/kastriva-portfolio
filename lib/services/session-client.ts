@@ -20,7 +20,7 @@ export async function refreshSession(role: 'admin' | 'customer'): Promise<boolea
 }
 export async function logoutSession(role: 'admin' | 'customer'): Promise<boolean> {
   const result = await gasPost({ action: role === 'admin' ? 'logout' : 'customerLogout' });
-  // Server returns a response and clears its cookie even when GAS is unavailable.
+  // Server returns a response and clears its cookie even when backend is unavailable.
   if (result.success || result.code === 'UPSTREAM_ERROR' || result.code === 'SETUP_REQUIRED') { setSession(role, null); return true; }
   return false;
 }

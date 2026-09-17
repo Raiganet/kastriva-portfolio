@@ -1,6 +1,6 @@
 /**
  * Interface untuk data project portfolio
- * Kompatibel dengan local config DAN Google Sheets (GAS)
+ * Kompatibel dengan local fallback dan Firebase Firestore
  */
 export interface PortfolioProject {
   id: number | string;

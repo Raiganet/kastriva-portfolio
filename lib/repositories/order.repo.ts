@@ -27,7 +27,7 @@ class HybridOrderRepository implements OrderRepository {
     try {
       let orderNumber = "";
 
-      // 1. Coba simpan ke Google Sheets
+      // 1. Coba simpan ke Firebase Firestore
       if (isGasConfigured()) {
         try {
           const res = await gasPost<{ orderNumber: string; id: string }>({

@@ -22,7 +22,7 @@ export function generateSlug(title: string): string {
 
 /**
  * Hybrid Repository:
- * 1. Coba ambil dari Google Apps Script (Google Sheets)
+ * 1. Coba ambil dari Firebase backend (Firebase Firestore)
  * 2. Jika gagal / belum dikonfigurasi → fallback ke data/config.ts
  */
 class HybridPortfolioRepository implements PortfolioRepository {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { verifySession } from "@/lib/server/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +10,11 @@ export async function POST(request: NextRequest) {
   const expectedOrigin = `${request.nextUrl.protocol}//${request.headers.get("host") || request.nextUrl.host}`;
   if (!origin || origin !== expectedOrigin || request.headers.get("sec-fetch-site") === "cross-site") {
     return NextResponse.json({ success: false }, { status: 403 });
+  }
+  const secure = process.env.NODE_ENV === "production";
+  const cookieName = `${secure ? "__Host-" : ""}kastriva_admin_session`;
+  if (!verifySession(request.cookies.get(cookieName)?.value, "admin")) {
+    return NextResponse.json({ success: false }, { status: 401 });
   }
   revalidateTag("site-content");
   return NextResponse.json({ success: true }, { headers: { "Cache-Control": "no-store" } });

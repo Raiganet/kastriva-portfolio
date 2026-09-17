@@ -116,7 +116,7 @@ function OrderFormContent() {
     return ()=>{window.removeEventListener("online",connection);window.removeEventListener("offline",connection);window.removeEventListener("storage",sync);};
   },[]);
 
-  // Saat datang dari portfolio CMS/GAS, tempelkan identitas project ke draf order.
+  // Saat datang dari portfolio CMS, tempelkan identitas project ke draf order.
   // Data kontak/budget yang sudah diketik tetap dipertahankan.
   useEffect(() => {
     if (!ready || !portfolioProject || draft?.pending || draft?.receipt) return;
@@ -340,9 +340,7 @@ function OrderFormContent() {
               name="type"
               className={inputClass("type")}
               value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value as ProjectType })
-              }
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as ProjectType })}
             >
               {PROJECT_TYPES.map((t) => (
                 <option key={t} value={t}>

@@ -20,7 +20,7 @@ const Router = {
     // ===== PUBLIC =====
     const publicActions = [
       'getPortfolio', 'getPortfolioBySlug', 'getPortfolioCategories',
-      'getServices', 'getSettings', 'createOrder', 'health'
+      'getServices', 'getSettings', 'getSiteContent', 'createOrder', 'health'
     ];
 
     // ===== ADMIN PROTECTED =====
@@ -29,6 +29,7 @@ const Router = {
       'getCustomers', 'getCustomer',
       'getProjects', 'getProject', 'createProject', 'createProjectUpdate',
       'getPortfolioAdmin', 'createPortfolio', 'updatePortfolio', 'deletePortfolio',
+      'getSiteContentAdmin', 'updateSiteContentSection',
       'createQuotation', 'getQuotations',
       'createInvoice', 'getInvoices', 'updateInvoicePayment',
       'getRevisions', 'updateRevision',
@@ -70,6 +71,7 @@ const Router = {
       case 'getPortfolioCategories': return Portfolio.getCategories();
       case 'getServices': return Services.getAll();
       case 'getSettings': return Settings.getAll();
+      case 'getSiteContent': return Cms.getAll();
       case 'createOrder': return Orders.create(body);
       case 'getOrderByNumber': return Orders.getByOrderNumber(params.orderNumber, customerSession.customerId);
 
@@ -88,6 +90,8 @@ const Router = {
       case 'createPortfolio': return Portfolio.create(body);
       case 'updatePortfolio': return Portfolio.update(body);
       case 'deletePortfolio': return Portfolio.remove(body);
+      case 'getSiteContentAdmin': return Cms.getAll();
+      case 'updateSiteContentSection': return DataIntegrity.mutate(function() { return Cms.updateSection(body); });
       case 'createQuotation': return DataIntegrity.mutate(function() { return Quotations.create(body); });
       case 'getQuotations': return Quotations.getAll(params);
       case 'createInvoice': return DataIntegrity.mutate(function() { return Invoices.create(body); });

@@ -6,16 +6,18 @@ import { usePortfolio } from "@/lib/hooks/usePortfolio";
 import { ImageWithFallback } from "@/components/ui";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { getPortfolioOrderHref } from "@/lib/order/portfolio-reference";
+import { useSiteContent } from "@/components/cms/SiteContentProvider";
 
 function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export default function FeaturedProject() {
+  const site = useSiteContent();
   const { projects } = usePortfolio();
   const featuredProjects = projects.filter((p) => p.featured && p.published).slice(0, 2);
 
-  if (featuredProjects.length === 0) return null;
+  if (!site.featured.visible || featuredProjects.length === 0) return null;
 
   const handleProjectClick = (project: any) => {
     PortfolioService.trackView(project.id, project.title);
@@ -32,13 +34,13 @@ export default function FeaturedProject() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold mb-4 shadow-lg"
           >
             <Star size={18} fill="currentColor" />
-            Project Unggulan
+            {site.featured.badge}
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Karya Terbaik Kami
+            {site.featured.title}
           </h2>
           <p className="text-slate-600 dark:text-slate-400">
-            Beberapa project terbaik yang pernah saya kerjakan
+            {site.featured.subtitle}
           </p>
         </div>
 
@@ -67,7 +69,7 @@ export default function FeaturedProject() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute top-4 right-4 px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold rounded-full shadow-xl flex items-center gap-2">
                   <Star size={16} fill="currentColor" />
-                  Featured
+                  {site.portfolio.featuredLabel}
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <span className="inline-block px-3 py-1 rounded-full bg-white/90 dark:bg-dark-surface/90 text-sm font-semibold mb-2">
@@ -104,7 +106,7 @@ export default function FeaturedProject() {
                       }}
                       className="flex-1 text-center py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                     >
-                      <ExternalLink size={16} /> Live Demo
+                      <ExternalLink size={16} /> {site.portfolio.demoLabel}
                     </a>
                   )}
                   <Link
@@ -112,7 +114,7 @@ export default function FeaturedProject() {
                     onClick={() => handleProjectClick(project)}
                     className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
-                    Lihat Detail <ArrowRight size={16} />
+                    {site.portfolio.detailLabel} <ArrowRight size={16} />
                   </Link>
                 </div>
                 <Link
@@ -120,7 +122,7 @@ export default function FeaturedProject() {
                   onClick={() => PortfolioService.trackOrderClick(project.id, project.title)}
                   className="mt-3 w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/15"
                 >
-                  Buat Project Serupa <ArrowRight size={16} />
+                  {site.portfolio.orderLabel} <ArrowRight size={16} />
                 </Link>
               </div>
             </motion.div>

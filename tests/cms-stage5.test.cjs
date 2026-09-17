@@ -89,16 +89,25 @@ test('CMS write rejects unknown sections and sanitizes URLs/contact values', () 
   assert.equal(stored.socials.youtube, 'https://youtube.com/@safe');
 });
 
-test('CMS write action is admin-protected by the same-origin gateway', async () => {
+test('CMS write action is admin-protected by the same-origin Firebase gateway', async () => {
   const calls = [];
-  const route = loadTs('app/api/gas/route.ts', {
+  const route = loadTs('app/api/backend/route.ts', {
     'next/server': { NextResponse: { json: (body, opts) => ({ body, status: opts.status, headers: opts.headers, cookies: { set() {} } }) } },
-    '@/lib/server/gas-bridge': { callGas: async (action, body, params) => { calls.push({ action, body, params }); return { success: true, data: {} }; } },
     '@/lib/server/admin-password': { verifyAdminPassword: async () => false },
+    '@/lib/server/session': {
+      createSession: () => ({ token: 'x', session: { role: 'admin', email: 'a', expiresAt: Date.now()+10000 } }),
+      verifySession: (token, role) => token === 'server-session' ? { role, email: 'admin@example.test', expiresAt: Date.now()+10000 } : null,
+    },
+    '@/lib/server/firebase-backend': {
+      allowAdminLoginAttempt: () => true,
+      handleFirebaseAction: async (action, body, params, session) => { calls.push({ action, body, params, session }); return { success: true, data: {} }; },
+      requestCustomerOtp: async () => ({ success: true }),
+      verifyCustomerOtp: async () => ({ success: false }),
+    },
   });
   const request = (cookies = {}) => ({
     headers: new Headers({ origin: 'https://example.test', 'content-type': 'application/json' }),
-    nextUrl: new URL('https://example.test/api/gas'),
+    nextUrl: new URL('https://example.test/api/backend'),
     body: new Blob([JSON.stringify({ action: 'updateSiteContentSection', section: 'hero', content: { headline: 'Baru' } })]).stream(),
     cookies: { get: (name) => cookies[name] ? { value: cookies[name] } : undefined },
   });
@@ -109,21 +118,30 @@ test('CMS write action is admin-protected by the same-origin gateway', async () 
   const response = await route.POST(request({ [cookie]: 'server-session' }));
   assert.equal(response.status, 200);
   assert.equal(calls[0].action, 'updateSiteContentSection');
-  assert.equal(calls[0].body.token, 'server-session');
+  assert.equal(calls[0].body.token, undefined);
+  assert.equal(calls[0].session.role, 'admin');
 });
 
-test('CMS cache invalidation rejects cross-site requests and revalidates same-origin saves', async () => {
+test('CMS cache invalidation rejects cross-site/anonymous requests and revalidates admin saves', async () => {
   const tags = [];
   const route = loadTs('app/api/cms/revalidate/route.ts', {
     'next/server': { NextResponse: { json: (body, opts = {}) => ({ body, status: opts.status || 200, headers: opts.headers || {} }) } },
     'next/cache': { revalidateTag: (tag) => tags.push(tag) },
+    '@/lib/server/session': {
+      verifySession: (token, role) => token === 'admin-cookie' && role === 'admin'
+        ? { role: 'admin', email: 'admin@example.test', expiresAt: Date.now() + 10_000 }
+        : null,
+    },
   });
-  const req = (origin) => ({
-    headers: new Headers({ origin }),
+  const req = (origin, cookie) => ({
+    headers: new Headers({ origin, host: 'example.test' }),
     nextUrl: new URL('https://example.test/api/cms/revalidate'),
+    cookies: { get: () => cookie ? { value: cookie } : undefined },
   });
   assert.equal((await route.POST(req('https://attacker.test'))).status, 403);
   assert.deepEqual(tags, []);
-  assert.equal((await route.POST(req('https://example.test'))).status, 200);
+  assert.equal((await route.POST(req('https://example.test'))).status, 401);
+  assert.deepEqual(tags, []);
+  assert.equal((await route.POST(req('https://example.test', 'admin-cookie'))).status, 200);
   assert.deepEqual(tags, ['site-content']);
 });

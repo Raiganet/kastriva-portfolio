@@ -89,7 +89,7 @@ export default function AdminCmsPage() {
     setLoading(true); setMessage(null);
     const res = await gasGet<Record<string, unknown>>("getSiteContentAdmin");
     if (res.success && res.data) setSite(mergeKnown(defaultSiteContent, res.data));
-    else setMessage({ type: "error", text: res.error || "Gagal memuat CMS. Pastikan GAS Stage 5 sudah dideploy." });
+    else setMessage({ type: "error", text: res.error || "Gagal memuat CMS. Pastikan Firebase Tahap 6 sudah dikonfigurasi dengan benar." });
     setLoading(false);
   };
 

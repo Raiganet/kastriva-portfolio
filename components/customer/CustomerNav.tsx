@@ -3,11 +3,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, ExternalLink, Home } from "lucide-react";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
-import { config } from "@/data/config";
+import { useSiteContent } from "@/components/cms/SiteContentProvider";
 
 export default function CustomerNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const site = useSiteContent();
 
   if (pathname === "/customer/login") return null;
 
@@ -24,11 +25,11 @@ export default function CustomerNav() {
         <Link href="/customer" className="flex items-center gap-2">
           <img
             src="/android-chrome-192x192.png"
-            alt="Logo Kastriva"
+            alt={`Logo ${site.brand.name}`}
             className="w-8 h-8 rounded-lg"
           />
           <div>
-            <div className="font-bold text-gradient leading-none">{config.brand.name}</div>
+            <div className="font-bold text-gradient leading-none">{site.brand.name}</div>
             <div className="text-xs text-slate-500">Customer Area</div>
           </div>
         </Link>

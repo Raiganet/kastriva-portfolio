@@ -1,6 +1,6 @@
 /**
  * API Client Abstraction
- * Layer ini memungkinkan swap dari local config ke Google Apps Script
+ * Layer ini memungkinkan swap dari local config ke Firebase backend
  * tanpa mengubah UI code.
  */
 
@@ -31,11 +31,11 @@ class ApiClient {
 
   /**
    * GET request
-   * Saat ini fallback ke local, nanti bisa diganti dengan fetch ke GAS
+   * Saat ini fallback ke local, nanti bisa diganti dengan fetch ke Firebase
    */
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<ApiResponse<T>> {
     try {
-      // TODO: Replace dengan fetch ke Google Apps Script
+      // TODO: Replace dengan fetch ke Firebase backend
       // const url = new URL(this.config.baseUrl + endpoint);
       // if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
       // const response = await fetch(url.toString(), { signal: AbortSignal.timeout(this.config.timeout || 10000) });
@@ -61,7 +61,7 @@ class ApiClient {
    */
   async post<T>(endpoint: string, body: unknown): Promise<ApiResponse<T>> {
     try {
-      // TODO: Replace dengan fetch POST ke Google Apps Script
+      // TODO: Replace dengan fetch POST ke Firebase backend
       // const response = await fetch(this.config.baseUrl + endpoint, {
       //   method: "POST",
       //   headers: { "Content-Type": "application/json" },
@@ -91,14 +91,14 @@ class ApiClient {
    */
   async isAvailable(): Promise<boolean> {
     // Untuk sekarang, selalu false karena kita masih pakai local config
-    // Nantinya akan check ke GAS endpoint
+    // Nantinya akan check ke Firebase endpoint
     return false;
   }
 }
 
 // Singleton instance
 export const apiClient = new ApiClient({
-  baseUrl: process.env.NEXT_PUBLIC_GAS_API_URL || "",
+  baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL || "/api/backend",
   useLocalStorage: true,
   timeout: 10000,
 });

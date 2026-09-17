@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Stage 6 keeps uploads server-side only. Direct browser access is denied.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

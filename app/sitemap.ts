@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     projects = await getServerPortfolio();
   } catch {
-    // Keep sitemap available even when the external CMS/GAS is temporarily unavailable.
+    // Keep sitemap available even when the Firebase CMS is temporarily unavailable.
   }
 
   const portfolioRoutes = projects

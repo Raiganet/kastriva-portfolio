@@ -19,7 +19,7 @@ export function isProjectType(value?: string | null): value is ProjectType {
 
 /**
  * Ubah kategori/nama portfolio yang bebas dari CMS menjadi tipe order yang
- * memang diterima validator dan Google Apps Script.
+ * memang diterima validator dan backend Firebase.
  */
 export function inferPortfolioProjectType(
   project?: Pick<PortfolioProject, "title" | "category"> | null,
