@@ -7,25 +7,34 @@ import {
   Users,
   FolderKanban,
   FileText,
+  BadgeDollarSign,
+  RotateCcw,
+  PackageCheck,
   Images,
+  LayoutTemplate,
   LogOut,
   ExternalLink,
 } from "lucide-react";
 import { AdminAuthService } from "@/lib/services/auth.service";
-import { config } from "@/data/config";
+import { useSiteContent } from "@/components/cms/SiteContentProvider";
 
 const menu = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Orders", href: "/admin/orders", icon: Package },
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
   { name: "Quotations", href: "/admin/quotations", icon: FileText },
+  { name: "Invoices", href: "/admin/invoices", icon: BadgeDollarSign },
+  { name: "Revisi", href: "/admin/revisions", icon: RotateCcw },
+  { name: "Serah Terima", href: "/admin/handovers", icon: PackageCheck },
   { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Portfolio CMS", href: "/admin/portfolio", icon: Images },
+  { name: "Website CMS", href: "/admin/cms", icon: LayoutTemplate },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const site = useSiteContent();
 
   if (pathname === "/admin/login") return null;
 
@@ -48,11 +57,11 @@ export default function AdminSidebar() {
           <Link href="/admin" className="flex items-center gap-2">
             <img
               src="/android-chrome-192x192.png"
-              alt="Logo Kastriva"
+              alt={`Logo ${site.brand.name}`}
               className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
             />
             <div>
-              <div className="font-bold text-gradient">{config.brand.name}</div>
+              <div className="font-bold text-gradient">{site.brand.name}</div>
               <div className="text-xs text-slate-500">Admin Panel</div>
             </div>
           </Link>
@@ -92,12 +101,12 @@ export default function AdminSidebar() {
         <Link href="/admin" className="flex items-center gap-2">
           <img
             src="/android-chrome-192x192.png"
-            alt="Logo Kastriva"
+            alt={`Logo ${site.brand.name}`}
             className="w-8 h-8 rounded-lg"
           />
           <span className="font-bold text-gradient">Admin</span>
         </Link>
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-1 overflow-x-auto max-w-[75vw]">
           {menu.map((item) => (
             <Link
               key={item.href}

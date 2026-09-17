@@ -4,28 +4,25 @@ import { gasPost, gasGet, isGasConfigured } from "@/lib/gas-client";
 import { OrderTrackingResult } from "@/lib/types/order";
 
 export interface OrderRepository {
-  submit(data: OrderFormData): Promise<{
+  submit(data: OrderFormData, requestId: string): Promise<{
     success: boolean;
     orderNumber?: string;
     whatsappUrl?: string;
     error?: string;
+    code?: string;
+    committed?: boolean;
   }>;
-  generateOrderNumber(): Promise<string>;
   getByOrderNumber(orderNumber: string): Promise<OrderTrackingResult | null>;
 }
 
 class HybridOrderRepository implements OrderRepository {
-  async generateOrderNumber(): Promise<string> {
-    const year = new Date().getFullYear();
-    const timestamp = Date.now().toString().slice(-4);
-    return `KAS-${year}-${timestamp}`;
-  }
-
-  async submit(data: OrderFormData): Promise<{
+  async submit(data: OrderFormData, requestId: string): Promise<{
     success: boolean;
     orderNumber?: string;
     whatsappUrl?: string;
     error?: string;
+    code?: string;
+    committed?: boolean;
   }> {
     try {
       let orderNumber = "";
@@ -36,14 +33,15 @@ class HybridOrderRepository implements OrderRepository {
           const res = await gasPost<{ orderNumber: string; id: string }>({
             action: "createOrder",
             ...data,
+            requestId,
           });
           if (res.success && res.data && res.data.orderNumber) {
             orderNumber = res.data.orderNumber;
           } else {
-            return { success: false, error: res.error || "Order belum tersimpan. Silakan coba kembali." };
+            return { success: false, error: res.error || "Hasil penyimpanan belum diketahui. Coba kirim kembali dengan permintaan yang sama.", code: res.code, committed: res.committed };
           }
         } catch (err) {
-          return { success: false, error: "Order belum tersimpan. Periksa koneksi dan coba kembali." };
+          return { success: false, error: "Hasil penyimpanan belum diketahui. Coba kirim kembali; jangan membuat permintaan baru." };
         }
       }
 
@@ -63,9 +61,10 @@ Saya ingin berkonsultasi mengenai project.
 - Email: ${data.email}
 - WhatsApp: ${data.whatsapp}
 - Jenis Project: ${data.type}
+- Referensi Portfolio: ${data.portfolioTitle || "Tidak ada"}
 - Budget: ${data.budget || "Belum ditentukan"}
 - Deadline: ${data.deadline || "Fleksibel"}
-- Referensi: ${data.reference || "Tidak ada"}
+- Link/Referensi: ${data.reference || "Tidak ada"}
 
 *Deskripsi:*
 ${data.description}

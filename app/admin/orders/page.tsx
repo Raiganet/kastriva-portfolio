@@ -15,9 +15,12 @@ const ALL_STATUSES: OrderStatus[] = [
   "Approved",
   "In Progress",
   "Revision",
+  "Handover",
   "Completed",
   "Cancelled",
 ];
+
+const MANUAL_STATUSES: OrderStatus[] = ["Submitted", "Reviewing", "Discussing", "Cancelled"];
 
 interface AdminOrder {
   id: string;
@@ -27,11 +30,14 @@ interface AdminOrder {
   email: string;
   whatsapp: string;
   projectType: string;
+  portfolioId?: string;
+  portfolioTitle?: string;
   budget: string;
   deadline: string;
   description: string;
   status: OrderStatus;
   createdAt: string;
+  updatedAt: string;
 }
 
 function waLink(number: string): string {
@@ -73,12 +79,14 @@ export default function AdminOrdersPage() {
   const changeStatus = async (id: string, status: OrderStatus) => {
     setUpdatingId(id);
     const token = AdminAuthService.getToken();
-    const res = await gasPost({ action: "updateOrderStatus", token, id, status });
+    const current = orders.find(order=>order.id===id);
+    const res = await gasPost({ action: "updateOrderStatus", token, id, status, expectedUpdatedAt: current?.updatedAt || "" });
     setUpdatingId("");
     if (res.success) {
       load();
     } else {
       alert(res.error || "Gagal update status");
+      if (res.code === "CONFLICT") load();
     }
   };
 
@@ -170,7 +178,14 @@ export default function AdminOrdersPage() {
                         {order.business || order.email}
                       </div>
                     </td>
-                    <td className="px-5 py-4">{order.projectType}</td>
+                    <td className="px-5 py-4">
+                      <div>{order.projectType}</div>
+                      {order.portfolioTitle && (
+                        <div className="mt-1 text-xs font-medium text-primary-600 dark:text-primary-400">
+                          Ref: {order.portfolioTitle}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-5 py-4 text-slate-500">
                       {order.budget || "-"}
                     </td>
@@ -188,7 +203,7 @@ export default function AdminOrdersPage() {
                             }
                             className="px-3 py-2 pr-8 rounded-lg bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
                           >
-                            {ALL_STATUSES.map((s) => (
+                            {Array.from(new Set([order.status, ...MANUAL_STATUSES])).map((s) => (
                               <option key={s} value={s}>{s}</option>
                             ))}
                           </select>

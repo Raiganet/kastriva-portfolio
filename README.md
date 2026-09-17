@@ -1,3 +1,7 @@
+# Pembaruan terbaru: Tahap 5 — Full Website CMS
+
+**Mulai dari [PANDUAN-TAHAP-5.md](PANDUAN-TAHAP-5.md).** Paket ini sudah mencakup Tahap 1–4: keamanan/order reliability, workflow penawaran-invoice-revisi-serah terima, PWA/performa/SEO/analytics, dan sekarang CMS seluruh website. Jalankan `setupSiteCmsStage5()` satu kali lalu redeploy Google Apps Script.
+
 # Pembaruan terbaru: keamanan tahap 1
 
 **Mulai dari [PANDUAN-TAHAP-1.md](PANDUAN-TAHAP-1.md).** Frontend dan GAS wajib dipasang bersama. Login pelanggan memakai OTP email; admin memakai hash scrypt di environment server; sesi memakai cookie HttpOnly.
@@ -16,11 +20,14 @@ sistem informasi, dan aplikasi Android.
 - Portfolio engine: filter, search, detail page, lightbox gallery
 - Order system: validasi Zod, honeypot anti-spam, nomor order unik (KAS-YYYY-NNNN)
 - Order tracking publik dengan timeline visual
-- FAQ + Testimonial (data-driven, placeholder jujur)
+- FAQ + Testimonial (CMS-driven)
+- Full Website CMS: Hero, layanan, harga, portfolio presentation, proses, testimonial, FAQ, tentang/tim, kontak/CTA, footer, dan SEO
+- PWA + offline fallback + install prompt
 - SEO: sitemap.xml, robots.txt, JSON-LD schema.org, OpenGraph
+- Analytics GA4 + Core Web Vitals
 
 ### Backend (Google Apps Script + Google Sheets)
-- 18 sheet database (setup otomatis via setupDatabase())
+- Database Google Sheets dengan migrasi non-destructive per tahap, termasuk `SiteContent` untuk CMS
 - API router dengan 3 tier auth: public / admin / customer
 - Email otomatis: notifikasi admin, konfirmasi customer, update project, quotation
 - Order → Customer auto-create → Project → Updates → Quotation
@@ -31,12 +38,15 @@ sistem informasi, dan aplikasi Android.
 - Order management (search, filter, ubah status)
 - Project management (convert order, kirim update progress)
 - Quotation builder (items, diskon, pajak, total server-side)
+- Invoice, revisi, dan serah terima
+- Full Website CMS + Portfolio CMS
 - Customer management
 
 ### Customer Dashboard (/customer)
 - Login dengan Email + kode OTP
 - Pantau orders, projects + timeline progress
 - Approve/reject quotation
+- Pantau invoice, ajukan revisi, dan terima serah terima
 
 ## 🛠️ Tech Stack
 Next.js 14 (App Router) • TypeScript • Tailwind CSS • Framer Motion •
@@ -93,6 +103,7 @@ sehingga website tidak pernah blank.
 | `/order/success` | Konfirmasi order |
 | `/services`, `/process`, `/about`, `/contact` | Halaman statis |
 | `/admin` | Admin dashboard (protected) |
+| `/admin/cms` | Full Website CMS (protected) |
 | `/customer` | Customer dashboard (protected) |
 
 ## 🚀 Deployment (Vercel)
@@ -104,9 +115,9 @@ sehingga website tidak pernah blank.
 
 ## 📝 Mengelola Konten
 
-- **Portfolio/Services/Pricing/FAQ**: edit `data/config.ts` & `data/content.ts`
-  (atau langsung di Google Sheets untuk portfolio setelah GAS aktif)
-- **Brand/WhatsApp/Social**: `data/config.ts` + sheet Settings
+- **Website CMS (`/admin/cms`)**: brand, navbar, Hero, statistik, layanan, harga, tampilan portfolio, proses, testimonial, FAQ, Tentang/Tim, Kontak/CTA, Footer, dan SEO.
+- **Portfolio CMS (`/admin/portfolio`)**: item project, kategori, gambar, detail, demo URL, dan featured.
+- `data/config.ts` / `data/content.ts` sekarang berfungsi sebagai **fallback lokal**, bukan tempat utama mengubah konten website.
 
 ---
 

@@ -20,7 +20,7 @@ const Router = {
     // ===== PUBLIC =====
     const publicActions = [
       'getPortfolio', 'getPortfolioBySlug', 'getPortfolioCategories',
-      'getServices', 'getSettings', 'createOrder', 'health'
+      'getServices', 'getSettings', 'getSiteContent', 'createOrder', 'health'
     ];
 
     // ===== ADMIN PROTECTED =====
@@ -29,14 +29,17 @@ const Router = {
       'getCustomers', 'getCustomer',
       'getProjects', 'getProject', 'createProject', 'createProjectUpdate',
       'getPortfolioAdmin', 'createPortfolio', 'updatePortfolio', 'deletePortfolio',
+      'getSiteContentAdmin', 'updateSiteContentSection',
       'createQuotation', 'getQuotations',
-      'createInvoice', 'getInvoices',
+      'createInvoice', 'getInvoices', 'updateInvoicePayment',
+      'getRevisions', 'updateRevision',
+      'createHandover', 'getHandovers',
       'sendMessage', 'getMessages', 'uploadFile',
       'getNotifications', 'markNotificationRead'
     ];
 
     // ===== CUSTOMER PROTECTED =====
-    const customerActions = ['getMyDashboard', 'respondQuotation', 'getOrderByNumber'];
+    const customerActions = ['getMyDashboard', 'respondQuotation', 'getOrderByNumber', 'requestRevision', 'respondHandover'];
 
     if (publicActions.indexOf(action) === -1 &&
         adminActions.indexOf(action) === -1 &&
@@ -68,33 +71,42 @@ const Router = {
       case 'getPortfolioCategories': return Portfolio.getCategories();
       case 'getServices': return Services.getAll();
       case 'getSettings': return Settings.getAll();
-      case 'createOrder':
-        var allowed = Security.locked(function() { return Security.consume('order-global', 30, 3600000) && Security.consume('order-email:' + String(body.email || '').trim().toLowerCase(), 5, 3600000); });
-        if (!allowed) return { success: false, error: 'Terlalu banyak permintaan. Coba lagi nanti.', code: 'RATE_LIMIT' };
-        return Orders.create(body);
+      case 'getSiteContent': return Cms.getAll();
+      case 'createOrder': return Orders.create(body);
       case 'getOrderByNumber': return Orders.getByOrderNumber(params.orderNumber, customerSession.customerId);
 
       // ADMIN
       case 'getDashboardStats': return Stats.getDashboard();
       case 'getOrders': return Orders.getAll(params);
       case 'getOrder': return Orders.getById(params.id);
-      case 'updateOrderStatus': return Orders.updateStatus(body);
+      case 'updateOrderStatus': return DataIntegrity.mutate(function() { return Orders.updateStatus(body); });
       case 'getCustomers': return Customers.getAll(params);
       case 'getCustomer': return Customers.getById(params.id);
       case 'getProjects': return Projects.getAll(params);
       case 'getProject': return Projects.getById(params.id);
-      case 'createProject': return Projects.create(body);
-      case 'createProjectUpdate': return Projects.createUpdate(body);
+      case 'createProject': return DataIntegrity.mutate(function() { return Projects.create(body); });
+      case 'createProjectUpdate': return DataIntegrity.mutate(function() { return Projects.createUpdate(body); });
       case 'getPortfolioAdmin': return Portfolio.getAllAdmin(params);
       case 'createPortfolio': return Portfolio.create(body);
       case 'updatePortfolio': return Portfolio.update(body);
       case 'deletePortfolio': return Portfolio.remove(body);
-      case 'createQuotation': return Quotations.create(body);
+      case 'getSiteContentAdmin': return Cms.getAll();
+      case 'updateSiteContentSection': return DataIntegrity.mutate(function() { return Cms.updateSection(body); });
+      case 'createQuotation': return DataIntegrity.mutate(function() { return Quotations.create(body); });
       case 'getQuotations': return Quotations.getAll(params);
+      case 'createInvoice': return DataIntegrity.mutate(function() { return Invoices.create(body); });
+      case 'getInvoices': return Invoices.getAll(params);
+      case 'updateInvoicePayment': return DataIntegrity.mutate(function() { return Invoices.updatePayment(body); });
+      case 'getRevisions': return Revisions.getAll(params);
+      case 'updateRevision': return DataIntegrity.mutate(function() { return Revisions.update(body); });
+      case 'createHandover': return DataIntegrity.mutate(function() { return Handovers.create(body); });
+      case 'getHandovers': return Handovers.getAll(params);
 
       // CUSTOMER
       case 'getMyDashboard': return CustomerPortal.getDashboard(customerSession.customerId);
-      case 'respondQuotation': return Quotations.respond(body, customerSession.customerId);
+      case 'respondQuotation': return DataIntegrity.mutate(function() { return Quotations.respond(body, customerSession.customerId); });
+      case 'requestRevision': return DataIntegrity.mutate(function() { return Revisions.request(body, customerSession.customerId); });
+      case 'respondHandover': return DataIntegrity.mutate(function() { return Handovers.respond(body, customerSession.customerId); });
 
       default:
         return { success: false, error: 'Action not implemented: ' + action };

@@ -39,6 +39,9 @@ const Projects = {
       if (!order) {
         return { success: false, error: 'Order not found' };
       }
+      if (String(oData[orderRow][16]) !== 'Approved') {
+        return { success: false, error: 'Project hanya dapat dimulai setelah quotation disetujui customer' };
+      }
 
       // Cek duplikat
       const sheet = Config.getSheet('Projects');
@@ -168,8 +171,11 @@ const Projects = {
         return { success: false, error: 'Missing projectId or title' };
       }
 
-      const progress = Math.max(0, Math.min(100, Number(data.progress) || 0));
+      const progress = Math.max(0, Math.min(95, Number(data.progress) || 0));
       const status = data.status || 'In Progress';
+      if (['In Progress', 'Revision'].indexOf(status) < 0) {
+        return { success: false, error: 'Status progress tidak valid. Gunakan Serah Terima untuk menyelesaikan project.' };
+      }
 
       const sheet = Config.getSheet('Projects');
       const pData = sheet.getDataRange().getValues();
@@ -204,9 +210,6 @@ const Projects = {
       // 2. Update project (F=6 status, G=7 progress, J=10 completed, L=12 updated)
       sheet.getRange(projectRow + 1, 6).setValue(status);
       sheet.getRange(projectRow + 1, 7).setValue(progress);
-      if (status === 'Completed') {
-        sheet.getRange(projectRow + 1, 10).setValue(now);
-      }
       sheet.getRange(projectRow + 1, 12).setValue(now);
 
       // 3. Sync order status + kirim email customer

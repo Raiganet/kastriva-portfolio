@@ -13,3 +13,46 @@
   .glass { @apply bg-white/70 dark:bg-dark-surface/70 backdrop-blur-md border border-slate-200 dark:border-dark-border; }
   .text-gradient { @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-400; }
 }
+
+/* Stage 4: accessibility, perceived performance, and shared premium surfaces */
+@layer base {
+  html { scroll-behavior: smooth; text-rendering: optimizeLegibility; }
+  body { min-height: 100vh; overflow-x: hidden; }
+  ::selection { @apply bg-primary-600 text-white; }
+  :focus-visible { @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-dark-bg; }
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-3xl border border-slate-200/80 bg-white/90 shadow-xl shadow-slate-900/[0.04] backdrop-blur-sm dark:border-slate-800 dark:bg-dark-surface/90 dark:shadow-black/20;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary-600 px-5 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/20;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 dark:border-slate-700 dark:bg-dark-surface dark:text-slate-100;
+  }
+  .section-kicker {
+    @apply mb-3 inline-flex rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-primary-700 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300;
+  }
+}
+
+@layer utilities {
+  .bg-mesh {
+    background-image:
+      radial-gradient(circle at 15% 15%, rgb(108 92 231 / 0.10), transparent 32%),
+      radial-gradient(circle at 85% 10%, rgb(168 85 247 / 0.08), transparent 30%),
+      radial-gradient(circle at 50% 90%, rgb(6 182 212 / 0.06), transparent 30%);
+  }
+  .content-auto { content-visibility: auto; contain-intrinsic-size: 1px 800px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -9,6 +9,7 @@ function fixture() {
   const mail = [];
   let now = 1800000000000;
   const headers = ['id','orderNumber','customerId','name','business','email','whatsapp','projectType','serviceId','portfolioId','portfolioTitle','budget','deadline','description','features','referenceUrl','status','createdAt','updatedAt'];
+  headers.push('requestId','requestHash','notifications');
   const rows = {
     Customers: [['id','name','email'], ['c1','First','one@example.test'], ['c2','Second','two@example.test']],
     Orders: [headers, ['o1','KAS-2026-0001','c1','First','','one@example.test','08000000000','Website','','','','','','Private one','','','Submitted','',''], ['o2','KAS-2026-0002','c2','Second','','two@example.test','08000000000','Website','','','','','','Private two','','','Submitted','','']],
@@ -20,11 +21,12 @@ function fixture() {
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock() {} }) },
     Utilities: { Charset: { UTF_8: 'utf8' }, DigestAlgorithm: { SHA_256: 'sha256' }, getUuid: crypto.randomUUID, computeDigest: (_,s) => [...crypto.createHash('sha256').update(s).digest()], computeHmacSha256Signature: (s,key) => [...crypto.createHmac('sha256',key).update(s).digest()] },
     Config: { APP_NAME: 'Kastriva', getSheet(name) { if (!rows[name]) throw new Error('Missing'); const a=rows[name]; return { getDataRange: () => ({ getValues: () => a }), appendRow: r => a.push(r), getRange: () => ({ setValue() {} }) }; } },
+    SpreadsheetApp: {flush() {}},
     Utils: { isValidEmail: x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x), sanitize: x => String(x||''), generateId: crypto.randomUUID, generateOrderNumber: () => 'KAS-2026-0003', logAudit() {} },
     GmailApp: { sendEmail: (to,subject,body) => mail.push({to,body}) },
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: text => ({ text, setMimeType() { return this; } }) }
   });
-  for (const name of ['Security','Auth','CustomerAuth','Orders','CustomerPortal','Router','Code']) vm.runInContext(fs.readFileSync(`google-apps-script/${name}.gs`,'utf8'),ctx);
+  for (const name of ['Security','DataIntegrity','Auth','CustomerAuth','Orders','CustomerPortal','Router','Code']) vm.runInContext(fs.readFileSync(`google-apps-script/${name}.gs`,'utf8'),ctx);
   const run = code => vm.runInContext(code,ctx);
   run('Orders.sendAdminNotification=()=>{}; Orders.sendConfirmationEmail=()=>{};');
   function login(email='one@example.test') { const req=run(`CustomerAuth.request(${JSON.stringify(email)})`); const code=mail.at(-1).body.match(/\d{8}/)[0]; return { request: req, code, session: run(`CustomerAuth.verifyCode(${JSON.stringify({ challengeId:req.data.challengeId,code,remember:true })})`) }; }
@@ -39,7 +41,7 @@ test('direct GAS requests and legacy email/order login are rejected', () => {
   assert.equal(f.run(`Router.handle('getOrderByNumber',{orderNumber:'KAS-2026-0001'}, {},'POST')`).success,false);
 });
 test('creating an order under an existing email does not issue a session', () => {
-  const f=fixture(); const created=f.run(`Orders.create({name:'Someone',email:'one@example.test',whatsapp:'08000000000',type:'Website',description:'A long enough project description'})`);
+  const f=fixture(); const created=f.run(`Orders.create({name:'Someone',email:'one@example.test',whatsapp:'08000000000',type:'Website',description:'A long enough project description',requestId:'12345678-1234-4123-8123-123456789abc'})`);
   assert.equal(created.success,true); assert.equal(created.data.token,undefined);
   assert.equal(f.run(`Router.handle('customerLogin',{}, {email:'one@example.test',orderNumber:'KAS-2026-0003'},'POST')`).success,false);
 });

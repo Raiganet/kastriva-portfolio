@@ -14,80 +14,43 @@ const Orders = {
   /**
    * Create order (endpoint publik)
    */
-  create: function(data) {
-    try {
-      // ===== SERVER-SIDE VALIDATION (WAJIB) =====
-      if (!data.name || !data.email || !data.whatsapp || !data.type || !data.description) {
-        return { success: false, error: 'Missing required fields' };
-      }
-      if (!Utils.isValidEmail(data.email)) {
-        return { success: false, error: 'Invalid email format' };
-      }
-      if (String(data.name).length < 2) {
-        return { success: false, error: 'Nama minimal 2 karakter' };
-      }
-      if (String(data.whatsapp).length < 10) {
-        return { success: false, error: 'Nomor WhatsApp minimal 10 digit' };
-      }
-      if (String(data.description).length < 20) {
-        return { success: false, error: 'Deskripsi minimal 20 karakter' };
-      }
-      // Honeypot anti-spam
-      if (data.website && String(data.website).length > 0) {
-        return { success: false, error: 'Spam detected' };
-      }
-
+  create: function(input) {
+    var data;
+    try { data = DataIntegrity.validateOrder(input); }
+    catch (e) { return { success: false, code: 'VALIDATION', committed: false, error: e.message }; }
+    const requestId = input.requestId.toLowerCase();
+    const requestHash = Security.hash(JSON.stringify(data));
+    return DataIntegrity.mutate(function() {
       const sheet = Config.getSheet('Orders');
+      var headers;
+      try { headers = DataIntegrity.headers(); }
+      catch (e) { return { success: false, code: 'MIGRATION_REQUIRED', error: 'Pembaruan database belum dijalankan. Hubungi admin.' }; }
+      const rows = sheet.getDataRange().getValues();
+      const keyIndex = headers.indexOf('requestId');
+      const hashIndex = headers.indexOf('requestHash');
+      const found = rows.slice(1).find(function(row) { return row[keyIndex] === requestId; });
+      if (found) {
+        if (found[hashIndex] !== requestHash) return { success: false, code: 'IDEMPOTENCY_CONFLICT', error: 'Permintaan ini sudah digunakan dengan isi berbeda. Periksa order sebelumnya.' };
+        return { success: true, data: { id: found[0], orderNumber: found[1], status: found[16], replayed: true } };
+      }
+      // A retry of a committed order is resolved BEFORE rate limiting or any writes.
+      if (!Security.consume('order-global',30,3600000) || !Security.consume('order-email:' + data.email,5,3600000))
+        return { success: false, code: 'RATE_LIMIT', committed: false, error: 'Terlalu banyak permintaan. Coba kembali setelah batas waktu berakhir.' };
+      const customerId = Orders.findOrCreateCustomer(data);
       const orderId = Utils.generateId();
-      const orderNumber = Utils.generateOrderNumber();
+      const orderNumber = DataIntegrity.nextNumber('Orders','KAS');
       const now = new Date().toISOString();
-
-      // Find or create customer
-      const customerId = this.findOrCreateCustomer(data);
-
-      // Insert order (urutan kolom sesuai header sheet Orders)
-      sheet.appendRow([
-        orderId,                                   // A  id
-        orderNumber,                               // B  orderNumber
-        customerId,                                // C  customerId
-        Utils.sanitize(data.name),                 // D  name
-        Utils.sanitize(data.business || ''),       // E  business
-        Utils.sanitize(data.email),                // F  email
-        Utils.sanitize(data.whatsapp),             // G  whatsapp
-        Utils.sanitize(data.type),                 // H  projectType
-        data.serviceId || '',                      // I  serviceId
-        data.portfolioId || '',                    // J  portfolioId
-        Utils.sanitize(data.portfolioTitle || ''), // K  portfolioTitle
-        Utils.sanitize(data.budget || ''),         // L  budget
-        Utils.sanitize(data.deadline || ''),       // M  deadline
-        Utils.sanitize(data.description),          // N  description
-        Utils.sanitize(data.features || ''),       // O  features
-        Utils.sanitize(data.referenceUrl || ''),   // P  referenceUrl
-        'Submitted',                               // Q  status
-        now,                                       // R  createdAt
-        now                                        // S  updatedAt
-      ]);
-
-      // ===== EMAIL NOTIFICATIONS =====
-      this.sendAdminNotification(orderNumber, data);
-      this.sendConfirmationEmail(orderNumber, data);
-
-      Utils.logAudit('order_created', customerId, {
-        orderId: orderId,
-        orderNumber: orderNumber
-      });
-
-      return {
-        success: true,
-        data: {
-          id: orderId,
-          orderNumber: orderNumber,
-          status: 'Submitted'
-        }
-      };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+      const values = [orderId,orderNumber,customerId,data.name,data.business,data.email,data.whatsapp,data.type,data.serviceId,data.portfolioId,data.portfolioTitle,data.budget,data.deadline,data.description,data.features,data.reference,'Submitted',now,now];
+      const row = new Array(headers.length).fill('');
+      values.forEach(function(value,i) { row[i] = i >= 3 && i <= 15 ? DataIntegrity.text(value) : value; });
+      row[keyIndex] = requestId; row[hashIndex] = requestHash;
+      row[headers.indexOf('notifications')] = JSON.stringify({ admin: { state:'pending',attempts:0 }, customer: { state:'pending',attempts:0 } });
+      // Commit order, idempotency identity and email jobs in ONE row write.
+      sheet.appendRow(row);
+      SpreadsheetApp.flush();
+      Utils.logAudit('order_created',customerId,{orderId:orderId,orderNumber:orderNumber});
+      return { success: true, data: { id:orderId,orderNumber:orderNumber,status:'Submitted',replayed:false } };
+    });
   },
 
   /**
@@ -111,10 +74,10 @@ const Orders = {
 
     sheet.appendRow([
       customerId,
-      Utils.sanitize(data.name),
-      Utils.sanitize(data.email),
-      Utils.sanitize(data.whatsapp),
-      Utils.sanitize(data.business || ''),
+      DataIntegrity.text(data.name),
+      DataIntegrity.text(data.email),
+      DataIntegrity.text(data.whatsapp),
+      DataIntegrity.text(data.business || ''),
       '',          // avatar
       'Active',    // status
       now,         // createdAt
@@ -192,7 +155,9 @@ const Orders = {
         return { success: false, error: 'Missing id or status' };
       }
 
-      const validStatuses = ['Submitted', 'Reviewing', 'Discussing', 'Quotation', 'Approved', 'In Progress', 'Revision', 'Completed', 'Cancelled'];
+      // Workflow-managed states (Quotation, Approved, In Progress, Revision, Handover, Completed)
+      // are written only by their dedicated modules to avoid bypassing approval/handover rules.
+      const validStatuses = ['Submitted', 'Reviewing', 'Discussing', 'Cancelled'];
       if (validStatuses.indexOf(data.status) === -1) {
         return { success: false, error: 'Invalid status' };
       }
@@ -202,8 +167,12 @@ const Orders = {
 
       for (let i = 1; i < values.length; i++) {
         if (values[i][0] === data.id) {
+          const existingTime = values[i][18] ? new Date(values[i][18]).toISOString() : '';
+          if (typeof data.expectedUpdatedAt !== 'string' || data.expectedUpdatedAt !== existingTime)
+            return { success:false,code:'CONFLICT',error:'Order telah diperbarui. Muat ulang sebelum mengubah status.' };
+          const updatedAt = new Date(Math.max(Date.now(), (Date.parse(existingTime) || 0) + 1)).toISOString();
           sheet.getRange(i + 1, 17).setValue(data.status);              // Q = status
-          sheet.getRange(i + 1, 19).setValue(new Date().toISOString()); // S = updatedAt
+          sheet.getRange(i + 1, 19).setValue(updatedAt); // S = updatedAt
 
           Utils.logAudit('order_status_updated', 'admin', {
             orderId: data.id,
@@ -240,7 +209,7 @@ const Orders = {
 
           // Build order object
           const order = {};
-          headers.forEach(function(header, j) { order[header] = rows[i][j]; });
+          headers.forEach(function(header, j) { if (['requestId','requestHash','notifications'].indexOf(header) === -1) order[header] = rows[i][j]; });
 
           // Cari project terkait (kolom B Projects = orderId)
           let relatedProject = null;
@@ -319,9 +288,10 @@ const Orders = {
         data.features || '-'
       ].join('\n');
 
-      Utils.sendEmail(Config.ADMIN_EMAIL, subject, body);
+      return Utils.sendEmail(Config.ADMIN_EMAIL, subject, body);
     } catch (error) {
       Logger.log('Admin notification error: ' + error.message);
+      return { success: false };
     }
   },
 

@@ -1,9 +1,9 @@
 /**
- * Analytics tracking abstraction
- * Siap diintegrasikan dengan Google Analytics / Plausible / dll
+ * Central analytics helper. Events are forwarded to GA4 when configured and
+ * remain safe no-ops when analytics is disabled.
  */
-
-type EventName = 
+export type AnalyticsEventName =
+  | "page_view"
   | "portfolio_view"
   | "portfolio_demo_click"
   | "portfolio_order_click"
@@ -11,41 +11,51 @@ type EventName =
   | "order_submitted"
   | "whatsapp_click"
   | "contact_submitted"
-  | "service_consult";
+  | "service_consult"
+  | "pwa_install_prompt"
+  | "pwa_installed"
+  | "web_vital";
 
-interface EventProperties {
+export interface AnalyticsEventProperties {
   [key: string]: string | number | boolean | undefined;
 }
 
 declare global {
   interface Window {
-    trackEvent?: (name: EventName, properties?: EventProperties) => void;
-    gtag?: (...args: any[]) => void;
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+    trackEvent?: (name: AnalyticsEventName, properties?: AnalyticsEventProperties) => void;
+    __deferredPWAInstall?: BeforeInstallPromptEvent;
+  }
+
+  interface BeforeInstallPromptEvent extends Event {
+    readonly platforms: string[];
+    readonly userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+    prompt(): Promise<void>;
   }
 }
 
-/**
- * Track event ke analytics provider
- * Saat ini hanya console.log, siap diintegrasikan ke GA4
- */
-export function trackEvent(name: EventName, properties?: EventProperties): void {
-  // Log untuk development
+export function trackEvent(name: AnalyticsEventName, properties: AnalyticsEventProperties = {}): void {
+  if (typeof window === "undefined") return;
+
   if (process.env.NODE_ENV === "development") {
-    console.log("[Analytics]", name, properties);
+    console.debug("[Analytics]", name, properties);
   }
 
-  // TODO: Integrasikan dengan Google Analytics 4
-  // if (typeof window !== "undefined" && window.gtag) {
-  //   window.gtag("event", name, properties);
-  // }
-
-  // Simpan ke window object untuk diakses global
-  if (typeof window !== "undefined") {
-    window.trackEvent = trackEvent;
+  if (typeof window.gtag === "function") {
+    window.gtag("event", name, properties);
   }
 }
 
-// Auto-register saat module diimport
+export function trackPageView(path: string): void {
+  if (typeof window === "undefined") return;
+  trackEvent("page_view", {
+    page_path: path,
+    page_title: document.title,
+    page_location: window.location.href,
+  });
+}
+
 if (typeof window !== "undefined") {
   window.trackEvent = trackEvent;
 }

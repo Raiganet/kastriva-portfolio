@@ -1,7 +1,7 @@
 /** Browser requests go through the same-origin server gateway; no GAS credentials or tokens. */
 export function isGasConfigured(): boolean { return true; }
 export function getGasUrl(): string { return '/api/gas'; }
-export interface GasResponse<T> { success: boolean; data?: T; error?: string; code?: string; message?: string; }
+export interface GasResponse<T> { success: boolean; data?: T; error?: string; code?: string; message?: string; committed?: boolean; }
 export async function gasPost<T>(payload: Record<string, unknown>): Promise<GasResponse<T>> {
   try {
     const { token: _legacyToken, ...body } = payload;

@@ -1,242 +1,166 @@
 /**
- * KASTRIVA - Quotations Module (Phase 10)
+ * KASTRIVA - Quotations Module (Stage 3)
+ * Professional quotation flow: server-side totals, revision quota, payment terms,
+ * customer response note, idempotent active quotation protection.
  */
-
 const Quotations = {
+  generateNumber: function() { return DataIntegrity.nextNumber('Quotations', 'QTN'); },
 
-  generateNumber: function() {
-    const sheet = Config.getSheet('Quotations');
-    const lastRow = sheet.getLastRow();
-    const year = new Date().getFullYear();
-    var next = 1;
-    if (lastRow > 1) {
-      const last = String(sheet.getRange(lastRow, 2).getValue());
-      const m = last.match(/QTN-\d{4}-(\d+)/);
-      if (m) next = parseInt(m[1], 10) + 1;
-    }
-    return 'QTN-' + year + '-' + ('000' + next).slice(-4);
+  isExpired: function(q) {
+    if (!q || !q.validUntil) return false;
+    const due = new Date(String(q.validUntil) + 'T23:59:59');
+    return !isNaN(due.getTime()) && due.getTime() < Date.now();
   },
 
-  /**
-   * Create quotation (ADMIN)
-   * Total dihitung SERVER-SIDE (jangan percaya client)
-   */
   create: function(data) {
     try {
-      if (!data.orderId || !data.items || data.items.length === 0) {
+      if (!data.orderId || !Array.isArray(data.items) || data.items.length === 0) {
         return { success: false, error: 'Order dan items wajib diisi' };
       }
 
-      // Cari order
-      const oSheet = Config.getSheet('Orders');
-      const oData = oSheet.getDataRange().getValues();
-      var order = null;
-      var orderRow = -1;
-      for (var i = 1; i < oData.length; i++) {
-        if (oData[i][0] === data.orderId) {
-          orderRow = i;
-          order = {
-            id: oData[i][0],
-            orderNumber: oData[i][1],
-            customerId: oData[i][2],
-            name: oData[i][3],
-            email: oData[i][5],
-            type: oData[i][7]
-          };
-          break;
-        }
-      }
-      if (!order) return { success: false, error: 'Order not found' };
+      const orderFound = Workflow.orderById(data.orderId);
+      if (!orderFound) return { success: false, error: 'Order tidak ditemukan' };
+      const order = orderFound.data;
 
-      // Hitung server-side
+      // Prevent accidental duplicate active quotations for the same order.
+      const active = Workflow.getAll('Quotations').find(function(q) {
+        return String(q.orderId) === String(data.orderId) && (q.status === 'approved' || (q.status === 'sent' && !Quotations.isExpired(q)));
+      });
+      if (active) {
+        return { success: false, error: 'Order ini masih memiliki penawaran aktif: ' + active.quotationNumber };
+      }
+
       var subtotal = 0;
       var cleanItems = [];
-      for (var j = 0; j < data.items.length; j++) {
-        var it = data.items[j];
-        var qty = Math.max(1, Number(it.qty) || 1);
-        var price = Math.max(0, Number(it.price) || 0);
-        var lineTotal = qty * price;
-        subtotal += lineTotal;
-        cleanItems.push({
-          description: String(it.description || 'Item'),
-          qty: qty,
-          price: price,
-          total: lineTotal
-        });
-      }
+      data.items.slice(0, 30).forEach(function(it) {
+        const description = Workflow.cleanText(it.description || '', 300);
+        const qty = Math.max(1, Math.min(999, Number(it.qty) || 1));
+        const price = Math.max(0, Math.min(999999999999, Number(it.price) || 0));
+        if (!description || price <= 0) return;
+        const total = qty * price;
+        subtotal += total;
+        cleanItems.push({ description: description, qty: qty, price: price, total: total });
+      });
+      if (!cleanItems.length) return { success: false, error: 'Minimal satu item penawaran harus valid' };
 
-      var discount = Math.max(0, Math.min(subtotal, Number(data.discount) || 0));
-      var taxPercent = Math.max(0, Math.min(100, Number(data.tax) || 0));
-      var taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
-      var total = subtotal - discount + taxAmount;
-
-      const qSheet = Config.getSheet('Quotations');
-      const qId = Utils.generateId();
-      const qNumber = this.generateNumber();
+      const discount = Math.max(0, Math.min(subtotal, Number(data.discount) || 0));
+      const taxPercent = Math.max(0, Math.min(100, Number(data.tax) || 0));
+      const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
+      const total = subtotal - discount + taxAmount;
+      const revisionRaw = Number(data.revisionLimit);
+      const revisionLimit = isFinite(revisionRaw) ? Math.max(0, Math.min(20, Math.floor(revisionRaw))) : 2;
+      const paymentTerms = Workflow.cleanText(data.paymentTerms || 'Pembayaran mengikuti invoice yang diterbitkan setelah penawaran disetujui.', 1000);
+      const notes = Workflow.cleanText(data.notes || '', 1500);
+      const projectName = Workflow.cleanText(data.projectName || (order.projectType + ' - ' + order.name), 200);
       const now = new Date().toISOString();
+      const id = Utils.generateId();
+      const number = this.generateNumber();
 
-      qSheet.appendRow([
-        qId,
-        qNumber,
-        order.id,
-        order.customerId,
-        data.projectName || (order.type + ' - ' + order.name),
-        JSON.stringify(cleanItems),
-        subtotal,
-        discount,
-        taxAmount,
-        total,
-        Utils.sanitize(data.notes || ''),
-        data.validUntil || '',
-        'sent',
-        now,
-        now
-      ]);
+      Workflow.appendObject('Quotations', {
+        id: id,
+        quotationNumber: number,
+        orderId: order.id,
+        customerId: order.customerId,
+        projectName: projectName,
+        items: JSON.stringify(cleanItems),
+        subtotal: subtotal,
+        discount: discount,
+        tax: taxAmount,
+        total: total,
+        notes: notes,
+        validUntil: String(data.validUntil || ''),
+        status: 'sent',
+        createdAt: now,
+        updatedAt: now,
+        revisionLimit: revisionLimit,
+        paymentTerms: paymentTerms,
+        customerNote: '',
+        respondedAt: ''
+      });
 
-      // Order status -> Quotation (Q=17, S=19)
-      oSheet.getRange(orderRow + 1, 17).setValue('Quotation');
-      oSheet.getRange(orderRow + 1, 19).setValue(now);
+      Workflow.setFields(orderFound, { status: 'Quotation', updatedAt: now });
 
-      // Email customer
       var lines = cleanItems.map(function(x) {
         return '- ' + x.description + ' (x' + x.qty + ') = Rp ' + Number(x.total).toLocaleString('id-ID');
       });
       var body = [
-        'Halo ' + order.name + ',',
-        '',
-        'Berikut penawaran resmi untuk project Anda:',
-        '',
-        '📄 Nomor: ' + qNumber,
-        '📌 Project: ' + (data.projectName || order.type),
-        '',
-        'RINCIAN:',
-        lines.join('\n'),
-        '',
+        'Halo ' + order.name + ',', '',
+        'Berikut penawaran resmi untuk project Anda:', '',
+        '📄 Nomor: ' + number,
+        '📌 Project: ' + projectName, '',
+        'RINCIAN:', lines.join('\n'), '',
         'Subtotal: Rp ' + subtotal.toLocaleString('id-ID'),
         'Diskon: - Rp ' + discount.toLocaleString('id-ID'),
         'Pajak: + Rp ' + taxAmount.toLocaleString('id-ID'),
-        '💰 TOTAL: Rp ' + total.toLocaleString('id-ID'),
-        '',
-        'Berlaku hingga: ' + (data.validUntil || '-'),
-        '',
-        data.notes || '',
-        '',
-        'Anda dapat MENYETUJUI atau MENOLAK penawaran ini melalui Customer Dashboard di website kami (menu Customer → login dengan kode verifikasi email).',
-        '',
-        'Salam,',
-        'Tim ' + Config.APP_NAME
+        '💰 TOTAL: Rp ' + total.toLocaleString('id-ID'), '',
+        'Revisi termasuk: ' + revisionLimit + ' kali',
+        'Ketentuan pembayaran: ' + paymentTerms,
+        'Berlaku hingga: ' + (data.validUntil || '-'), '',
+        notes, '',
+        'Silakan login ke Customer Dashboard untuk menyetujui atau menolak penawaran.', '',
+        'Salam,', 'Tim ' + Config.APP_NAME
       ].join('\n');
+      if (order.email) Utils.sendEmail(order.email, 'Penawaran ' + number + ' | ' + Config.APP_NAME, body);
 
-      Utils.sendEmail(order.email, 'Penawaran ' + qNumber + ' | ' + Config.APP_NAME, body);
-
-      Utils.logAudit('quotation_created', 'admin', {
-        quotationId: qId,
-        orderNumber: order.orderNumber,
-        total: total
-      });
-
-      return { success: true, data: { id: qId, quotationNumber: qNumber, total: total } };
+      Utils.logAudit('quotation_created', 'admin', { quotationId: id, orderNumber: order.orderNumber, total: total });
+      return { success: true, data: { id: id, quotationNumber: number, total: total } };
     } catch (error) {
       return { success: false, error: error.message };
     }
   },
 
-  /**
-   * List semua quotation (ADMIN)
-   */
-  getAll: function(params) {
+  getAll: function() {
     try {
-      const sheet = Config.getSheet('Quotations');
-      const data = sheet.getDataRange().getValues();
-      const headers = data[0];
-
-      var rows = data.slice(1)
-        .filter(function(r) { return r[0] !== ''; })
-        .map(function(r) {
-          var o = {};
-          headers.forEach(function(h, i) { o[h] = r[i]; });
-          try { o.items = JSON.parse(o.items); } catch (e) { o.items = []; }
-          return o;
-        });
-
-      rows.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+      const rows = Workflow.getAll('Quotations').map(function(q) {
+        q.items = Workflow.parseJsonArray(q.items);
+        q.revisionLimit = q.revisionLimit === '' || q.revisionLimit == null ? 2 : Number(q.revisionLimit);
+        q.displayStatus = q.status === 'sent' && Quotations.isExpired(q) ? 'expired' : q.status;
+        return q;
+      }).sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
       return { success: true, data: rows };
     } catch (error) {
       return { success: false, error: error.message };
     }
   },
 
-  /**
-   * Customer respond: approved / rejected
-   * Ownership diverifikasi server-side
-   */
   respond: function(data, customerId) {
     try {
-      if (!data.quotationId || !data.response) {
-        return { success: false, error: 'Missing quotationId or response' };
+      if (!data.quotationId || ['approved', 'rejected'].indexOf(data.response) < 0) {
+        return { success: false, error: 'Respons penawaran tidak valid' };
       }
-      if (data.response !== 'approved' && data.response !== 'rejected') {
-        return { success: false, error: 'Invalid response' };
-      }
+      const found = Workflow.find('Quotations', 'id', data.quotationId);
+      if (!found) return { success: false, error: 'Penawaran tidak ditemukan' };
+      if (String(found.data.customerId) !== String(customerId)) return { success: false, error: 'Unauthorized' };
+      if (found.data.status !== 'sent') return { success: false, error: 'Penawaran sudah direspons sebelumnya' };
+      if (this.isExpired(found.data)) return { success: false, error: 'Masa berlaku penawaran sudah berakhir. Hubungi admin untuk penawaran terbaru.' };
 
-      const sheet = Config.getSheet('Quotations');
-      const values = sheet.getDataRange().getValues();
+      const now = new Date().toISOString();
+      const customerNote = Workflow.cleanText(data.customerNote || '', 1000);
+      Workflow.setFields(found, {
+        status: data.response,
+        customerNote: customerNote,
+        respondedAt: now,
+        updatedAt: now
+      });
 
-      for (var i = 1; i < values.length; i++) {
-        if (values[i][0] === data.quotationId) {
-          // Ownership check
-          if (values[i][3] !== customerId) {
-            return { success: false, error: 'Unauthorized' };
-          }
-          if (values[i][12] !== 'sent') {
-            return { success: false, error: 'Quotation sudah direspons sebelumnya' };
-          }
-
-          const now = new Date().toISOString();
-          sheet.getRange(i + 1, 13).setValue(data.response);
-          sheet.getRange(i + 1, 15).setValue(now);
-
-          const quotationNumber = values[i][1];
-          const orderId = values[i][2];
-          const total = values[i][9];
-
-          // Jika approved -> order status Approved + email admin
-          if (data.response === 'approved') {
-            try {
-              const oSheet = Config.getSheet('Orders');
-              const oData = oSheet.getDataRange().getValues();
-              for (var o = 1; o < oData.length; o++) {
-                if (oData[o][0] === orderId) {
-                  oSheet.getRange(o + 1, 17).setValue('Approved');
-                  oSheet.getRange(o + 1, 19).setValue(now);
-                  break;
-                }
-              }
-            } catch (e) {}
-
-            Utils.sendEmail(
-              Config.ADMIN_EMAIL,
-              '✅ Quotation ' + quotationNumber + ' DISETUJUI (Rp ' + Number(total).toLocaleString('id-ID') + ')',
-              'Customer telah menyetujui quotation ' + quotationNumber + '.\nSegera convert order menjadi project di Admin Dashboard.'
-            );
-          } else {
-            Utils.sendEmail(
-              Config.ADMIN_EMAIL,
-              '❌ Quotation ' + quotationNumber + ' ditolak',
-              'Customer menolak quotation ' + quotationNumber + '. Silakan diskusikan ulang.'
-            );
-          }
-
-          Utils.logAudit('quotation_responded', customerId, {
-            quotationId: data.quotationId,
-            response: data.response
-          });
-
-          return { success: true };
-        }
+      if (data.response === 'approved') {
+        Workflow.setOrderStatus(found.data.orderId, 'Approved', now);
+        Utils.sendEmail(
+          Config.ADMIN_EMAIL,
+          '✅ Penawaran ' + found.data.quotationNumber + ' disetujui',
+          'Customer menyetujui penawaran ' + found.data.quotationNumber + '.\nTotal: Rp ' + Number(found.data.total || 0).toLocaleString('id-ID') + (customerNote ? '\nCatatan: ' + customerNote : '') + '\n\nLangkah berikutnya: terbitkan invoice dari Admin Dashboard.'
+        );
+      } else {
+        Workflow.setOrderStatus(found.data.orderId, 'Discussing', now);
+        Utils.sendEmail(
+          Config.ADMIN_EMAIL,
+          '❌ Penawaran ' + found.data.quotationNumber + ' ditolak',
+          'Customer menolak penawaran ' + found.data.quotationNumber + '.' + (customerNote ? '\nAlasan/catatan: ' + customerNote : '') + '\nSilakan diskusikan ulang dan buat penawaran baru setelah penawaran ini ditutup.'
+        );
       }
 
-      return { success: false, error: 'Quotation not found' };
+      Utils.logAudit('quotation_responded', customerId, { quotationId: data.quotationId, response: data.response });
+      return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
     }

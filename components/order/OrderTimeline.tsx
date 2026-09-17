@@ -111,6 +111,7 @@ function getStepDescription(status: OrderStatus): string {
     Approved: "Project disetujui dan siap dimulai",
     "In Progress": "Tim developer sedang mengerjakan project Anda",
     Revision: "Sedang dalam tahap revisi berdasarkan feedback",
+    Handover: "Hasil project sedang diperiksa dan menunggu penerimaan serah terima",
     Completed: "Project telah selesai dan siap digunakan",
     Cancelled: "Order dibatalkan",
   };

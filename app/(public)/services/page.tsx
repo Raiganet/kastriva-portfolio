@@ -1,18 +1,14 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import ServicesSection from "@/components/sections/ServicesSection";
 import FinalCTA from "@/components/sections/FinalCTA";
-import { config } from "@/data/config";
+import { getSiteContent } from "@/lib/server/site-content.server";
+import { pageMetadata } from "@/lib/seo-cms";
 
-export const metadata: Metadata = {
-  title: `Layanan | ${config.brand.name}`,
-  description: "Layanan pembuatan website, web app, sistem informasi, dan aplikasi Android profesional.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteContent();
+  return pageMetadata(site, "services", "/services", "Layanan Pembuatan Website & Aplikasi", site.services.subtitle);
+}
 
 export default function ServicesPage() {
-  return (
-    <div className="pt-32">
-      <ServicesSection />
-      <FinalCTA />
-    </div>
-  );
+  return <div className="pt-32"><ServicesSection /><FinalCTA /></div>;
 }

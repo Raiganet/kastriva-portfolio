@@ -1,16 +1,13 @@
-import { Metadata } from "next";
-import { config } from "@/data/config";
+import type { Metadata } from "next";
 import SmartOrderForm from "@/components/order/SmartOrderForm";
+import { getSiteContent } from "@/lib/server/site-content.server";
+import { pageMetadata } from "@/lib/seo-cms";
 
-export const metadata: Metadata = {
-  title: `Mulai Project | ${config.brand.name}`,
-  description: "Mulai project website atau aplikasi Anda bersama Kastriva.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteContent();
+  return pageMetadata(site, "order", "/order", "Mulai Project", `Mulai konsultasi dan order project bersama ${site.brand.name}.`);
+}
 
 export default function OrderPage() {
-  return (
-    <div className="pt-32 pb-20">
-      <SmartOrderForm />
-    </div>
-  );
+  return <div className="pt-32 pb-20"><SmartOrderForm /></div>;
 }

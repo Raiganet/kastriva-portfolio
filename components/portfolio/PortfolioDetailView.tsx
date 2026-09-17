@@ -15,12 +15,14 @@ import PortfolioDetailCTA from "@/components/portfolio/PortfolioDetailCTA";
 import { Lightbox, ImageWithFallback } from "@/components/ui";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { PortfolioProject } from "@/lib/types/portfolio";
+import { useSiteContent } from "@/components/cms/SiteContentProvider";
 
 interface PortfolioDetailViewProps {
   project: PortfolioProject;
 }
 
 export default function PortfolioDetailView({ project }: PortfolioDetailViewProps) {
+  const { portfolio } = useSiteContent();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -44,7 +46,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 mb-8 transition-colors"
         >
           <ArrowLeft size={16} />
-          Kembali ke Portfolio
+          {portfolio.backLabel}
         </Link>
 
         {/* Hero Image */}
@@ -63,7 +65,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-dark-bg/90 px-6 py-3 rounded-full flex items-center gap-2 font-semibold">
               <Maximize2 size={20} />
-              Lihat Fullscreen
+              {portfolio.fullscreenLabel}
             </div>
           </div>
         </div>

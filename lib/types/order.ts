@@ -6,6 +6,7 @@ export type OrderStatus =
   | "Approved"
   | "In Progress"
   | "Revision"
+  | "Handover"
   | "Completed"
   | "Cancelled";
 
@@ -70,6 +71,8 @@ export const ORDER_STATUS_FLOW: OrderStatus[] = [
   "Quotation",
   "Approved",
   "In Progress",
+  "Revision",
+  "Handover",
   "Completed",
 ];
 
@@ -81,6 +84,7 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
   Approved: "Disetujui",
   "In Progress": "Sedang Dikerjakan",
   Revision: "Revisi",
+  Handover: "Serah Terima",
   Completed: "Selesai",
   Cancelled: "Dibatalkan",
 };
@@ -93,6 +97,7 @@ export const STATUS_COLORS: Record<OrderStatus, string> = {
   Approved: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
   "In Progress": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
   Revision: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
+  Handover: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
   Completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
   Cancelled: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
 };

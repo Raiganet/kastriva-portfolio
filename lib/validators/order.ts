@@ -15,7 +15,7 @@ export const orderFormSchema = z.object({
     .or(z.literal("")),
   email: z
     .string()
-    .email("Format email tidak valid"),
+    .trim().toLowerCase().email("Format email tidak valid").max(254),
   whatsapp: z
     .string()
     .min(10, "Nomor WhatsApp minimal 10 digit")
@@ -33,7 +33,7 @@ export const orderFormSchema = z.object({
   ], {
     message: "Pilih jenis project",
   }),
-  budget: z.string().optional(),
+  budget: z.string().max(100).optional(),
   deadline: z.string().max(100).optional(),
   description: z
     .string()
@@ -41,6 +41,9 @@ export const orderFormSchema = z.object({
     .max(2000, "Deskripsi maksimal 2000 karakter"),
   features: z.string().max(500).optional(),
   reference: z.string().max(200).optional(),
+  serviceId: z.string().max(100).optional(),
+  portfolioId: z.string().max(100).optional(),
+  portfolioTitle: z.string().max(200).optional(),
   // Honeypot field untuk anti-spam
   website: z.string().max(0, "Spam detected").optional(),
 });

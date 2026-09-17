@@ -55,7 +55,6 @@ interface ProjectDetail {
 const UPDATE_STATUSES: OrderStatus[] = [
   "In Progress",
   "Revision",
-  "Completed",
 ];
 
 export default function AdminProjectsPage() {
@@ -98,12 +97,9 @@ export default function AdminProjectsPage() {
     load();
   }, [load]);
 
-  // Orders yang belum punya project & belum selesai
+  // Project hanya dimulai setelah quotation disetujui customer.
   const convertibleOrders = orders.filter(
-    (o) =>
-      !projects.some((p) => p.orderId === o.id) &&
-      o.status !== "Cancelled" &&
-      o.status !== "Completed"
+    (o) => !projects.some((p) => p.orderId === o.id) && o.status === "Approved"
   );
 
   const convert = async () => {
@@ -224,7 +220,7 @@ export default function AdminProjectsPage() {
       ) : projects.length === 0 ? (
         <EmptyState
           title="Belum ada project"
-          description="Convert order yang sudah approved menjadi project untuk mulai tracking."
+          description="Project baru dapat dimulai setelah quotation disetujui customer."
           icon={<FolderKanban className="text-slate-400" size={32} />}
         />
       ) : (
@@ -336,6 +332,7 @@ export default function AdminProjectsPage() {
                 </div>
 
                 {/* Add Update Form */}
+                {detail.project.status !== "Handover" && detail.project.status !== "Completed" ? (
                 <div className="border-t border-slate-200 dark:border-slate-800 pt-5">
                   <h3 className="font-bold mb-3">Kirim Update Baru</h3>
                   <div className="space-y-3">
@@ -361,7 +358,7 @@ export default function AdminProjectsPage() {
                         <input
                           type="range"
                           min={0}
-                          max={100}
+                          max={95}
                           step={5}
                           value={updateProgress}
                           onChange={(e) => setUpdateProgress(Number(e.target.value))}
@@ -393,6 +390,11 @@ export default function AdminProjectsPage() {
                     </button>
                   </div>
                 </div>
+                ) : (
+                  <div className="border-t border-slate-200 dark:border-slate-800 pt-5 text-sm text-slate-500">
+                    Progress final dikelola melalui menu Serah Terima. Project menjadi 100% setelah customer menerima serah terima.
+                  </div>
+                )}
               </div>
             ) : null}
           </div>

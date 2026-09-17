@@ -1,5 +1,6 @@
 import { orderRepository } from "@/lib/repositories/order.repo";
 import { OrderFormData, validateOrderForm } from "@/lib/validators/order";
+import { prepareOrder, completeOrder, rejectOrder } from "@/lib/order/draft";
 import { OrderTrackingResult } from "@/lib/types/order";
 
 export interface SubmitOrderResult {
@@ -22,37 +23,21 @@ export class OrderService {
       return { success: false, error: "Spam detected" };
     }
 
-    // Rate limit (client-side only, server-side validated di GAS)
-    if (typeof window !== "undefined") {
-      const lastSubmit = localStorage.getItem("lastOrderSubmit");
-      const now = Date.now();
-      if (lastSubmit && now - parseInt(lastSubmit) < 30000) {
-        return {
-          success: false,
-          error: "Terlalu cepat. Silakan tunggu 30 detik.",
-        };
-      }
-    }
-
-    const result = await orderRepository.submit(validation.data!);
-
-    if (result.success && typeof window !== "undefined") {
-      localStorage.setItem("lastOrderSubmit", Date.now().toString());
-      // Simpan order number terakhir untuk quick access
-      if (result.orderNumber) {
-        const history = JSON.parse(
-          localStorage.getItem("orderHistory") || "[]"
-        );
-        history.unshift({
-          orderNumber: result.orderNumber,
-          timestamp: new Date().toISOString(),
-          projectType: validation.data!.type,
-        });
-        localStorage.setItem(
-          "orderHistory",
-          JSON.stringify(history.slice(0, 10))
-        );
-      }
+    if (typeof navigator !== "undefined" && !navigator.onLine) return { success:false,error:"Anda sedang offline. Draf tetap tersimpan; kirim kembali setelah online." };
+    const draft = await prepareOrder(validation.data!);
+    if (draft.receipt) return { success:true,...draft.receipt };
+    const pending = draft.pending!;
+    const result = await orderRepository.submit(pending.data,pending.requestId);
+    if (result.success && result.orderNumber) {
+      // Local history failures must never turn a committed order into a failed submission.
+      try { await completeOrder(pending.requestId,{orderNumber:result.orderNumber,whatsappUrl:result.whatsappUrl}); } catch { /* Same request ID remains retryable. */ }
+      try {
+        const history = this.getOrderHistory().filter(x=>x.orderNumber!==result.orderNumber);
+        history.unshift({orderNumber:result.orderNumber,timestamp:new Date().toISOString(),projectType:pending.data.type});
+        localStorage.setItem("orderHistory",JSON.stringify(history.slice(0,10)));
+      } catch { /* Optional history only. */ }
+    } else if (result.committed === false) {
+      await rejectOrder(pending.requestId);
     }
 
     return result;
@@ -71,7 +56,8 @@ export class OrderService {
   }> {
     if (typeof window === "undefined") return [];
     try {
-      return JSON.parse(localStorage.getItem("orderHistory") || "[]");
+      const value = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+      return Array.isArray(value) ? value.filter(x=>x && typeof x.orderNumber==="string").slice(0,10) : [];
     } catch {
       return [];
     }

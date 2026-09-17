@@ -87,7 +87,7 @@ function setupDatabase() {
     'Quotations': [
       'id', 'quotationNumber', 'orderId', 'customerId', 'projectName', 'items', 
       'subtotal', 'discount', 'tax', 'total', 'notes', 'validUntil', 'status', 
-      'createdAt', 'updatedAt'
+      'createdAt', 'updatedAt', 'revisionLimit', 'paymentTerms', 'customerNote', 'respondedAt'
     ],
     
     'QuotationItems': [
@@ -97,7 +97,18 @@ function setupDatabase() {
     'Invoices': [
       'id', 'invoiceNumber', 'orderId', 'customerId', 'projectName', 'items', 
       'subtotal', 'discount', 'tax', 'total', 'paymentStatus', 'dueDate', 
-      'paymentMethod', 'createdAt', 'updatedAt'
+      'paymentMethod', 'createdAt', 'updatedAt', 'quotationId', 'amountPaid', 'notes', 'paidAt'
+    ],
+
+    'Revisions': [
+      'id', 'revisionNumber', 'projectId', 'orderId', 'customerId', 'title', 'description',
+      'status', 'priority', 'adminResponse', 'requestedAt', 'updatedAt', 'resolvedAt'
+    ],
+
+    'Handovers': [
+      'id', 'handoverNumber', 'projectId', 'orderId', 'customerId', 'projectName', 'deliverables',
+      'liveUrl', 'repositoryUrl', 'adminUrl', 'notes', 'warrantyUntil', 'status', 'sentAt',
+      'acceptedAt', 'createdAt', 'updatedAt'
     ],
     
     'Testimonials': [

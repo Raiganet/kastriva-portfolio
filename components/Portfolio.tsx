@@ -1,17 +1,20 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ExternalLink, Calendar, Image as ImageIcon } from "lucide-react";
+import { Search, ExternalLink, Calendar, Image as ImageIcon, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { usePortfolio } from "@/lib/hooks/usePortfolio";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { EmptyState, ErrorState, ImageWithFallback, PortfolioGridSkeleton } from "@/components/ui";
 import { PortfolioProject } from "@/lib/types/portfolio";
+import { getPortfolioOrderHref } from "@/lib/order/portfolio-reference";
+import { useSiteContent } from "@/components/cms/SiteContentProvider";
 
 function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export default function Portfolio() {
+  const site = useSiteContent();
   const {
     categories,
     filteredProjects,
@@ -32,14 +35,16 @@ export default function Portfolio() {
     PortfolioService.trackDemoClick(project.id, project.title);
   };
 
+  if (!site.portfolio.visible) return null;
+
   if (loading) {
     return (
       <section id="portfolio" className="py-20 bg-slate-50 dark:bg-dark-surface/50">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Project yang Pernah Saya Buat</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{site.portfolio.title}</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Beberapa hasil kerja terbaik yang telah membantu klien mencapai tujuan digital mereka.
+              {site.portfolio.subtitle}
             </p>
           </div>
           <PortfolioGridSkeleton count={6} />
@@ -62,9 +67,9 @@ export default function Portfolio() {
     <section id="portfolio" className="py-20 bg-slate-50 dark:bg-dark-surface/50">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Project yang Pernah Saya Buat</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{site.portfolio.title}</h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Beberapa hasil kerja terbaik yang telah membantu klien mencapai tujuan digital mereka.
+            {site.portfolio.subtitle}
           </p>
         </div>
 
@@ -89,7 +94,7 @@ export default function Portfolio() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="text"
-              placeholder="Cari project..."
+              placeholder={site.portfolio.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white dark:bg-dark-bg border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
@@ -100,11 +105,11 @@ export default function Portfolio() {
         {/* Grid */}
         {filteredProjects.length === 0 ? (
           <EmptyState
-            title="Project tidak ditemukan"
-            description="Coba ubah filter atau kata kunci pencarian Anda."
+            title={site.portfolio.emptyTitle}
+            description={site.portfolio.emptyText}
             icon={<ImageIcon className="text-slate-400" size={32} />}
             action={{
-              label: "Reset Filter",
+              label: site.portfolio.resetLabel,
               onClick: () => {
                 setCategory("Semua");
                 setSearchQuery("");
@@ -140,7 +145,7 @@ export default function Portfolio() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     {project.featured && (
                       <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
-                        ⭐ Featured
+                        ⭐ {site.portfolio.featuredLabel}
                       </div>
                     )}
                   </Link>
@@ -181,7 +186,7 @@ export default function Portfolio() {
                           }}
                           className="flex-1 text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                         >
-                          <ExternalLink size={16} /> Live Demo
+                          <ExternalLink size={16} /> {site.portfolio.demoLabel}
                         </a>
                       )}
                       <Link
@@ -189,9 +194,16 @@ export default function Portfolio() {
                         onClick={() => handleProjectClick(project)}
                         className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg text-sm font-medium transition-colors text-center"
                       >
-                        Detail
+                        {site.portfolio.detailLabel}
                       </Link>
                     </div>
+                    <Link
+                      href={getPortfolioOrderHref(project)}
+                      onClick={() => PortfolioService.trackOrderClick(project.id, project.title)}
+                      className="mt-3 w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-primary-600/10"
+                    >
+                      {site.portfolio.orderLabel} <ArrowRight size={16} />
+                    </Link>
                   </div>
                 </motion.div>
               ))}

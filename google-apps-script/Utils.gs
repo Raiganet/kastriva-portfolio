@@ -13,23 +13,9 @@ const Utils = {
   /**
    * Generate order number: KAS-YYYY-NNNN
    */
-  generateOrderNumber: function() {
-    const sheet = Config.getSheet('Orders');
-    const lastRow = sheet.getLastRow();
-    const year = new Date().getFullYear();
-    
-    let nextNumber = 1;
-    if (lastRow > 1) {
-      const lastOrderNumber = sheet.getRange(lastRow, 2).getValue(); // Column B = orderNumber
-      const match = lastOrderNumber.match(/KAS-\d{4}-(\d+)/);
-      if (match) {
-        nextNumber = parseInt(match[1]) + 1;
-      }
-    }
-    
-    return 'KAS-' + year + '-' + String(nextNumber).padStart(4, '0');
-  },
-  
+  // Caller must hold DataIntegrity's script lock.
+  generateOrderNumber: function() { return DataIntegrity.nextNumber('Orders', 'KAS'); },
+
   /**
    * Generate slug from title
    */

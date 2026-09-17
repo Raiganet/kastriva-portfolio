@@ -12,8 +12,10 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { config } from "@/data/config";
+import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import Link from "next/link";
+import Image from "next/image";
+import InstallPWAButton from "@/components/pwa/InstallPWAButton";
 import { usePathname } from "next/navigation";
 import { AdminAuthService } from "@/lib/services/auth.service";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
@@ -24,6 +26,7 @@ export default function Navbar() {
   const [auth, setAuth] = useState<null | { role: "admin" | "customer" }>(null);
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
+  const site = useSiteContent();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -42,14 +45,7 @@ export default function Navbar() {
     return () => { active = false; };
   }, [pathname]);
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Services", href: "/services" },
-    { name: "Portfolio", href: "/portfolio" },
-    { name: "Process", href: "/process" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ];
+  const navLinks = site.navigation.links.map((link) => ({ name: link.label, href: link.href }));
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -64,13 +60,16 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
-          <img
+          <Image
             src="/android-chrome-192x192.png"
-            alt="Logo Kastriva"
+            alt={`Logo ${site.brand.name}`}
+            width={36}
+            height={36}
+            priority
             className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
           />
           <span className="text-xl font-bold tracking-tight text-gradient">
-            {config.brand.name}
+            {site.brand.name}
           </span>
         </Link>
 
@@ -96,7 +95,7 @@ export default function Navbar() {
                 : "text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
             }`}
           >
-            <Package size={14} /> Lacak Order
+            <Package size={14} /> {site.navigation.trackOrderLabel}
           </Link>
         </nav>
 
@@ -109,6 +108,8 @@ export default function Navbar() {
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
+
+          <InstallPWAButton />
 
           {auth ? (
             <Link
@@ -130,7 +131,7 @@ export default function Navbar() {
             href="/order"
             className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-primary-600/20"
           >
-            Mulai Project <ArrowRight size={16} />
+            {site.navigation.startProjectLabel} <ArrowRight size={16} />
           </Link>
         </div>
 
@@ -176,8 +177,9 @@ export default function Navbar() {
                 href="/order/track"
                 className="text-base font-medium py-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2"
               >
-                <Package size={16} /> Lacak Order
+                <Package size={16} /> {site.navigation.trackOrderLabel}
               </Link>
+              <InstallPWAButton compact />
               {auth ? (
                 <Link
                   href={auth.role === "admin" ? "/admin" : "/customer"}
@@ -197,7 +199,7 @@ export default function Navbar() {
                 href="/order"
                 className="bg-primary-600 text-white text-center py-3 rounded-lg font-semibold mt-2"
               >
-                Mulai Project
+                {site.navigation.startProjectLabel}
               </Link>
             </nav>
           </motion.div>

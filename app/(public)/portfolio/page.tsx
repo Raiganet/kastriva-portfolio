@@ -1,16 +1,13 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Portfolio from "@/components/Portfolio";
-import { config } from "@/data/config";
+import { getSiteContent } from "@/lib/server/site-content.server";
+import { pageMetadata } from "@/lib/seo-cms";
 
-export const metadata: Metadata = {
-  title: `Portfolio | ${config.brand.name}`,
-  description: "Lihat portfolio project website, web app, dan aplikasi yang pernah saya buat.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteContent();
+  return pageMetadata(site, "portfolio", "/portfolio", site.portfolio.title, site.portfolio.subtitle);
+}
 
 export default function PortfolioPage() {
-  return (
-    <div className="pt-32">
-      <Portfolio />
-    </div>
-  );
+  return <div className="pt-32"><Portfolio /></div>;
 }

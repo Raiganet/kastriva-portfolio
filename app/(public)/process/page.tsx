@@ -1,18 +1,14 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import ProcessSection from "@/components/sections/ProcessSection";
 import FinalCTA from "@/components/sections/FinalCTA";
-import { config } from "@/data/config";
+import { getSiteContent } from "@/lib/server/site-content.server";
+import { pageMetadata } from "@/lib/seo-cms";
 
-export const metadata: Metadata = {
-  title: `Proses Kerja | ${config.brand.name}`,
-  description: "Bagaimana project Anda dikerjakan dari konsultasi hingga deployment.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteContent();
+  return pageMetadata(site, "process", "/process", site.process.title, site.process.subtitle);
+}
 
 export default function ProcessPage() {
-  return (
-    <div className="pt-32">
-      <ProcessSection />
-      <FinalCTA />
-    </div>
-  );
+  return <div className="pt-32"><ProcessSection /><FinalCTA /></div>;
 }

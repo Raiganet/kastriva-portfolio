@@ -22,6 +22,11 @@ interface AdminQuotation {
   status: string;
   validUntil: string;
   createdAt: string;
+  revisionLimit?: number;
+  paymentTerms?: string;
+  customerNote?: string;
+  respondedAt?: string;
+  displayStatus?: string;
 }
 
 interface AdminOrder {
@@ -51,6 +56,8 @@ export default function AdminQuotationsPage() {
   const [tax, setTax] = useState(0);
   const [notes, setNotes] = useState("");
   const [validUntil, setValidUntil] = useState("");
+  const [revisionLimit, setRevisionLimit] = useState(2);
+  const [paymentTerms, setPaymentTerms] = useState("Pembayaran mengikuti invoice yang diterbitkan setelah penawaran disetujui.");
   const [sending, setSending] = useState(false);
 
   const token = () => AdminAuthService.getToken() || "";
@@ -98,6 +105,8 @@ export default function AdminQuotationsPage() {
       tax,
       notes,
       validUntil,
+      revisionLimit,
+      paymentTerms,
     });
     setSending(false);
     if (res.success) {
@@ -108,6 +117,8 @@ export default function AdminQuotationsPage() {
       setTax(0);
       setNotes("");
       setValidUntil("");
+      setRevisionLimit(2);
+      setPaymentTerms("Pembayaran mengikuti invoice yang diterbitkan setelah penawaran disetujui.");
       load();
     } else {
       alert(res.error || "Gagal membuat quotation");
@@ -151,6 +162,7 @@ export default function AdminQuotationsPage() {
                 <th className="px-5 py-3 font-medium">Project</th>
                 <th className="px-5 py-3 font-medium">Total</th>
                 <th className="px-5 py-3 font-medium">Berlaku</th>
+                <th className="px-5 py-3 font-medium">Revisi</th>
                 <th className="px-5 py-3 font-medium">Status</th>
               </tr>
             </thead>
@@ -158,14 +170,17 @@ export default function AdminQuotationsPage() {
               {quotations.map((q) => (
                 <tr key={q.id} className="border-b border-slate-100 dark:border-slate-800/50 last:border-0">
                   <td className="px-5 py-4 font-mono font-semibold text-primary-600">{q.quotationNumber}</td>
-                  <td className="px-5 py-4">{q.projectName}</td>
+                  <td className="px-5 py-4"><div>{q.projectName}</div>{q.customerNote && <div className="text-xs text-slate-500 mt-1 max-w-xs">Catatan customer: {q.customerNote}</div>}</td>
                   <td className="px-5 py-4 font-semibold">{rupiah(q.total)}</td>
                   <td className="px-5 py-4 text-slate-500">{q.validUntil || "-"}</td>
+                  <td className="px-5 py-4 text-slate-500">{q.revisionLimit ?? 2}x</td>
                   <td className="px-5 py-4">
-                    {q.status === "sent" ? (
+                    {(q.displayStatus || q.status) === "sent" ? (
                       <span className="px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-semibold">Menunggu</span>
-                    ) : q.status === "approved" ? (
+                    ) : (q.displayStatus || q.status) === "approved" ? (
                       <span className="px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold">Disetujui ✅</span>
+                    ) : (q.displayStatus || q.status) === "expired" ? (
+                      <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold">Kedaluwarsa</span>
                     ) : (
                       <span className="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-semibold">Ditolak</span>
                     )}
@@ -261,6 +276,18 @@ export default function AdminQuotationsPage() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Berlaku Hingga</label>
                   <input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-sm" />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Kuota Revisi</label>
+                  <input type="number" min={0} max={20} value={revisionLimit} onChange={(e) => setRevisionLimit(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-sm" />
+                  <p className="text-xs text-slate-500 mt-1">0 = tanpa kuota otomatis.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Ketentuan Pembayaran</label>
+                  <textarea rows={2} value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-sm" />
                 </div>
               </div>
 

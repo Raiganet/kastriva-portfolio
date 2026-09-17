@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Send, Loader2, CheckCircle, AlertCircle, Package } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -7,51 +7,182 @@ import { config } from "@/data/config";
 import { useOrder } from "@/lib/hooks/useOrder";
 import { trackEvent } from "@/lib/analytics";
 import Link from "next/link";
+import { readOrderDraft, saveOrderDraft, startNewOrder, isOrderDraftStorageEvent, OrderDraft } from "@/lib/order/draft";
+import { PortfolioService } from "@/lib/services/portfolio.service";
+import type { PortfolioProject } from "@/lib/types/portfolio";
+import {
+  PROJECT_TYPES,
+  getPortfolioReference,
+  inferPortfolioProjectType,
+} from "@/lib/order/portfolio-reference";
 
 function OrderFormContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const portfolioId = searchParams.get("portfolio");
   const serviceType = searchParams.get("service");
+  const serviceId = searchParams.get("serviceId") || "";
 
-  const portfolioProject = portfolioId
-    ? config.portfolio.find((p) => String(p.id) === portfolioId)
+  const localPortfolioProject = portfolioId
+    ? config.portfolio.find((p) => String(p.id) === portfolioId) || null
     : null;
+  const [portfolioProject, setPortfolioProject] = useState<PortfolioProject | null>(
+    localPortfolioProject
+  );
+  const [portfolioLoading, setPortfolioLoading] = useState(
+    Boolean(portfolioId && !localPortfolioProject)
+  );
+  const [portfolioLoadError, setPortfolioLoadError] = useState("");
 
   const { submit, submitting, lastResult, reset } = useOrder();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState({
+  const defaults = {
     name: "",
     business: "",
     email: "",
     whatsapp: "",
-    type: serviceType || (portfolioProject ? portfolioProject.category : "Website"),
+    type: inferPortfolioProjectType(portfolioProject, serviceType),
     budget: "",
     deadline: "",
     description: portfolioProject
-      ? `Saya tertarik dengan konsep project "${portfolioProject.title}" dan ingin membuat website serupa.`
+      ? `Saya tertarik dengan konsep project "${portfolioProject.title}" dan ingin membuat project serupa.`
       : "",
     features: portfolioProject ? portfolioProject.features.join(", ") : "",
-    reference: portfolioProject ? portfolioProject.title : "",
+    reference: portfolioProject ? getPortfolioReference(portfolioProject) : "",
+    serviceId,
+    portfolioId: portfolioProject ? String(portfolioProject.id) : portfolioId || "",
+    portfolioTitle: portfolioProject ? portfolioProject.title : "",
     website: "", // Honeypot
-  });
+  };
+  const [formData,setFormData] = useState(defaults);
+  const [draft,setDraft] = useState<OrderDraft|null>(null);
+  const [ready,setReady] = useState(false);
+  const [draftError,setDraftError] = useState("");
+  const [online,setOnline] = useState(true);
+  const [persisted,setPersisted] = useState(true);
+  const submitted = useRef(false);
+  const locked = !!draft?.pending && !draft?.receipt;
+
+  useEffect(() => {
+    if (!portfolioId) {
+      setPortfolioProject(null);
+      setPortfolioLoading(false);
+      setPortfolioLoadError("");
+      return;
+    }
+
+    let active = true;
+    setPortfolioLoading(!localPortfolioProject);
+    setPortfolioLoadError("");
+
+    PortfolioService.getById(portfolioId)
+      .then((project) => {
+        if (!active) return;
+        if (project) {
+          setPortfolioProject(project);
+        } else if (!localPortfolioProject) {
+          setPortfolioLoadError(
+            "Referensi portfolio tidak ditemukan. Form tetap bisa digunakan sebagai order umum."
+          );
+        }
+      })
+      .catch(() => {
+        if (active && !localPortfolioProject) {
+          setPortfolioLoadError(
+            "Referensi portfolio belum dapat dimuat. Form tetap bisa digunakan sebagai order umum."
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setPortfolioLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [portfolioId]);
+
+  const restore = () => {
+    try { const saved=readOrderDraft();setDraft(saved);if(saved) setFormData({...defaults,...saved.data}); }
+    catch(e) {setDraftError(e instanceof Error?e.message:"Draf tidak dapat dibaca.");}
+  };
+  useEffect(()=>{
+    restore();setReady(true);setOnline(navigator.onLine);
+    const connection=()=>setOnline(navigator.onLine);
+    const sync=(e:StorageEvent)=>{if(isOrderDraftStorageEvent(e))restore();};
+    window.addEventListener("online",connection);window.addEventListener("offline",connection);window.addEventListener("storage",sync);
+    return ()=>{window.removeEventListener("online",connection);window.removeEventListener("offline",connection);window.removeEventListener("storage",sync);};
+  },[]);
+
+  // Saat datang dari portfolio CMS/GAS, tempelkan identitas project ke draf order.
+  // Data kontak/budget yang sudah diketik tetap dipertahankan.
+  useEffect(() => {
+    if (!ready || !portfolioProject || draft?.pending || draft?.receipt) return;
+
+    setFormData((current) => {
+      const nextPortfolioId = String(portfolioProject.id);
+      const alreadyLinked =
+        current.portfolioId === nextPortfolioId &&
+        current.portfolioTitle === portfolioProject.title;
+
+      if (alreadyLinked && current.type === inferPortfolioProjectType(portfolioProject, serviceType)) {
+        return current;
+      }
+
+      const descriptionIsAuto =
+        !current.description.trim() ||
+        current.description.startsWith('Saya tertarik dengan konsep project "');
+      const featuresAreAuto = !current.features.trim() || Boolean(current.portfolioId);
+
+      return {
+        ...current,
+        type: inferPortfolioProjectType(portfolioProject, serviceType),
+        serviceId,
+        portfolioId: nextPortfolioId,
+        portfolioTitle: portfolioProject.title,
+        reference: getPortfolioReference(portfolioProject),
+        description: descriptionIsAuto
+          ? `Saya tertarik dengan konsep project "${portfolioProject.title}" dan ingin membuat project serupa.`
+          : current.description,
+        features: featuresAreAuto
+          ? portfolioProject.features.join(", ")
+          : current.features,
+      };
+    });
+  }, [portfolioProject, ready, draft?.pending, draft?.receipt, serviceType, serviceId]);
+  useEffect(()=>{
+    if(!ready || draftError || submitted.current) return;
+    let active=true;
+    saveOrderDraft(formData).then(({draft,persisted})=>{if(active){setDraft(draft);setPersisted(persisted);if(draft.pending || draft.receipt){const restored={...defaults,...draft.data};setFormData(current=>JSON.stringify(current)===JSON.stringify(restored)?current:restored);}}}).catch(e=>{if(active)setDraftError(e.message);});
+    return ()=>{active=false;};
+  },[formData,ready,draftError]);
 
   useEffect(() => {
     trackEvent("order_started", {
-      source: portfolioProject ? "portfolio" : "direct",
+      source: portfolioId ? "portfolio" : "direct",
       portfolioId: portfolioId || undefined,
     });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!ready || submitting || draftError) return;
+    submitted.current=true;
     setFieldErrors({});
     reset();
 
     const result = await submit(formData);
+    restore();
+    submitted.current=false;
 
     if (result.success && result.orderNumber) {
+      trackEvent("order_submitted", {
+        order_number: result.orderNumber,
+        project_type: formData.type,
+        source: portfolioId ? "portfolio" : "direct",
+        portfolio_id: portfolioId || undefined,
+      });
       // Redirect ke success page dengan order number
       const params = new URLSearchParams();
       params.set("orderNumber", result.orderNumber);
@@ -75,6 +206,14 @@ function OrderFormContent() {
 
   return (
     <div className="container mx-auto px-4 md:px-6 max-w-4xl">
+      {!ready && <p role="status">Memuat draf...</p>}
+      {draftError && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{draftError}</p>}
+      {!online && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-amber-900">Anda sedang offline. Isian tetap disimpan; pengiriman dapat dilanjutkan setelah online.</p>}
+      {ready && !draftError && <div className="mb-4 rounded-xl border p-4 text-sm">
+        {draft?.receipt ? <><p>Order <b>{draft.receipt.orderNumber}</b> sudah tersimpan.</p><Link className="mr-4 text-primary-600" href={`/order/success?orderNumber=${encodeURIComponent(draft.receipt.orderNumber)}`}>Lihat konfirmasi</Link><button type="button" disabled={submitting} onClick={async()=>{try{const d=await startNewOrder(defaults);setDraft(d);setFormData(defaults);reset();}catch{restore();}}}>Buat permintaan baru</button></>
+        : locked ? <p>Permintaan sebelumnya belum dikonfirmasi. Gunakan tombol coba lagi untuk memeriksa atau menyimpan permintaan yang sama. Isian dikunci agar tidak membuat order berbeda.</p>
+        : <><p>{persisted ? "Draf disimpan di browser ini. Draf yang belum dikirim berlaku 7 hari." : "Penyimpanan browser tidak tersedia. Jangan tutup halaman; aktifkan penyimpanan situs sebelum mengirim."}</p><button type="button" className="mt-2 text-primary-600" disabled={submitting} onClick={async()=>{try{const d=await startNewOrder(defaults);setDraft(d);setFormData(defaults);reset();}catch{restore();}}}>Hapus draf</button></>}
+      </div>}
       {/* Quick Track Link */}
       <div className="flex justify-end mb-4">
         <Link
@@ -84,6 +223,18 @@ function OrderFormContent() {
           <Package size={16} /> Sudah order? Lacak status di sini
         </Link>
       </div>
+
+      {portfolioLoading && (
+        <div className="mb-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+          <Loader2 className="animate-spin" size={18} /> Memuat referensi portfolio...
+        </div>
+      )}
+
+      {portfolioLoadError && !portfolioProject && (
+        <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
+          {portfolioLoadError}
+        </div>
+      )}
 
       {portfolioProject && (
         <div className="mb-6 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
@@ -121,6 +272,7 @@ function OrderFormContent() {
           </div>
         )}
 
+        <fieldset disabled={submitting || locked || !!draft?.receipt || !ready || !!draftError} className="space-y-5">
         <div className="grid md:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium mb-2">Nama Lengkap *</label>
@@ -189,16 +341,7 @@ function OrderFormContent() {
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
             >
-              {[
-                "Website",
-                "Landing Page",
-                "Company Profile",
-                "Web App",
-                "Dashboard",
-                "Sistem Informasi",
-                "Android App",
-                "Custom",
-              ].map((t) => (
+              {PROJECT_TYPES.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>
@@ -274,8 +417,9 @@ function OrderFormContent() {
           />
         </div>
 
+        </fieldset>
         <button
-          disabled={submitting}
+          disabled={submitting || !ready || !online || !!draft?.receipt || !!draftError}
           type="submit"
           className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/20"
         >
@@ -284,7 +428,7 @@ function OrderFormContent() {
           ) : (
             <Send size={20} />
           )}
-          {submitting ? "Mengirim..." : "Kirim Permintaan Project"}
+          {submitting ? "Memastikan order tersimpan..." : locked ? "Coba kirim kembali dengan aman" : "Kirim Permintaan Project"}
         </button>
 
         <p className="text-xs text-center text-slate-500 mt-4">
