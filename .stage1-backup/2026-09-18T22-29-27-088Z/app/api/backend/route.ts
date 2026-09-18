@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     let role:SessionRole|null=null; let result:any; let sessionToken=''; let sessionInfo:any=null;
 
     if(action==='login'){
-      if(!await allowAdminLoginAttempt(input.email)) return json({success:false,error:'Terlalu banyak percobaan login. Coba lagi beberapa menit lagi.',code:'RATE_LIMIT'},429);
+      if(!allowAdminLoginAttempt(input.email)) return json({success:false,error:'Terlalu banyak percobaan login. Coba lagi beberapa menit lagi.',code:'RATE_LIMIT'},429);
       if(!(await verifyAdminPassword(input.email,input.password))) return json({success:false,error:'Email atau password salah.'},401);
       role='admin'; const created=createSession('admin',{email:(process.env.ADMIN_EMAIL||'').trim().toLowerCase(),name:'Admin'},input.remember===true); sessionToken=created.token; sessionInfo=created.session; result={success:true,data:created.session};
     } else if(action==='requestCustomerOtp') {

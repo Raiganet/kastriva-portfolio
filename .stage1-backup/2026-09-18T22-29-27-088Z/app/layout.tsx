@@ -133,7 +133,7 @@ export default async function RootLayout({
       <body className={`${plusJakarta.variable} font-sans antialiased`}>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {gaId && (
           <>

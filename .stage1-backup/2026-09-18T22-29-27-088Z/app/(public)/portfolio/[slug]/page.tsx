@@ -66,7 +66,7 @@ export default async function PortfolioDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(portfolioJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioJsonLd) }}
       />
       <PortfolioDetailView project={project} />
     </>
