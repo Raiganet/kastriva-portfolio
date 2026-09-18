@@ -125,6 +125,8 @@ sehingga website tidak pernah blank.
 
 ## Project portfolio lokal
 
-Lima project selesai disimpan di `data/projects.ts`. Ubah judul, deskripsi, dan `demoUrl` di sana. Gambar saat ini memakai logo Kastriva; ganti `image` dengan screenshot di `public/portfolio/` bila tersedia. Tahun, teknologi, dan studi kasus yang belum dikonfirmasi dibiarkan kosong.
+Tujuh project selesai disimpan di `data/projects.ts`. Ubah judul, deskripsi, dan `demoUrl` di sana. Thumbnail menggunakan screenshot di `public/portfolio/`, dengan nama file yang harus sama persis (termasuk huruf besar, spasi, dan ekstensi). Tahun, teknologi, dan studi kasus yang belum dikonfirmasi dibiarkan kosong.
 
 Daftar publik menggabungkan project CMS dengan project lokal. Entri CMS diprioritaskan jika ID, slug judul, atau URL demo sama (garis miring terakhir diabaikan). Entri CMS yang tidak dipublikasikan menyembunyikan padanan lokalnya. Kategori, halaman detail, project unggulan, dan sitemap memakai repository yang sama.
+
+Thumbnail tujuh project dikenal mengikuti `data/projects.ts` meskipun entri berasal dari CMS. Project contoh Sistem Manajemen Inventaris dipetakan menjadi Kastriva-Smart Kasir pada tampilan publik; dokumen CMS asli tidak diubah. Aturan ini berada di `lib/repositories/portfolio-merge.ts` dan dipakai bersama oleh browser dan server.

@@ -57,13 +57,13 @@ export default function FeaturedProject() {
               <Link
                 href={`/portfolio/${generateSlug(project.title)}`}
                 onClick={() => handleProjectClick(project)}
-                className="block relative h-72 overflow-hidden"
+                className="block relative aspect-video overflow-hidden"
               >
                 <ImageWithFallback
                   src={project.image}
                   alt={project.title}
                   fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="object-cover object-top group-hover:scale-110 transition-transform duration-700"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

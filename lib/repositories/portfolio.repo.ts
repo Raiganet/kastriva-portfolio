@@ -1,4 +1,4 @@
-import { config } from "@/data/config";
+import { applyPortfolioUpdates, mergePortfolio } from "./portfolio-merge";
 import { gasGet, isGasConfigured } from "@/lib/gas-client";
 import { normalizePortfolio } from "./normalizer";
 import { PortfolioProject, PortfolioCategory } from "@/lib/types/portfolio";
@@ -41,13 +41,7 @@ class HybridPortfolioRepository implements PortfolioRepository {
 
   async getAll(): Promise<PortfolioProject[]> {
     const remote = await this.fetchFromGas();
-    const local = config.portfolio;
-    const remoteProjects = remote || [];
-    const key = (url: string) => url.replace(/\/$/, "");
-    return [...remoteProjects, ...local.filter((p) => !remoteProjects.some((r) =>
-      String(r.id) === String(p.id) || generateSlug(r.title) === generateSlug(p.title) ||
-      (r.demoUrl && key(r.demoUrl) === key(p.demoUrl))
-    ))].filter((p) => p.published);
+    return mergePortfolio(remote || []);
   }
 
   async getById(id: number | string): Promise<PortfolioProject | null> {
@@ -61,7 +55,7 @@ class HybridPortfolioRepository implements PortfolioRepository {
       try {
         const res = await gasGet<any>("getPortfolioBySlug", { slug });
         if (res.success && res.data) {
-          const project = normalizePortfolio(res.data);
+          const project = applyPortfolioUpdates(normalizePortfolio(res.data));
           return project.published ? project : null;
         }
       } catch {

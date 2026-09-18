@@ -132,13 +132,13 @@ export default function Portfolio() {
                   <Link
                     href={`/portfolio/${generateSlug(project.title)}`}
                     onClick={() => handleProjectClick(project)}
-                    className="block relative h-48 bg-slate-200 dark:bg-slate-800 overflow-hidden"
+                    className="block relative aspect-video bg-slate-200 dark:bg-slate-800 overflow-hidden"
                   >
                     <ImageWithFallback
                       src={project.image}
                       alt={project.title}
                       fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="object-cover object-top group-hover:scale-110 transition-transform duration-500"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       fallbackIcon={<ImageIcon className="text-slate-400" size={48} />}
                     />
