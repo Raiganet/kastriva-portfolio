@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { getSiteContent } from "@/lib/server/site-content.server";
 import PortfolioDetailView from "@/components/portfolio/PortfolioDetailView";
 import { getServerPortfolioBySlug } from "@/lib/server/portfolio.server";
-import { serializeJsonLd } from "@/lib/seo-jsonld";
 
 // Revalidasi tiap 60 detik agar data Sheets tidak stale
 export const revalidate = 60;
@@ -66,7 +65,7 @@ export default async function PortfolioDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(portfolioJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioJsonLd) }}
       />
       <PortfolioDetailView project={project} />
     </>

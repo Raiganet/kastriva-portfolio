@@ -7,7 +7,6 @@ import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import PWAProvider from "@/components/pwa/PWAProvider";
 import { SiteContentProvider } from "@/components/cms/SiteContentProvider";
 import { getSiteContent } from "@/lib/server/site-content.server";
-import { serializeJsonLd } from "@/lib/seo-jsonld";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -133,7 +132,7 @@ export default async function RootLayout({
       <body className={`${plusJakarta.variable} font-sans antialiased`}>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {gaId && (
           <>
