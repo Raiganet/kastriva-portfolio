@@ -1,9 +1,12 @@
-const CACHE_VERSION = "kastriva-v4";
+const CACHE_VERSION = "kastriva-v5-brand";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGE_CACHE = `${CACHE_VERSION}-pages`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [
   OFFLINE_URL,
+  "/brand/kastriva-logo-on-dark.png",
+  "/brand/kastriva-logo-on-light.png",
+  "/brand/kastriva-mark.png",
   "/android-chrome-192x192.png",
   "/android-chrome-512x512.png",
   "/maskable-icon-512x512.png",

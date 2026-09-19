@@ -56,9 +56,9 @@ export default function AdminSidebar() {
         <div className="p-6 border-b border-slate-200 dark:border-slate-800">
           <Link href="/admin" className="flex items-center gap-2">
             <img
-              src="/android-chrome-192x192.png"
+              src="/brand/kastriva-mark.png"
               alt={`Logo ${site.brand.name}`}
-              className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
+              className="w-9 h-9 object-contain"
             />
             <div>
               <div className="font-bold text-gradient">{site.brand.name}</div>
@@ -100,9 +100,9 @@ export default function AdminSidebar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-dark-surface border-b border-slate-200 dark:border-slate-800 z-40 flex items-center justify-between px-4">
         <Link href="/admin" className="flex items-center gap-2">
           <img
-            src="/android-chrome-192x192.png"
+            src="/brand/kastriva-mark.png"
             alt={`Logo ${site.brand.name}`}
-            className="w-8 h-8 rounded-lg"
+            className="w-8 h-8 object-contain"
           />
           <span className="font-bold text-gradient">Admin</span>
         </Link>

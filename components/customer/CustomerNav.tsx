@@ -24,9 +24,9 @@ export default function CustomerNav() {
       <div className="container mx-auto px-4 md:px-6 h-full flex items-center justify-between">
         <Link href="/customer" className="flex items-center gap-2">
           <img
-            src="/android-chrome-192x192.png"
+            src="/brand/kastriva-mark.png"
             alt={`Logo ${site.brand.name}`}
-            className="w-8 h-8 rounded-lg"
+            className="w-8 h-8 object-contain"
           />
           <div>
             <div className="font-bold text-gradient leading-none">{site.brand.name}</div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -25,6 +24,7 @@ import { AdminAuthService } from "@/lib/services/auth.service";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { buildWhatsAppLink } from "@/lib/contact";
+import BrandLogo from "@/components/BrandLogo";
 
 type Role = "admin" | "customer";
 
@@ -156,21 +156,13 @@ export default function LoginPageClient() {
       {/* Login navigation: keeps users inside the site without relying on browser Back. */}
       <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#070711]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="group flex min-w-0 items-center gap-3" aria-label={`Kembali ke beranda ${site.brand.name}`}>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-lg shadow-primary-600/15 transition group-hover:border-primary-400/40 group-hover:bg-white/[0.09]">
-              <Image
-                src="/kastriva-mark.png"
-                alt={`Logo ${site.brand.name}`}
-                width={44}
-                height={44}
-                priority
-                className="h-10 w-10 object-contain"
-              />
-            </span>
-            <span className="min-w-0 leading-tight">
-              <span className="block truncate text-base font-extrabold text-white sm:text-lg">{site.brand.name}</span>
-              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 sm:block">Web & App Studio</span>
-            </span>
+          <Link href="/" className="group flex min-w-0 items-center" aria-label={`Kembali ke beranda ${site.brand.name}`}>
+            <BrandLogo
+              alt={`Logo ${site.brand.name}`}
+              surface="dark"
+              priority
+              className="w-[150px] sm:w-[172px] transition duration-300 group-hover:brightness-110"
+            />
           </Link>
 
           <nav className="hidden items-center gap-6 lg:flex" aria-label="Navigasi login">
@@ -207,28 +199,20 @@ export default function LoginPageClient() {
           <div className={`absolute -bottom-28 -left-20 h-80 w-80 rounded-full blur-3xl ${isAdmin ? "bg-cyan-500/10" : "bg-cyan-200/25"}`} />
           <div className="pointer-events-none absolute inset-0 opacity-[0.045] [background-image:linear-gradient(rgba(255,255,255,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.6)_1px,transparent_1px)] [background-size:32px_32px]" />
 
-          {/* Transparent brand lockup. No baked-in square background. */}
+          {/* Canonical logo: artwork stays identical; only the contrast variant changes. */}
           <div className="relative z-10">
             <div
-              className={`inline-flex items-center gap-3 rounded-2xl border px-3 py-2.5 backdrop-blur-md ${
+              className={`inline-flex rounded-2xl border px-4 py-3 backdrop-blur-md ${
                 isAdmin
-                  ? "border-white/10 bg-white/[0.055] shadow-lg shadow-black/10"
-                  : "border-slate-200/80 bg-white/[0.85] shadow-sm"
+                  ? "border-white/10 bg-white/[0.045] shadow-lg shadow-black/10"
+                  : "border-slate-200/80 bg-white/90 shadow-sm"
               }`}
             >
-              <span className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl ${isAdmin ? "bg-white/[0.06]" : "bg-slate-100"}`}>
-                <Image
-                  src="/kastriva-mark.png"
-                  alt={`Logo ${site.brand.name}`}
-                  width={44}
-                  height={44}
-                  className="h-10 w-10 object-contain"
-                />
-              </span>
-              <span className="leading-tight">
-                <span className={`block text-lg font-extrabold tracking-tight ${isAdmin ? "text-white" : "text-slate-950"}`}>{site.brand.name}</span>
-                <span className={`block text-[10px] font-semibold uppercase tracking-[0.18em] ${isAdmin ? "text-slate-400" : "text-slate-500"}`}>Web & Android Development</span>
-              </span>
+              <BrandLogo
+                alt={`Logo ${site.brand.name}`}
+                surface={isAdmin ? "dark" : "light"}
+                className="w-[205px] sm:w-[235px]"
+              />
             </div>
           </div>
 

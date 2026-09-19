@@ -14,8 +14,8 @@ import {
 import { useTheme } from "next-themes";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import Link from "next/link";
-import Image from "next/image";
 import InstallPWAButton from "@/components/pwa/InstallPWAButton";
+import BrandLogo from "@/components/BrandLogo";
 import { usePathname } from "next/navigation";
 import { AdminAuthService } from "@/lib/services/auth.service";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
@@ -59,18 +59,12 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/android-chrome-192x192.png"
+        <Link href="/" className="flex items-center" aria-label={`Beranda ${site.brand.name}`}>
+          <BrandLogo
             alt={`Logo ${site.brand.name}`}
-            width={36}
-            height={36}
             priority
-            className="w-9 h-9 rounded-xl shadow-lg shadow-primary-600/30"
+            className="w-[142px] sm:w-[158px]"
           />
-          <span className="text-xl font-bold tracking-tight text-gradient">
-            {site.brand.name}
-          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">

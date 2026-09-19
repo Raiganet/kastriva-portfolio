@@ -13,8 +13,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Footer() {
   const site = useSiteContent();
@@ -31,9 +31,8 @@ export default function Footer() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-1 md:col-span-2">
-            <Link href="/" className="mb-4 inline-flex items-center gap-3">
-              <Image src="/android-chrome-192x192.png" alt={`Logo ${site.brand.name}`} width={42} height={42} className="rounded-xl" />
-              <h3 className="text-2xl font-bold text-gradient">{site.brand.name}</h3>
+            <Link href="/" className="mb-5 inline-flex items-center" aria-label={`Beranda ${site.brand.name}`}>
+              <BrandLogo alt={`Logo ${site.brand.name}`} className="w-[190px] sm:w-[215px]" />
             </Link>
             <p className="text-slate-600 dark:text-slate-400 max-w-sm mb-6">{site.footer.description}</p>
             {socials.length > 0 && <div className="flex flex-wrap gap-3">{socials.map(({ href, label, Icon }) => <a key={label} aria-label={`${label} ${site.brand.name}`} href={href} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white dark:bg-dark-bg border border-slate-200 dark:border-slate-700 hover:-translate-y-0.5 hover:text-primary-600 transition-all"><Icon size={19} /></a>)}</div>}
