@@ -5,7 +5,7 @@ export const config = {
     name: "Kastriva",
     tagline: "Solusi Digital Modern untuk Bisnis Anda",
     whatsapp: "6282117119762",
-    email: "hello@kastriva.com",
+    email: "admin@kastriva.web.id",
     socials: {
       instagram: "#",
       tiktok: "#",

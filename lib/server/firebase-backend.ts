@@ -61,7 +61,26 @@ function sanitizeCms(value:any,key='',depth=0):any {
 }
 
 async function getSiteContentMap(){
-  const docs=await listDocs('siteContent'); const out:any={}; docs.forEach(d=>{ if(CMS_SECTIONS.includes(d.id)&&d.content&&typeof d.content==='object') out[d.id]=d.content; }); return out;
+  const docs=await listDocs('siteContent');
+  const out:any={};
+  docs.forEach(d=>{
+    if(CMS_SECTIONS.includes(d.id)&&d.content&&typeof d.content==='object') out[d.id]=d.content;
+  });
+
+  // One-time compatibility migration: older CMS data may still contain the
+  // placeholder email used before kastriva.web.id was configured. Normalize
+  // only that exact legacy value, while preserving any future custom email.
+  if(String(out.brand?.email||'').trim().toLowerCase()==='hello@kastriva.com'){
+    out.brand={...out.brand,email:defaultSiteContent.brand.email};
+    try {
+      await setDoc('siteContent','brand',{content:out.brand,updatedAt:iso()});
+    } catch {
+      // The public site can still use the normalized in-memory value even if
+      // persistence is temporarily unavailable.
+    }
+  }
+
+  return out;
 }
 
 async function getPortfolio(admin=false, params:any={}) {

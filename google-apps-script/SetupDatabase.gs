@@ -26,7 +26,7 @@ function setupDatabase() {
       ['brandName', 'Kastriva'],
       ['tagline', 'Solusi Digital Modern untuk Bisnis Anda'],
       ['whatsapp', '6281234567890'],
-      ['email', 'hello@kastriva.com'],
+      ['email', 'admin@kastriva.web.id'],
       ['instagram', '#'],
       ['tiktok', '#'],
       ['github', '#'],
