@@ -52,8 +52,8 @@ export default function AdminSidebar() {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white dark:bg-dark-surface border-r border-slate-200 dark:border-slate-800 z-40">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 h-dvh overflow-hidden bg-white dark:bg-dark-surface border-r border-slate-200 dark:border-slate-800 z-40">
+        <div className="shrink-0 p-6 border-b border-slate-200 dark:border-slate-800">
           <Link href="/admin" className="flex items-center gap-2">
             <img
               src="/brand/kastriva-mark.png"
@@ -67,7 +67,10 @@ export default function AdminSidebar() {
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav
+          className="admin-sidebar-scroll flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1 [scrollbar-gutter:stable]"
+          aria-label="Navigasi admin"
+        >
           {menu.map((item) => (
             <Link
               key={item.href}
@@ -84,7 +87,7 @@ export default function AdminSidebar() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
+        <div className="shrink-0 bg-white dark:bg-dark-surface p-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
           <div className="px-4 py-2 text-xs text-slate-500 truncate">
             {session ? session.email : ""}
           </div>

@@ -68,3 +68,29 @@
   box-shadow: 0 0 0 1000px #f8fafc inset !important;
   transition: background-color 9999s ease-out 0s;
 }
+
+
+/* Admin sidebar: the menu owns its vertical scroll area so footer actions stay reachable at 100% zoom. */
+.admin-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184 / 0.8) transparent;
+}
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+.admin-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184 / 0.7);
+  border-radius: 999px;
+}
+.admin-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139 / 0.85);
+}
+.dark .admin-sidebar-scroll {
+  scrollbar-color: rgb(71 85 105 / 0.9) transparent;
+}
+.dark .admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105 / 0.85);
+}
