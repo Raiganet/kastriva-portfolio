@@ -16,7 +16,7 @@ function load(file, imports = {}) {
   return module.exports;
 }
 const { projects } = load('data/projects.ts');
-const { mergePortfolio, applyPortfolioUpdates } = load('lib/repositories/portfolio-merge.ts', {
+const { mergePortfolio, applyPortfolioUpdates, mergePortfolioForCms } = load('lib/repositories/portfolio-merge.ts', {
   '@/data/projects': { projects }
 });
 
@@ -28,6 +28,7 @@ test('all portfolio thumbnails refer to exact existing filenames', () => {
     assert.equal(new URL(project.demoUrl).protocol, 'https:');
   }
 });
+
 test('legacy inventory becomes Smart Kasir without duplicate or fictional metadata', () => {
   const smartKasir = projects.find((project) => project.id === 'kastriva-smart-kasir');
   assert.ok(smartKasir);
@@ -42,13 +43,42 @@ test('legacy inventory becomes Smart Kasir without duplicate or fictional metada
   assert.deepEqual(result[0].technologies, []);
   assert.equal(applyPortfolioUpdates(old).image, smartKasir.image);
 });
-test('CMS project keeps its content but uses the supplied thumbnail', () => {
+
+test('CMS project overrides bundled content including thumbnail', () => {
   const warung = projects.find((project) => project.id === 'kasir-kilat-warung');
   assert.ok(warung);
   const cms = { ...warung, id: 'cms-warung', image: '/logo-kastriva.png', description: 'CMS description' };
   const result = mergePortfolio([cms]);
   assert.equal(result.length, 9);
-  assert.equal(result.find((project) => project.id === 'cms-warung').image, warung.image);
+  assert.equal(result.find((project) => project.id === 'cms-warung').image, '/logo-kastriva.png');
   assert.equal(result.find((project) => project.id === 'cms-warung').description, 'CMS description');
   assert.equal(mergePortfolio([{ ...cms, published: false }]).length, 8);
+});
+
+test('Admin CMS sees all bundled projects even when Firestore is empty', () => {
+  const result = mergePortfolioForCms([], true);
+  assert.equal(result.length, 9);
+  assert.ok(result.every((project) => project.cmsSource === 'bundled'));
+  assert.equal(result[0].sortOrder, 1);
+});
+
+test('Persisted CMS record replaces matching bundled record and becomes editable source of truth', () => {
+  const lingo = projects.find((project) => project.id === 'lingospace-pro');
+  assert.ok(lingo);
+  const remote = { ...lingo, image: '/portfolio/custom-lingo.jpg', description: 'Edited from CMS', sortOrder: 7, cmsSource: 'cms' };
+  const result = mergePortfolioForCms([remote], true);
+  assert.equal(result.length, 9);
+  const edited = result.find((project) => project.id === 'lingospace-pro');
+  assert.equal(edited.cmsSource, 'cms');
+  assert.equal(edited.image, '/portfolio/custom-lingo.jpg');
+  assert.equal(edited.description, 'Edited from CMS');
+  assert.equal(edited.sortOrder, 7);
+});
+
+test('deleted CMS tombstone suppresses bundled fallback', () => {
+  const lingo = projects.find((project) => project.id === 'lingospace-pro');
+  const resultAdmin = mergePortfolioForCms([{ ...lingo, deleted: true, published: false, cmsSource: 'cms' }], true);
+  const resultPublic = mergePortfolioForCms([{ ...lingo, deleted: true, published: false, cmsSource: 'cms' }], false);
+  assert.equal(resultAdmin.some((project) => project.id === 'lingospace-pro'), false);
+  assert.equal(resultPublic.some((project) => project.id === 'lingospace-pro'), false);
 });

@@ -101,6 +101,7 @@ export default function AdminPortfolioPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | number | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const token = () => AdminAuthService.getToken() || "";
 
@@ -117,6 +118,25 @@ export default function AdminPortfolioPage() {
 
   const publishedCount = useMemo(() => projects.filter((p) => p.published).length, [projects]);
   const featuredCount = useMemo(() => projects.filter((p) => p.featured).length, [projects]);
+  const bundledCount = useMemo(() => projects.filter((p) => p.cmsSource === "bundled").length, [projects]);
+
+  const revalidatePortfolio = async () => {
+    try {
+      await fetch("/api/portfolio/revalidate", { method: "POST", credentials: "same-origin" });
+    } catch {
+      // Public client lists already fetch fresh data; this only speeds up server-rendered detail pages.
+    }
+  };
+
+  const syncDefaults = async () => {
+    setSyncing(true);
+    const res = await gasPost<{ imported: number; skipped: number; total: number }>({ action: "syncPortfolioDefaults", token: token() });
+    setSyncing(false);
+    if (!res.success) { alert(res.error || "Gagal menyinkronkan portfolio bawaan"); return; }
+    await revalidatePortfolio();
+    await load();
+    alert(`Sinkronisasi selesai. ${res.data?.imported || 0} project disimpan ke CMS, ${res.data?.skipped || 0} project sudah ada.`);
+  };
 
   const openCreate = () => { setForm({ ...emptyForm }); setEditorOpen(true); };
   const openEdit = (p: CmsProject) => { setForm(projectToForm(p)); setEditorOpen(true); };
@@ -140,16 +160,20 @@ export default function AdminPortfolioPage() {
     setSaving(false);
     if (!res.success) { alert(res.error || "Gagal menyimpan portfolio"); return; }
     setEditorOpen(false);
+    await revalidatePortfolio();
     await load();
   };
 
   const remove = async (p: CmsProject) => {
-    if (!window.confirm(`Hapus project “${p.title}”?\n\nData portfolio dan gallery-nya akan dihapus dari Google Sheets.`)) return;
+    const sourceNote = p.cmsSource === "bundled"
+      ? "Project bawaan akan disembunyikan dari website dan CMS. Data source code tetap aman."
+      : "Project akan dihapus dari Firebase CMS.";
+    if (!window.confirm(`Hapus project “${p.title}”?\n\n${sourceNote}`)) return;
     setDeleting(p.id);
     const res = await gasPost({ action: "deletePortfolio", token: token(), id: p.id });
     setDeleting(null);
     if (!res.success) alert(res.error || "Gagal menghapus portfolio");
-    else await load();
+    else { await revalidatePortfolio(); await load(); }
   };
 
   return (
@@ -160,15 +184,26 @@ export default function AdminPortfolioPage() {
             <ImageIcon size={14} /> Content Management System
           </div>
           <h1 className="text-3xl font-black tracking-tight">Portfolio CMS</h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">Tambah, edit, publish, dan pasang link demo website tanpa mengubah kode.</p>
+          <p className="mt-1 text-slate-600 dark:text-slate-400">Semua project website tampil di sini. Tambah, edit, publish, urutkan, dan perbarui thumbnail tanpa mengubah source code.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-surface px-4 py-2 text-sm"><b>{projects.length}</b> project</div>
           <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-surface px-4 py-2 text-sm"><b>{publishedCount}</b> tampil</div>
           <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-surface px-4 py-2 text-sm"><b>{featuredCount}</b> featured</div>
+          {bundledCount > 0 && (
+            <button onClick={syncDefaults} disabled={syncing} className="inline-flex items-center gap-2 rounded-xl border border-primary-300 bg-primary-50 px-4 py-2.5 text-sm font-bold text-primary-700 hover:bg-primary-100 disabled:opacity-60 dark:border-primary-800 dark:bg-primary-950/30 dark:text-primary-300">
+              <RefreshCw size={17} className={syncing ? "animate-spin" : ""} /> {syncing ? "Menyinkronkan..." : `Sinkronkan ${bundledCount} ke CMS`}
+            </button>
+          )}
           <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary-600/20 hover:bg-primary-700"><Plus size={17} /> Tambah Project</button>
         </div>
       </div>
+
+      {bundledCount > 0 && (
+        <div className="mb-5 rounded-2xl border border-primary-200 bg-primary-50/80 p-4 text-sm text-primary-900 dark:border-primary-900/60 dark:bg-primary-950/20 dark:text-primary-200">
+          <b>{bundledCount} project bawaan sudah ditampilkan di CMS dan bisa langsung diedit.</b> Saat satu project disimpan, perubahan menjadi data CMS/Firebase dan akan menimpa data bawaan. Gunakan tombol <b>Sinkronkan ke CMS</b> untuk menyimpan semua project bawaan sekaligus.
+        </div>
+      )}
 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
@@ -184,8 +219,11 @@ export default function AdminPortfolioPage() {
             <article key={String(p.id)} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-dark-surface">
               <div className="relative h-48 bg-slate-100 dark:bg-slate-900">
                 <ImageWithFallback src={p.image} alt={p.title} fill className="object-cover transition duration-500 group-hover:scale-105" fallbackIcon={<ImageIcon className="text-slate-400" size={42} />} />
-                <div className="absolute inset-x-3 top-3 flex justify-between gap-2">
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur ${p.published ? "bg-emerald-500 text-white" : "bg-slate-900/80 text-white"}`}>{p.published ? "Published" : "Draft"}</span>
+                <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur ${p.published ? "bg-emerald-500 text-white" : "bg-slate-900/80 text-white"}`}>{p.published ? "Published" : "Draft"}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur ${p.cmsSource === "bundled" ? "bg-sky-500 text-white" : "bg-primary-600 text-white"}`}>{p.cmsSource === "bundled" ? "Bawaan" : "CMS"}</span>
+                  </div>
                   {p.featured && <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-white"><Star size={12} fill="currentColor" /> Featured</span>}
                 </div>
               </div>

@@ -1,5 +1,7 @@
 import { createHash, createHmac, randomInt, randomUUID, timingSafeEqual } from 'node:crypto';
 import { defaultSiteContent } from '@/data/site-content';
+import { projects as bundledPortfolio } from '@/data/projects';
+import { applyPortfolioUpdates, findBundledPortfolio, mergePortfolioForCms, portfolioSlug, type PortfolioRecord } from '@/lib/repositories/portfolio-merge';
 import { validateOrderForm } from '@/lib/validators/order';
 import { createDoc, deleteDoc, getDoc, listDocs, mergeDoc, queryEquals, setDoc } from './firebase-rest';
 import type { ServerSession } from './session';
@@ -83,11 +85,61 @@ async function getSiteContentMap(){
   return out;
 }
 
+function bundledPortfolioPayload(project:any, index:number, now=iso()) {
+  return {
+    slug: portfolioSlug(String(project.title || '')),
+    title: cleanText(project.title,200),
+    category: cleanText(project.category,100),
+    description: cleanText(project.description,4000),
+    shortDescription: cleanText(project.shortDescription || '',500),
+    image: String(project.image || '').trim(),
+    images: Array.isArray(project.images) ? project.images.map((x:any)=>String(x).trim()).filter(Boolean).slice(0,30) : [],
+    technologies: Array.isArray(project.technologies) ? project.technologies.map((x:any)=>cleanText(x,100)).filter(Boolean) : [],
+    demoUrl: String(project.demoUrl || '').trim(),
+    githubUrl: String(project.githubUrl || '').trim(),
+    year: String(project.year || new Date().getFullYear()),
+    status: cleanText(project.status || 'Completed',50),
+    problemSolved: cleanText(project.problemSolved || '',2000),
+    solution: cleanText(project.solution || '',2000),
+    features: Array.isArray(project.features) ? project.features.map((x:any)=>cleanText(x,200)).filter(Boolean) : [],
+    myRole: cleanText(project.myRole || '',500),
+    featured: project.featured === true,
+    published: project.published !== false,
+    sortOrder: Number(project.sortOrder) || index + 1,
+    deleted: false,
+    createdAt: project.createdAt || now,
+    updatedAt: project.updatedAt || now,
+  };
+}
+
 async function getPortfolio(admin=false, params:any={}) {
-  let rows=await listDocs('portfolio'); if(!admin) rows=rows.filter(x=>x.published===true);
+  const remote = await listDocs('portfolio') as PortfolioRecord[];
+  let rows = mergePortfolioForCms(remote, admin);
+
   if(params.category&&params.category!=='Semua'&&params.category!=='all') rows=rows.filter(x=>x.category===params.category);
   if(params.search){ const q=String(params.search).toLowerCase(); rows=rows.filter(x=>[x.title,x.description,x.category,(x.technologies||[]).join(' ')].some(v=>String(v||'').toLowerCase().includes(q))); }
-  rows.sort((a,b)=>(Number(a.sortOrder)||999)-(Number(b.sortOrder)||999)); return rows;
+
+  // cmsSource is useful in Admin CMS only. Keep public payload clean.
+  if(!admin) rows=rows.map(({cmsSource,deleted,...row})=>row as PortfolioRecord);
+  return rows;
+}
+
+async function syncBundledPortfolioDefaults() {
+  const remote = await listDocs('portfolio') as PortfolioRecord[];
+  let imported = 0;
+  let skipped = 0;
+  const now = iso();
+
+  for (let index = 0; index < bundledPortfolio.length; index++) {
+    const project = bundledPortfolio[index];
+    const exists = remote.some((record) => findBundledPortfolio(applyPortfolioUpdates(record))?.id === project.id);
+    if (exists) { skipped++; continue; }
+    await setDoc('portfolio', String(project.id), bundledPortfolioPayload(project, index, now));
+    imported++;
+  }
+
+  await audit('portfolio_defaults_synced','admin',{imported,skipped,total:bundledPortfolio.length});
+  return { imported, skipped, total: bundledPortfolio.length };
 }
 
 async function revisionQuota(orderId:string){ const rows=(await listDocs('quotations')).filter(q=>q.orderId===orderId&&q.status==='approved').sort(byDateDesc('updatedAt')); return rows[0]?Math.max(0,Number(rows[0].revisionLimit??2)):2; }
@@ -142,8 +194,9 @@ export async function handleFirebaseAction(action:string, body:any={}, params:an
       case 'getPortfolioBySlug': { const slug=String(params.slug||body.slug||''); const rows=await getPortfolio(false,{}); const p=rows.find(x=>String(x.slug||slugify(x.title))===slug); return p?ok(p):fail('Portfolio not found'); }
       case 'getPortfolioCategories': { const rows=await getPortfolio(false,{}); const m=new Map<string,number>(); rows.forEach(x=>m.set(String(x.category||'Lainnya'),(m.get(String(x.category||'Lainnya'))||0)+1)); return ok([{id:'all',name:'Semua',slug:'all',count:rows.length},...Array.from(m.entries()).map(([name,count])=>({id:slugify(name),name,slug:slugify(name),count}))]); }
       case 'createPortfolio':
-      case 'updatePortfolio': { const id=action==='updatePortfolio'?String(body.id||''):randomUUID(); if(action==='updatePortfolio'&&!id)return fail('ID portfolio wajib diisi'); const title=cleanText(body.title,200),category=cleanText(body.category,100),description=cleanText(body.description,4000); if(!title||!category||!description)return fail('Judul, kategori, dan deskripsi wajib diisi'); const old=action==='updatePortfolio'?await getDoc('portfolio',id):null; const now=iso(); const data={slug:slugify(title),title,category,description,shortDescription:cleanText(body.shortDescription,500),image:String(body.image||'').trim(),images:Array.isArray(body.images)?body.images.map((x:any)=>String(x).trim()).filter(Boolean).slice(0,30):[],technologies:Array.isArray(body.technologies)?body.technologies.map((x:any)=>cleanText(x,100)).filter(Boolean):[],demoUrl:String(body.demoUrl||'').trim(),githubUrl:String(body.githubUrl||'').trim(),year:String(body.year||new Date().getFullYear()),status:cleanText(body.status||'Completed',50),problemSolved:cleanText(body.problemSolved,2000),solution:cleanText(body.solution,2000),features:Array.isArray(body.features)?body.features.map((x:any)=>cleanText(x,200)).filter(Boolean):[],myRole:cleanText(body.myRole,500),featured:body.featured===true||String(body.featured).toLowerCase()==='true',published:body.published===true||String(body.published).toLowerCase()==='true',sortOrder:Math.max(1,Number(body.sortOrder)||999),createdAt:old?.createdAt||now,updatedAt:now}; await setDoc('portfolio',id,data); await audit(action==='createPortfolio'?'portfolio_created':'portfolio_updated','admin',{id,title}); return ok({id}); }
-      case 'deletePortfolio': { const id=String(body.id||''); if(!id)return fail('ID portfolio wajib diisi'); await deleteDoc('portfolio',id); await audit('portfolio_deleted','admin',{id}); return ok(); }
+      case 'updatePortfolio': { const id=action==='updatePortfolio'?String(body.id||''):randomUUID(); if(action==='updatePortfolio'&&!id)return fail('ID portfolio wajib diisi'); const title=cleanText(body.title,200),category=cleanText(body.category,100),description=cleanText(body.description,4000); if(!title||!category||!description)return fail('Judul, kategori, dan deskripsi wajib diisi'); const old=action==='updatePortfolio'?await getDoc('portfolio',id):null; const now=iso(); const data={slug:slugify(title),title,category,description,shortDescription:cleanText(body.shortDescription,500),image:String(body.image||'').trim(),images:Array.isArray(body.images)?body.images.map((x:any)=>String(x).trim()).filter(Boolean).slice(0,30):[],technologies:Array.isArray(body.technologies)?body.technologies.map((x:any)=>cleanText(x,100)).filter(Boolean):[],demoUrl:String(body.demoUrl||'').trim(),githubUrl:String(body.githubUrl||'').trim(),year:String(body.year||new Date().getFullYear()),status:cleanText(body.status||'Completed',50),problemSolved:cleanText(body.problemSolved,2000),solution:cleanText(body.solution,2000),features:Array.isArray(body.features)?body.features.map((x:any)=>cleanText(x,200)).filter(Boolean):[],myRole:cleanText(body.myRole,500),featured:body.featured===true||String(body.featured).toLowerCase()==='true',published:body.published===true||String(body.published).toLowerCase()==='true',sortOrder:Math.max(1,Number(body.sortOrder)||999),deleted:false,createdAt:old?.createdAt||now,updatedAt:now}; await setDoc('portfolio',id,data); await audit(action==='createPortfolio'?'portfolio_created':'portfolio_updated','admin',{id,title}); return ok({id}); }
+      case 'syncPortfolioDefaults': return ok(await syncBundledPortfolioDefaults());
+      case 'deletePortfolio': { const id=String(body.id||''); if(!id)return fail('ID portfolio wajib diisi'); const existing=await getDoc('portfolio',id); const candidate=(existing||{id}) as PortfolioRecord; const bundled=findBundledPortfolio(candidate); if(bundled){ const index=Math.max(0,bundledPortfolio.findIndex((p)=>String(p.id)===String(bundled.id))); const base=bundledPortfolioPayload(bundled,index); await setDoc('portfolio',id,{...base,...(existing||{}),deleted:true,published:false,updatedAt:iso()}); } else { await deleteDoc('portfolio',id); } await audit('portfolio_deleted','admin',{id,bundled:Boolean(bundled)}); return ok(); }
       case 'getServices': { const rows=(await listDocs('services')).filter(x=>x.isActive===true).sort((a,b)=>(Number(a.sortOrder)||999)-(Number(b.sortOrder)||999)); return ok(rows); }
       case 'getSettings': { const d=await getDoc('settings','global'); return ok(d?Object.fromEntries(Object.entries(d).filter(([k])=>k!=='id')):{}); }
       case 'createOrder': {

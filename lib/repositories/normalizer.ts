@@ -30,6 +30,7 @@ export function normalizePortfolio(raw: any): PortfolioProject {
     title: String(raw.title || ""),
     category: String(raw.category || "Lainnya"),
     description: String(raw.description || ""),
+    shortDescription: raw.shortDescription ? String(raw.shortDescription) : undefined,
     image: String(raw.image || ""),
     images: raw.images ? parseJsonArray(raw.images) : undefined,
     technologies: parseJsonArray(raw.technologies),
@@ -43,6 +44,10 @@ export function normalizePortfolio(raw: any): PortfolioProject {
     features: parseJsonArray(raw.features),
     myRole: String(raw.myRole || ""),
     published: toBool(raw.published),
+    sortOrder: Number(raw.sortOrder) || undefined,
+    slug: raw.slug ? String(raw.slug) : undefined,
+    cmsSource: raw.cmsSource === "bundled" ? "bundled" : raw.cmsSource === "cms" ? "cms" : undefined,
+    deleted: toBool(raw.deleted),
     createdAt: String(raw.createdAt || ""),
     updatedAt: String(raw.updatedAt || ""),
   };

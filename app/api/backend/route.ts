@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const publicActions = new Set(['getPortfolio','getPortfolioBySlug','getPortfolioCategories','getServices','getSettings','getSiteContent','createOrder','health','requestCustomerOtp']);
-const adminActions = new Set(['getDashboardStats','getOrders','getOrder','updateOrderStatus','getCustomers','getCustomer','getProjects','getProject','createProject','createProjectUpdate','getPortfolioAdmin','createPortfolio','updatePortfolio','deletePortfolio','getSiteContentAdmin','updateSiteContentSection','createQuotation','getQuotations','createInvoice','getInvoices','updateInvoicePayment','getRevisions','updateRevision','createHandover','getHandovers']);
+const adminActions = new Set(['getDashboardStats','getOrders','getOrder','updateOrderStatus','getCustomers','getCustomer','getProjects','getProject','createProject','createProjectUpdate','getPortfolioAdmin','createPortfolio','updatePortfolio','deletePortfolio','syncPortfolioDefaults','getSiteContentAdmin','updateSiteContentSection','createQuotation','getQuotations','createInvoice','getInvoices','updateInvoicePayment','getRevisions','updateRevision','createHandover','getHandovers']);
 const customerActions = new Set(['getMyDashboard','respondQuotation','requestRevision','respondHandover','getOrderByNumber']);
 const secure = process.env.NODE_ENV === 'production';
 const cookieName = (role: SessionRole) => `${secure ? '__Host-' : ''}kastriva_${role}_session`;
