@@ -11,6 +11,7 @@ import {
   Package,
   UserCircle2,
   ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
@@ -56,6 +57,30 @@ export default function Footer() {
             </ul>
           </div>
         </div>
+        {site.footer.showLegalIdentity && site.footer.nib && (
+          <div className="mb-8 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20 sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                  <BadgeCheck size={23} aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="font-bold text-slate-900 dark:text-white">{site.footer.legalTitle}</h4>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-900 dark:bg-dark-bg/70 dark:text-emerald-300">
+                      <ShieldCheck size={12} /> Terdaftar OSS
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{site.footer.legalDescription}</p>
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-left dark:border-slate-700 dark:bg-dark-bg sm:text-right">
+                <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Nomor Induk Berusaha</div>
+                <div className="mt-1 font-mono text-sm font-bold tracking-wider text-slate-900 dark:text-white sm:text-base">NIB {site.footer.nib}</div>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="border-t border-slate-200 dark:border-slate-800 pt-8 text-center text-sm text-slate-500">
           {site.footer.copyright.replace("{year}", String(new Date().getFullYear()))}
         </div>

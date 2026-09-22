@@ -163,6 +163,10 @@ export const defaultSiteContent: SiteContent = {
     accountTitle: "Customer & Admin",
     showCustomerLogin: true,
     showAdminLogin: true,
+    showLegalIdentity: true,
+    legalTitle: "Legalitas Usaha",
+    legalDescription: "Usaha terdaftar melalui OSS Republik Indonesia",
+    nib: "1803260015159",
   },
   seo: {
     siteTitle: `${config.brand.name} | Jasa Pembuatan Website & Aplikasi Profesional`,

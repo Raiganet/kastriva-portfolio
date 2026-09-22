@@ -107,6 +107,10 @@ export interface SiteContent {
     accountTitle: string;
     showCustomerLogin: boolean;
     showAdminLogin: boolean;
+    showLegalIdentity: boolean;
+    legalTitle: string;
+    legalDescription: string;
+    nib: string;
   };
   seo: {
     siteTitle: string;

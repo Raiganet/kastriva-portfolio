@@ -209,7 +209,33 @@ export default function AdminCmsPage() {
         <section className={cardClass}><SectionHeader title="CTA Global" description="Ajakan bertindak di bagian bawah halaman." /><Toggle label="Tampilkan CTA" checked={site.cta.visible} onChange={(v)=>setSection("cta",{...site.cta,visible:v})}/><div className="mt-4 grid gap-4 md:grid-cols-2"><Field label="Judul" value={site.cta.title} onChange={(v)=>setSection("cta",{...site.cta,title:v})}/><Field label="Subjudul" value={site.cta.subtitle} onChange={(v)=>setSection("cta",{...site.cta,subtitle:v})}/><Field label="Tombol Utama" value={site.cta.primaryLabel} onChange={(v)=>setSection("cta",{...site.cta,primaryLabel:v})}/><Field label="Link Tombol Utama" value={site.cta.primaryHref} onChange={(v)=>setSection("cta",{...site.cta,primaryHref:v})}/><Field label="Tombol Kedua" value={site.cta.secondaryLabel} onChange={(v)=>setSection("cta",{...site.cta,secondaryLabel:v})}/><Field label="Link Tombol Kedua" value={site.cta.secondaryHref} onChange={(v)=>setSection("cta",{...site.cta,secondaryHref:v})}/></div></section>
       </>}
 
-      {active === "footer" && <section className={cardClass}><SectionHeader title="Footer" description="Konten bagian paling bawah website." /><div className="space-y-4"><TextArea label="Deskripsi Brand" value={site.footer.description} onChange={(v)=>setSection("footer",{...site.footer,description:v})}/><Field label="Copyright" value={site.footer.copyright} onChange={(v)=>setSection("footer",{...site.footer,copyright:v})} hint="Gunakan {year} untuk tahun otomatis."/><div className="grid gap-4 md:grid-cols-2"><Field label="Judul Kolom Navigasi" value={site.footer.navigationTitle} onChange={(v)=>setSection("footer",{...site.footer,navigationTitle:v})}/><Field label="Judul Kolom Akun" value={site.footer.accountTitle} onChange={(v)=>setSection("footer",{...site.footer,accountTitle:v})}/></div><Toggle label="Tampilkan Login Customer" checked={site.footer.showCustomerLogin} onChange={(v)=>setSection("footer",{...site.footer,showCustomerLogin:v})}/><Toggle label="Tampilkan Login Admin" checked={site.footer.showAdminLogin} onChange={(v)=>setSection("footer",{...site.footer,showAdminLogin:v})}/></div></section>}
+      {active === "footer" && <section className={cardClass}>
+        <SectionHeader title="Footer & Legalitas" description="Konten bagian paling bawah website, termasuk identitas legal usaha." />
+        <div className="space-y-4">
+          <TextArea label="Deskripsi Brand" value={site.footer.description} onChange={(v)=>setSection("footer",{...site.footer,description:v})}/>
+          <Field label="Copyright" value={site.footer.copyright} onChange={(v)=>setSection("footer",{...site.footer,copyright:v})} hint="Gunakan {year} untuk tahun otomatis."/>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Judul Kolom Navigasi" value={site.footer.navigationTitle} onChange={(v)=>setSection("footer",{...site.footer,navigationTitle:v})}/>
+            <Field label="Judul Kolom Akun" value={site.footer.accountTitle} onChange={(v)=>setSection("footer",{...site.footer,accountTitle:v})}/>
+          </div>
+          <Toggle label="Tampilkan Login Customer" checked={site.footer.showCustomerLogin} onChange={(v)=>setSection("footer",{...site.footer,showCustomerLogin:v})}/>
+          <Toggle label="Tampilkan Login Admin" checked={site.footer.showAdminLogin} onChange={(v)=>setSection("footer",{...site.footer,showAdminLogin:v})}/>
+          <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
+            <div className="mb-4">
+              <h3 className="font-black">Legalitas Usaha</h3>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Tampilkan badge legalitas NIB di footer untuk meningkatkan kepercayaan calon klien.</p>
+            </div>
+            <div className="space-y-4">
+              <Toggle label="Tampilkan Legalitas NIB" checked={site.footer.showLegalIdentity} onChange={(v)=>setSection("footer",{...site.footer,showLegalIdentity:v})} hint="Jika dimatikan, panel legalitas tidak ditampilkan di website."/>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Judul Legalitas" value={site.footer.legalTitle} onChange={(v)=>setSection("footer",{...site.footer,legalTitle:v})}/>
+                <Field label="Nomor Induk Berusaha (NIB)" value={site.footer.nib} onChange={(v)=>setSection("footer",{...site.footer,nib:v.replace(/\D/g,"")})} hint="Hanya angka. NIB saat ini: 1803260015159"/>
+              </div>
+              <Field label="Keterangan Legalitas" value={site.footer.legalDescription} onChange={(v)=>setSection("footer",{...site.footer,legalDescription:v})} placeholder="Usaha terdaftar melalui OSS Republik Indonesia"/>
+            </div>
+          </div>
+        </div>
+      </section>}
 
       {active === "seo" && <section className={cardClass}><SectionHeader title="SEO Website" description="Metadata utama dan per halaman. Perubahan SEO dapat membutuhkan waktu sebelum terlihat di Google." /><div className="space-y-4"><Field label="Site Title" value={site.seo.siteTitle} onChange={(v)=>setSection("seo",{...site.seo,siteTitle:v})}/><Field label="Template Title" value={site.seo.titleTemplate} onChange={(v)=>setSection("seo",{...site.seo,titleTemplate:v})} hint="Gunakan %s sebagai judul halaman."/><TextArea label="Meta Description Global" value={site.seo.description} onChange={(v)=>setSection("seo",{...site.seo,description:v})}/><TextArea label="Keywords" value={lineText(site.seo.keywords)} onChange={(v)=>setSection("seo",{...site.seo,keywords:lines(v)})} hint="Satu keyword per baris."/><div className="grid gap-4 md:grid-cols-2"><Field label="Area Layanan" value={site.seo.areaServed} onChange={(v)=>setSection("seo",{...site.seo,areaServed:v})}/><Field label="Price Range" value={site.seo.priceRange} onChange={(v)=>setSection("seo",{...site.seo,priceRange:v})}/></div><div className="pt-3"><h3 className="mb-3 font-bold">Metadata Per Halaman</h3><div className="space-y-4">{Object.entries(site.seo.pages).map(([key,item])=><div key={key} className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"><div className="mb-3 text-xs font-black uppercase tracking-widest text-primary-600">{key}</div><div className="grid gap-3 md:grid-cols-2"><Field label="Title" value={item.title} onChange={(v)=>setSection("seo",{...site.seo,pages:{...site.seo.pages,[key]:{...item,title:v}}})}/><Field label="Description" value={item.description} onChange={(v)=>setSection("seo",{...site.seo,pages:{...site.seo.pages,[key]:{...item,description:v}}})}/></div></div>)}</div></div></div></section>}
     </div>
