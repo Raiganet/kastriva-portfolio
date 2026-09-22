@@ -20,8 +20,8 @@ const { mergePortfolio, applyPortfolioUpdates } = load('lib/repositories/portfol
   '@/data/projects': { projects }
 });
 
-test('all seven portfolio thumbnails refer to exact existing filenames', () => {
-  assert.equal(projects.length, 7);
+test('all portfolio thumbnails refer to exact existing filenames', () => {
+  assert.equal(projects.length, 9);
   const names = fs.readdirSync(path.join(root, 'public/portfolio'));
   for (const project of projects) {
     assert.ok(names.includes(project.image.replace('/portfolio/', '')), project.image);
@@ -29,22 +29,26 @@ test('all seven portfolio thumbnails refer to exact existing filenames', () => {
   }
 });
 test('legacy inventory becomes Smart Kasir without duplicate or fictional metadata', () => {
-  const old = { ...projects[0], id: 'cms-inventory', title: 'Sistem Manajemen Inventaris',
+  const smartKasir = projects.find((project) => project.id === 'kastriva-smart-kasir');
+  assert.ok(smartKasir);
+  const old = { ...smartKasir, id: 'cms-inventory', title: 'Sistem Manajemen Inventaris',
     demoUrl: 'https://demo.kastriva.com/inventory', githubUrl: 'https://github.com/kastriva/inventory',
     technologies: ['PostgreSQL'], image: '/portfolio/inventory.png' };
   const result = mergePortfolio([old]);
-  assert.equal(result.length, 7);
+  assert.equal(result.length, 9);
   assert.equal(result[0].title, 'Kastriva-Smart Kasir');
   assert.equal(result[0].demoUrl, 'https://kastriva-smart-kasir.vercel.app/');
   assert.equal(result[0].githubUrl, undefined);
   assert.deepEqual(result[0].technologies, []);
-  assert.equal(applyPortfolioUpdates(old).image, projects[0].image);
+  assert.equal(applyPortfolioUpdates(old).image, smartKasir.image);
 });
 test('CMS project keeps its content but uses the supplied thumbnail', () => {
-  const cms = { ...projects[1], id: 'cms-warung', image: '/logo-kastriva.png', description: 'CMS description' };
+  const warung = projects.find((project) => project.id === 'kasir-kilat-warung');
+  assert.ok(warung);
+  const cms = { ...warung, id: 'cms-warung', image: '/logo-kastriva.png', description: 'CMS description' };
   const result = mergePortfolio([cms]);
-  assert.equal(result.length, 7);
-  assert.equal(result[0].image, projects[1].image);
-  assert.equal(result[0].description, 'CMS description');
-  assert.equal(mergePortfolio([{ ...cms, published: false }]).length, 6);
+  assert.equal(result.length, 9);
+  assert.equal(result.find((project) => project.id === 'cms-warung').image, warung.image);
+  assert.equal(result.find((project) => project.id === 'cms-warung').description, 'CMS description');
+  assert.equal(mergePortfolio([{ ...cms, published: false }]).length, 8);
 });
