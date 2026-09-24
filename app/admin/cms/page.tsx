@@ -27,8 +27,8 @@ const groups = [
 
 type GroupId = typeof groups[number]["id"];
 
-const inputClass = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 dark:border-slate-700 dark:bg-dark-bg";
-const cardClass = "rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-dark-surface";
+const inputClass = "w-full min-h-[46px] rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-base sm:text-sm outline-none transition focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 dark:border-slate-700 dark:bg-dark-bg";
+const cardClass = "min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-dark-surface";
 
 function mergeKnown<T>(fallback: T, incoming: unknown): T {
   if (Array.isArray(fallback)) return (Array.isArray(incoming) ? incoming : fallback) as T;
@@ -62,14 +62,14 @@ function TextArea({ label, value, onChange, rows = 4, hint }: {
 }
 
 function Toggle({ label, checked, onChange, hint }: { label: string; checked: boolean; onChange: (value: boolean) => void; hint?: string }) {
-  return <button type="button" onClick={() => onChange(!checked)} className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition ${checked ? "border-primary-300 bg-primary-50/60 dark:border-primary-800 dark:bg-primary-950/20" : "border-slate-200 bg-white dark:border-slate-700 dark:bg-dark-bg"}`}>
-    <span><span className="block text-sm font-semibold">{label}</span>{hint && <span className="mt-0.5 block text-xs text-slate-400">{hint}</span>}</span>
-    <span className={`relative h-6 w-11 rounded-full transition ${checked ? "bg-primary-600" : "bg-slate-300 dark:bg-slate-700"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${checked ? "left-6" : "left-1"}`} /></span>
+  return <button type="button" onClick={() => onChange(!checked)} className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-xl border px-3.5 py-3 text-left transition sm:px-4 ${checked ? "border-primary-300 bg-primary-50/60 dark:border-primary-800 dark:bg-primary-950/20" : "border-slate-200 bg-white dark:border-slate-700 dark:bg-dark-bg"}`}> 
+    <span className="min-w-0"><span className="block text-sm font-semibold">{label}</span>{hint && <span className="mt-0.5 block text-xs leading-5 text-slate-400">{hint}</span>}</span>
+    <span className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-primary-600" : "bg-slate-300 dark:bg-slate-700"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${checked ? "left-6" : "left-1"}`} /></span>
   </button>;
 }
 
 function SectionHeader({ title, description }: { title: string; description: string }) {
-  return <div className="mb-5"><h2 className="text-xl font-black">{title}</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p></div>;
+  return <div className="mb-4 sm:mb-5"><h2 className="text-lg font-black sm:text-xl">{title}</h2><p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{description}</p></div>;
 }
 
 const lines = (value: string) => value.split("\n").map((v) => v.trim()).filter(Boolean);
@@ -116,28 +116,42 @@ export default function AdminCmsPage() {
 
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-10 w-10 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" /></div>;
 
-  return <div className="pb-24">
-    <div className="mb-7 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-      <div>
-        <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[.2em] text-primary-600"><LayoutTemplate size={14} /> Full Website CMS</div>
-        <h1 className="text-3xl font-black tracking-tight">CMS Seluruh Website</h1>
-        <p className="mt-1 max-w-3xl text-slate-600 dark:text-slate-400">Kelola seluruh konten halaman publik tanpa mengedit source code. Judul dan tampilan Portfolio diatur di sini, sedangkan item project, gambar, dan detailnya dikelola dari menu Portfolio CMS.</p>
+  return <div className="min-w-0 pb-36 sm:pb-28">
+    <div className="mb-5 flex min-w-0 flex-col gap-4 sm:mb-7 xl:flex-row xl:items-end xl:justify-between">
+      <div className="min-w-0">
+        <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.16em] text-primary-600 sm:text-xs sm:tracking-[.2em]"><LayoutTemplate size={14} /> Full Website CMS</div>
+        <h1 className="text-2xl font-black tracking-tight sm:text-3xl">CMS Seluruh Website</h1>
+        <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">Kelola seluruh konten halaman publik tanpa mengedit source code. Judul dan tampilan Portfolio diatur di sini, sedangkan item project, gambar, dan detailnya dikelola dari menu Portfolio CMS.</p>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Link href="/" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:bg-dark-surface dark:hover:bg-slate-800"><Eye size={17} /> Preview Website <ExternalLink size={14} /></Link>
-        <button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:bg-dark-surface dark:hover:bg-slate-800"><RefreshCw size={17} /> Muat Ulang</button>
+      <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+        <Link href="/" target="_blank" className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:bg-dark-surface dark:hover:bg-slate-800 sm:w-auto"><Eye size={17} /> Preview Website <ExternalLink size={14} /></Link>
+        <button onClick={() => void load()} className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:bg-dark-surface dark:hover:bg-slate-800 sm:w-auto"><RefreshCw size={17} /> Muat Ulang</button>
       </div>
     </div>
 
-    {message && <div className={`mb-5 flex items-start gap-3 rounded-xl border p-4 text-sm ${message.type === "ok" ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950/20 dark:text-green-300" : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/20 dark:text-red-300"}`}>{message.type === "ok" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}<span>{message.text}</span></div>}
+    {message && <div className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 text-sm leading-6 sm:p-4 ${message.type === "ok" ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950/20 dark:text-green-300" : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/20 dark:text-red-300"}`}>{message.type === "ok" ? <CheckCircle2 size={18} className="mt-0.5 shrink-0" /> : <AlertCircle size={18} className="mt-0.5 shrink-0" />}<span className="min-w-0">{message.text}</span></div>}
 
-    <div className="mb-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 dark:border-slate-800 dark:bg-dark-surface">
+    <div className="mb-5 sm:hidden">
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[.14em] text-slate-500 dark:text-slate-400">Bagian CMS</span>
+        <select
+          value={active}
+          onChange={(e) => setActive(e.target.value as GroupId)}
+          className="min-h-[48px] w-full rounded-xl border border-slate-200 bg-white px-3.5 text-base font-semibold text-slate-800 outline-none transition focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 dark:border-slate-700 dark:bg-dark-surface dark:text-white"
+          aria-label="Pilih bagian CMS"
+        >
+          {groups.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
+        </select>
+      </label>
+    </div>
+
+    <div className="mb-6 hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 dark:border-slate-800 dark:bg-dark-surface sm:block">
       <div className="flex min-w-max gap-1">
-        {groups.map((g) => <button key={g.id} onClick={() => setActive(g.id)} className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition ${active === g.id ? "bg-primary-600 text-white shadow-md shadow-primary-600/20" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}><g.icon size={16} /> {g.label}</button>)}
+        {groups.map((g) => <button key={g.id} onClick={() => setActive(g.id)} className={`inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition ${active === g.id ? "bg-primary-600 text-white shadow-md shadow-primary-600/20" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}><g.icon size={16} /> {g.label}</button>)}
       </div>
     </div>
 
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       {active === "general" && <>
         <section className={cardClass}><SectionHeader title="Identitas Brand" description="Nama, kontak, alamat, dan akun sosial yang digunakan di seluruh website." />
           <div className="grid gap-4 md:grid-cols-2">
@@ -240,10 +254,12 @@ export default function AdminCmsPage() {
       {active === "seo" && <section className={cardClass}><SectionHeader title="SEO Website" description="Metadata utama dan per halaman. Perubahan SEO dapat membutuhkan waktu sebelum terlihat di Google." /><div className="space-y-4"><Field label="Site Title" value={site.seo.siteTitle} onChange={(v)=>setSection("seo",{...site.seo,siteTitle:v})}/><Field label="Template Title" value={site.seo.titleTemplate} onChange={(v)=>setSection("seo",{...site.seo,titleTemplate:v})} hint="Gunakan %s sebagai judul halaman."/><TextArea label="Meta Description Global" value={site.seo.description} onChange={(v)=>setSection("seo",{...site.seo,description:v})}/><TextArea label="Keywords" value={lineText(site.seo.keywords)} onChange={(v)=>setSection("seo",{...site.seo,keywords:lines(v)})} hint="Satu keyword per baris."/><div className="grid gap-4 md:grid-cols-2"><Field label="Area Layanan" value={site.seo.areaServed} onChange={(v)=>setSection("seo",{...site.seo,areaServed:v})}/><Field label="Price Range" value={site.seo.priceRange} onChange={(v)=>setSection("seo",{...site.seo,priceRange:v})}/></div><div className="pt-3"><h3 className="mb-3 font-bold">Metadata Per Halaman</h3><div className="space-y-4">{Object.entries(site.seo.pages).map(([key,item])=><div key={key} className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"><div className="mb-3 text-xs font-black uppercase tracking-widest text-primary-600">{key}</div><div className="grid gap-3 md:grid-cols-2"><Field label="Title" value={item.title} onChange={(v)=>setSection("seo",{...site.seo,pages:{...site.seo.pages,[key]:{...item,title:v}}})}/><Field label="Description" value={item.description} onChange={(v)=>setSection("seo",{...site.seo,pages:{...site.seo.pages,[key]:{...item,description:v}}})}/></div></div>)}</div></div></div></section>}
     </div>
 
-    <div className="fixed bottom-4 left-4 right-4 z-30 flex justify-end lg:left-72">
-      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-slate-700 dark:bg-dark-surface/95">
-        <span className="hidden text-sm text-slate-500 sm:block">Menyimpan: <b className="text-slate-900 dark:text-white">{group.label}</b></span>
-        <button onClick={() => void saveCurrent()} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 hover:bg-primary-700 disabled:opacity-60">{saving ? <RefreshCw size={17} className="animate-spin"/> : <Save size={17}/>} {saving ? "Menyimpan..." : "Simpan Perubahan"}</button>
+    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(15,23,42,0.10)] backdrop-blur dark:border-slate-800 dark:bg-dark-surface/95 sm:bottom-4 sm:left-4 sm:right-4 sm:border-0 sm:bg-transparent sm:p-0 sm:pb-0 sm:shadow-none lg:left-72">
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-3 sm:justify-end">
+        <div className="flex w-full items-center gap-3 rounded-none border-0 bg-transparent p-0 sm:w-auto sm:rounded-2xl sm:border sm:border-slate-200 sm:bg-white/95 sm:p-3 sm:shadow-2xl sm:backdrop-blur dark:sm:border-slate-700 dark:sm:bg-dark-surface/95">
+          <span className="hidden text-sm text-slate-500 md:block">Menyimpan: <b className="text-slate-900 dark:text-white">{group.label}</b></span>
+          <button onClick={() => void saveCurrent()} disabled={saving} className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-primary-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary-600/20 hover:bg-primary-700 disabled:opacity-60 sm:w-auto">{saving ? <RefreshCw size={17} className="animate-spin"/> : <Save size={17}/>} {saving ? "Menyimpan..." : "Simpan Perubahan"}</button>
+        </div>
       </div>
     </div>
   </div>;

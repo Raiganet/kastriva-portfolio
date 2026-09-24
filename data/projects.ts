@@ -36,7 +36,7 @@ export const projects: PortfolioProject[] = [
     "title": "Kastriva-Katalog",
     "category": "Aplikasi Bisnis",
     "description": "Platform katalog digital multi-tenant untuk UMKM dengan produk, kategori, branding toko, QR katalog, keranjang, pembayaran, dan checkout WhatsApp.",
-    "image": "/portfolio/Kastriva-Katalog.jpg",
+    "image": "/portfolio/Kastriva-Katalog.png",
     "technologies": ["Next.js", "React", "Firebase", "Firestore", "PWA"],
     "demoUrl": "https://kastriva-katalog-one.vercel.app/",
     "year": "2026",

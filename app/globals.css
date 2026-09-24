@@ -94,3 +94,12 @@
 .dark .admin-sidebar-scroll::-webkit-scrollbar-thumb {
   background: rgb(71 85 105 / 0.85);
 }
+
+/* Admin mobile UX: keep tap targets comfortable and avoid accidental horizontal page scroll. */
+@media (max-width: 1023px) {
+  .admin-mobile-safe {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}

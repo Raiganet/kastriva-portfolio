@@ -14,10 +14,10 @@ export default function AdminLayout({
 }) {
   return (
     <AdminGuard>
-      <div className="min-h-screen bg-slate-50 dark:bg-dark-bg">
+      <div className="min-h-screen overflow-x-hidden bg-slate-50 dark:bg-dark-bg">
         <AdminSidebar />
-        <main className="lg:pl-64 pt-16 lg:pt-0">
-          <div className="p-4 md:p-8">{children}</div>
+        <main className="min-w-0 pt-16 lg:pl-64 lg:pt-0">
+          <div className="min-w-0 p-3 sm:p-4 md:p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </AdminGuard>
