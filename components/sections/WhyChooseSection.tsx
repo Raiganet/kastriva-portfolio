@@ -8,7 +8,7 @@ export default function WhyChooseSection() {
   if (!site.whyChoose.visible) return null;
   const showProcessPreview = site.whyChoose.showProcessPreview && site.process.items.length > 0;
   return (
-    <section className="py-20 bg-slate-50 dark:bg-dark-surface/50">
+    <section className="ambient-panel py-20">
       <div className="container mx-auto px-4 md:px-6">
         <div className={`grid gap-12 items-center ${showProcessPreview ? "lg:grid-cols-2" : "max-w-4xl mx-auto"}`}>
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>

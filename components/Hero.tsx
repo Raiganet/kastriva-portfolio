@@ -8,9 +8,7 @@ export default function Hero() {
   const { hero } = useSiteContent();
   if (!hero.visible) return null;
   return (
-    <section id="home" className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-      <div className="absolute top-0 right-0 -z-10 w-[600px] h-[600px] bg-primary-500/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px]" />
+    <section id="home" className="ambient-hero relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>

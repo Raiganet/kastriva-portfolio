@@ -39,7 +39,7 @@ export default function Portfolio() {
 
   if (loading) {
     return (
-      <section id="portfolio" className="py-20 bg-slate-50 dark:bg-dark-surface/50">
+      <section id="portfolio" className="ambient-panel py-20">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{site.portfolio.title}</h2>
@@ -55,7 +55,7 @@ export default function Portfolio() {
 
   if (error) {
     return (
-      <section id="portfolio" className="py-20 bg-slate-50 dark:bg-dark-surface/50">
+      <section id="portfolio" className="ambient-panel py-20">
         <div className="container mx-auto px-4 md:px-6">
           <ErrorState message={error} onRetry={refresh} />
         </div>
@@ -64,7 +64,7 @@ export default function Portfolio() {
   }
 
   return (
-    <section id="portfolio" className="py-20 bg-slate-50 dark:bg-dark-surface/50">
+    <section id="portfolio" className="ambient-panel py-20">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{site.portfolio.title}</h2>

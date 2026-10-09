@@ -24,7 +24,7 @@ export default function FeaturedProject() {
   };
 
   return (
-    <section className="py-20 bg-slate-50 dark:bg-dark-surface/50">
+    <section className="ambient-panel py-20">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
           <motion.div

@@ -57,6 +57,59 @@
   }
 }
 
+/* Soft Studio: diffused lavender light and quiet diagonal planes.
+   CSS-only decoration stays behind content and never captures input. */
+.public-canvas {
+  --ambient-violet: 120 112 255 / 0.085;
+  --ambient-plane: 129 136 170 / 0.045;
+  --ambient-line: 108 92 231 / 0.075;
+  position: relative;
+  isolation: isolate;
+  background-color: #f8f9ff;
+  background-image:
+    radial-gradient(ellipse 75% 580px at 30% 0%, rgb(var(--ambient-violet)), transparent 85%),
+    radial-gradient(ellipse 55% 420px at 95% 1000px, rgb(var(--ambient-violet)), transparent 85%);
+  background-size: 100% 1600px;
+}
+.dark .public-canvas {
+  --ambient-violet: 120 112 255 / 0.115;
+  --ambient-plane: 129 136 170 / 0.045;
+  --ambient-line: 155 138 255 / 0.085;
+  background-color: #0b0c14;
+}
+.public-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(116deg, transparent 54%, rgb(var(--ambient-plane)) 54%, rgb(var(--ambient-plane)) 70%, transparent 70%);
+  background-size: 100% 1600px;
+}
+.public-canvas .ambient-panel {
+  background-color: rgb(255 255 255 / 0.25);
+  background-image: radial-gradient(ellipse at 15% 0%, rgb(var(--ambient-violet)), transparent 65%);
+  border-block: 1px solid rgb(var(--ambient-line));
+}
+.dark .public-canvas .ambient-panel { background-color: rgb(15 18 29 / 0.25); }
+.public-canvas .ambient-hero { isolation: isolate; }
+.public-canvas .ambient-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% -20%, rgb(var(--ambient-violet)), transparent 65%);
+}
+@media (max-width: 767px) {
+  .public-canvas, .public-canvas::before { background-size: 100% 1100px; }
+  .public-canvas::before { opacity: 0.6; }
+}
+@media (forced-colors: active) {
+  .public-canvas, .public-canvas .ambient-panel { background-image: none; }
+  .public-canvas::before, .public-canvas .ambient-hero::before { display: none; }
+}
+
 /* Login form: keep Chrome/Edge autofill visually consistent with the input design. */
 .login-input:-webkit-autofill,
 .login-input:-webkit-autofill:hover,

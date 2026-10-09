@@ -9,7 +9,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         Lewati ke konten
       </a>
       <Navbar />
-      <main id="main-content" className="flex-1">{children}</main>
+      <main id="main-content" className="public-canvas flex-1">{children}</main>
       <Footer />
       <WhatsAppFloat />
     </div>
