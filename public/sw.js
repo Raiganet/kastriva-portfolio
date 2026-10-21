@@ -1,4 +1,4 @@
-const CACHE_VERSION = "kastriva-v5-brand";
+const CACHE_VERSION = "kastriva-v6-sw-response-fix";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGE_CACHE = `${CACHE_VERSION}-pages`;
 const OFFLINE_URL = "/offline";
@@ -45,7 +45,10 @@ self.addEventListener("fetch", (event) => {
         .then((response) => {
           if (response.ok && !url.pathname.startsWith("/order/success")) {
             const copy = response.clone();
-            caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy));
+            const cacheWrite = caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy)).catch((error) => {
+              console.warn("[Kastriva SW] Page cache write failed:", error);
+            });
+            event.waitUntil(cacheWrite);
           }
           return response;
         })
@@ -58,7 +61,13 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.match(request).then((cached) => {
         const network = fetch(request).then((response) => {
-          if (response.ok) caches.open(STATIC_CACHE).then((cache) => cache.put(request, response.clone()));
+          if (response.ok) {
+            const copy = response.clone();
+            const cacheWrite = caches.open(STATIC_CACHE).then((cache) => cache.put(request, copy)).catch((error) => {
+              console.warn("[Kastriva SW] Static cache write failed:", error);
+            });
+            event.waitUntil(cacheWrite);
+          }
           return response;
         }).catch(() => cached);
         return cached || network;
