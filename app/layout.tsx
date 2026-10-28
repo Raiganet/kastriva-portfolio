@@ -58,11 +58,18 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "id_ID",
       url: siteUrl,
       siteName: site.brand.name,
+      images: [
+        {
+          url: "/brand/kastriva-brand-system.png",
+          alt: `${site.brand.name} - ${site.seo.siteTitle}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: site.seo.siteTitle,
       description: site.seo.description,
+      images: ["/brand/kastriva-brand-system.png"],
     },
     robots: {
       index: true,

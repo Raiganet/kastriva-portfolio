@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Portfolio from "@/components/Portfolio";
+import Reveal from "@/components/ui/Reveal";
 import { getSiteContent } from "@/lib/server/site-content.server";
 import { pageMetadata } from "@/lib/seo-cms";
 
@@ -9,5 +10,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function PortfolioPage() {
-  return <div className="pt-32"><Portfolio /></div>;
+  return (
+    <div className="pt-32">
+      <Reveal><Portfolio /></Reveal>
+    </div>
+  );
 }

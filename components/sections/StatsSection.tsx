@@ -1,6 +1,6 @@
 "use client";
-import { motion } from "framer-motion";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
+import { InteractiveCard } from "@/components/ui";
 
 export default function StatsSection() {
   const { stats } = useSiteContent();
@@ -10,10 +10,16 @@ export default function StatsSection() {
       <div className="container mx-auto px-4">
         <div className={`grid gap-8 text-center ${stats.items.length <= 2 ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4"}`}>
           {stats.items.map((stat, i) => (
-            <motion.div key={`${stat.label}-${i}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+            <InteractiveCard
+              key={`${stat.label}-${i}`}
+              delay={i * 0.08}
+              tilt={6}
+              lift={4}
+              className="rounded-2xl p-3 transition-colors duration-300 hover:bg-white/70 dark:hover:bg-white/5"
+            >
               <div className="text-3xl md:text-4xl font-bold text-primary-600 mb-1">{stat.value}</div>
               <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
-            </motion.div>
+            </InteractiveCard>
           ))}
         </div>
       </div>

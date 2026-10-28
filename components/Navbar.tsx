@@ -123,7 +123,7 @@ export default function Navbar() {
 
           <Link
             href="/order"
-            className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-primary-600/20"
+            className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-primary-600/20"
           >
             {site.navigation.startProjectLabel} <ArrowRight size={16} />
           </Link>
@@ -191,7 +191,7 @@ export default function Navbar() {
               )}
               <Link
                 href="/order"
-                className="bg-primary-600 text-white text-center py-3 rounded-lg font-semibold mt-2"
+                className="btn-lift btn-shine bg-primary-600 text-white text-center py-3 rounded-lg font-semibold mt-2"
               >
                 {site.navigation.startProjectLabel}
               </Link>

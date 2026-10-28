@@ -8,13 +8,14 @@ import { getServerPortfolioBySlug } from "@/lib/server/portfolio.server";
 export const revalidate = 60;
 
 interface PortfolioDetailProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: PortfolioDetailProps): Promise<Metadata> {
-  const [project, site] = await Promise.all([getServerPortfolioBySlug(params.slug), getSiteContent()]);
+  const { slug } = await params;
+  const [project, site] = await Promise.all([getServerPortfolioBySlug(slug), getSiteContent()]);
 
   if (!project) {
     return { title: "Project Not Found" };
@@ -23,11 +24,11 @@ export async function generateMetadata({
   return {
     title: `${project.title} - ${site.brand.name}`,
     description: project.description,
-    alternates: { canonical: `/portfolio/${params.slug}` },
+    alternates: { canonical: `/portfolio/${slug}` },
     openGraph: {
       title: project.title,
       description: project.description,
-      url: `/portfolio/${params.slug}`,
+      url: `/portfolio/${slug}`,
       type: "article",
       images: project.image ? [{ url: project.image, alt: project.title }] : undefined,
     },
@@ -43,7 +44,8 @@ export async function generateMetadata({
 export default async function PortfolioDetailPage({
   params,
 }: PortfolioDetailProps) {
-  const [project, site] = await Promise.all([getServerPortfolioBySlug(params.slug), getSiteContent()]);
+  const { slug } = await params;
+  const [project, site] = await Promise.all([getServerPortfolioBySlug(slug), getSiteContent()]);
 
   if (!project) {
     notFound();
@@ -56,7 +58,7 @@ export default async function PortfolioDetailPage({
     name: project.title,
     description: project.description,
     image: project.image,
-    url: `${siteUrl}/portfolio/${params.slug}`,
+    url: `${siteUrl}/portfolio/${slug}`,
     creator: { "@type": "Organization", name: site.brand.name },
     keywords: project.technologies.join(", "),
   };

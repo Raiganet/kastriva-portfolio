@@ -4,3 +4,5 @@ export { default as ErrorState } from "./ErrorState";
 export { default as Lightbox } from "./Lightbox";
 export { default as ImageWithFallback } from "./ImageWithFallback";
 export { default as SkeletonLoader, PortfolioGridSkeleton } from "./SkeletonLoader";
+export { default as InteractiveCard } from "./InteractiveCard";
+export { default as Reveal } from "./Reveal";

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ServicesSection from "@/components/sections/ServicesSection";
 import FinalCTA from "@/components/sections/FinalCTA";
+import Reveal from "@/components/ui/Reveal";
 import { getSiteContent } from "@/lib/server/site-content.server";
 import { pageMetadata } from "@/lib/seo-cms";
 
@@ -10,5 +11,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function ServicesPage() {
-  return <div className="pt-32"><ServicesSection /><FinalCTA /></div>;
+  return (
+    <div className="pt-32">
+      <Reveal><ServicesSection /></Reveal>
+      <Reveal delay={0.05}><FinalCTA /></Reveal>
+    </div>
+  );
 }

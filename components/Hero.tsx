@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight, Code2 } from "lucide-react";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
+import { InteractiveCard } from "@/components/ui";
 import Link from "next/link";
 
 export default function Hero() {
@@ -19,15 +20,16 @@ export default function Hero() {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">{hero.headline}</h1>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-xl">{hero.subheadline}</p>
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Link href={hero.ctaPrimaryHref} className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-xl hover:shadow-primary-600/20 hover:-translate-y-1">{hero.ctaPrimary} <ArrowRight size={20} /></Link>
-              <Link href={hero.ctaSecondaryHref} className="glass hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-slate-700">{hero.ctaSecondary}</Link>
+              <Link href={hero.ctaPrimaryHref} className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-xl hover:shadow-primary-600/20 hover:-translate-y-1">{hero.ctaPrimary} <ArrowRight size={20} /></Link>
+              <Link href={hero.ctaSecondaryHref} className="btn-lift glass hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-slate-700">{hero.ctaSecondary}</Link>
             </div>
             <div className="flex flex-wrap gap-4 md:gap-6">
               {hero.badges.map((badge, i) => (<div key={i} className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400"><CheckCircle2 size={16} className="text-primary-500" /> {badge}</div>))}
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.2 }} className="relative">
-            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl shadow-primary-900/10 animate-float bg-slate-900">
+            <div className="animate-float">
+            <InteractiveCard tilt={6} lift={0} entrance={false} className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl shadow-primary-900/10 bg-slate-900">
               <div className="flex items-center gap-2 px-4 py-3 bg-slate-800 border-b border-slate-700">
                 <div className="w-3 h-3 rounded-full bg-red-500" /><div className="w-3 h-3 rounded-full bg-yellow-500" /><div className="w-3 h-3 rounded-full bg-green-500" />
                 <div className="ml-4 text-xs text-slate-400 font-mono">kastriva-dashboard.tsx</div>
@@ -40,6 +42,7 @@ export default function Hero() {
                 <div className="pl-8"><span className="text-blue-400">&lt;Success</span> <span className="text-sky-300">message</span>=<span className="text-green-400">"Project Siap Digunakan"</span> <span className="text-blue-400">/&gt;</span></div>
                 <div className="pl-4">);</div><div>{'}'}</div>
               </div>
+            </InteractiveCard>
             </div>
           </motion.div>
         </div>

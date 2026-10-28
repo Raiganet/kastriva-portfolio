@@ -4,7 +4,7 @@ import { Search, ExternalLink, Calendar, Image as ImageIcon, ArrowRight } from "
 import Link from "next/link";
 import { usePortfolio } from "@/lib/hooks/usePortfolio";
 import { PortfolioService } from "@/lib/services/portfolio.service";
-import { EmptyState, ErrorState, ImageWithFallback, PortfolioGridSkeleton } from "@/components/ui";
+import { EmptyState, ErrorState, ImageWithFallback, InteractiveCard, PortfolioGridSkeleton } from "@/components/ui";
 import { PortfolioProject } from "@/lib/types/portfolio";
 import { getPortfolioOrderHref } from "@/lib/order/portfolio-reference";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
@@ -127,8 +127,13 @@ export default function Portfolio() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3 }}
-                  className="group bg-white dark:bg-dark-bg rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-primary-900/5 transition-all duration-300 hover:-translate-y-1"
+                  className="h-full"
                 >
+                  <InteractiveCard
+                    entrance={false}
+                    tilt={6}
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-[border-color,box-shadow] duration-300 hover:shadow-xl hover:shadow-primary-900/5 dark:border-slate-800 dark:bg-dark-bg"
+                  >
                   <Link
                     href={`/portfolio/${generateSlug(project.title)}`}
                     onClick={() => handleProjectClick(project)}
@@ -184,7 +189,7 @@ export default function Portfolio() {
                             e.stopPropagation();
                             handleDemoClick(project);
                           }}
-                          className="flex-1 text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                          className="btn-lift flex-1 text-center py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                         >
                           <ExternalLink size={16} /> {site.portfolio.demoLabel}
                         </a>
@@ -192,7 +197,7 @@ export default function Portfolio() {
                       <Link
                         href={`/portfolio/${generateSlug(project.title)}`}
                         onClick={() => handleProjectClick(project)}
-                        className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg text-sm font-medium transition-colors text-center"
+                        className="btn-lift flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg text-sm font-medium transition-colors text-center"
                       >
                         {site.portfolio.detailLabel}
                       </Link>
@@ -200,11 +205,12 @@ export default function Portfolio() {
                     <Link
                       href={getPortfolioOrderHref(project)}
                       onClick={() => PortfolioService.trackOrderClick(project.id, project.title)}
-                      className="mt-3 w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-primary-600/10"
+                      className="btn-lift btn-shine mt-3 w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-primary-600/10"
                     >
                       {site.portfolio.orderLabel} <ArrowRight size={16} />
                     </Link>
                   </div>
+                  </InteractiveCard>
                 </motion.div>
               ))}
             </AnimatePresence>

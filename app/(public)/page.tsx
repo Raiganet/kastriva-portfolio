@@ -8,6 +8,7 @@ import StatsSection from "@/components/sections/StatsSection";
 import FeaturedProject from "@/components/sections/FeaturedProject";
 import TestimonialSection from "@/components/sections/TestimonialSection";
 import FAQSection from "@/components/sections/FAQSection";
+import Reveal from "@/components/ui/Reveal";
 import { getSiteContent } from "@/lib/server/site-content.server";
 import { pageMetadata } from "@/lib/seo-cms";
 
@@ -20,14 +21,14 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <div className="content-auto"><StatsSection /></div>
-      <div className="content-auto"><ServicesSection /></div>
-      <div className="content-auto"><FeaturedProject /></div>
-      <div className="content-auto"><WhyChooseSection /></div>
-      <div className="content-auto"><PricingSection /></div>
-      <div className="content-auto"><TestimonialSection /></div>
-      <div className="content-auto"><FAQSection /></div>
-      <div className="content-auto"><FinalCTA /></div>
+      <Reveal className="content-auto"><StatsSection /></Reveal>
+      <Reveal className="content-auto"><ServicesSection /></Reveal>
+      <Reveal className="content-auto"><FeaturedProject /></Reveal>
+      <Reveal className="content-auto"><WhyChooseSection /></Reveal>
+      <Reveal className="content-auto"><PricingSection /></Reveal>
+      <Reveal className="content-auto"><TestimonialSection /></Reveal>
+      <Reveal className="content-auto"><FAQSection /></Reveal>
+      <Reveal className="content-auto"><FinalCTA /></Reveal>
     </>
   );
 }

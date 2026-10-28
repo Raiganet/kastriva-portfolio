@@ -12,7 +12,7 @@ import {
   Maximize2,
 } from "lucide-react";
 import PortfolioDetailCTA from "@/components/portfolio/PortfolioDetailCTA";
-import { Lightbox, ImageWithFallback } from "@/components/ui";
+import { Lightbox, ImageWithFallback, InteractiveCard } from "@/components/ui";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { PortfolioProject } from "@/lib/types/portfolio";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
@@ -50,9 +50,12 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
         </Link>
 
         {/* Hero Image */}
-        <div
-          className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden mb-8 border border-slate-200 dark:border-slate-800 shadow-2xl cursor-zoom-in group"
+        <InteractiveCard
+          tilt={4}
+          lift={0}
+          entrance={false}
           onClick={() => openLightbox(0)}
+          className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden mb-8 border border-slate-200 dark:border-slate-800 shadow-2xl cursor-zoom-in group"
         >
           <ImageWithFallback
             src={project.image}
@@ -68,7 +71,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
               {portfolio.fullscreenLabel}
             </div>
           </div>
-        </div>
+        </InteractiveCard>
 
         {/* Header */}
         <div className="mb-10">
@@ -98,7 +101,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
         <div className="grid lg:grid-cols-3 gap-8 mb-10">
           <div className="lg:col-span-2 space-y-6">
             {/* Problem & Solution */}
-            <div className="bg-slate-50 dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <InteractiveCard tilt={4} lift={3} entrance={false} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-colors hover:border-primary-300 dark:border-slate-800 dark:bg-dark-surface">
               <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                 <CheckCircle2 className="text-red-500" size={20} />
                 Masalah yang Diselesaikan
@@ -106,9 +109,9 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 {project.problemSolved || "Informasi studi kasus belum ditambahkan."}
               </p>
-            </div>
+            </InteractiveCard>
 
-            <div className="bg-slate-50 dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <InteractiveCard tilt={4} lift={3} entrance={false} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-colors hover:border-primary-300 dark:border-slate-800 dark:bg-dark-surface">
               <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                 <CheckCircle2 className="text-green-500" size={20} />
                 Solusi yang Diberikan
@@ -116,7 +119,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 {project.solution || project.description}
               </p>
-            </div>
+            </InteractiveCard>
 
             {/* Features */}
             {project.features && project.features.length > 0 && (
@@ -139,8 +142,11 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                 <h3 className="text-xl font-bold mb-4">Galeri Project</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {allImages.map((img, i) => (
-                    <div
+                    <InteractiveCard
                       key={i}
+                      tilt={5}
+                      lift={3}
+                      entrance={false}
                       onClick={() => openLightbox(i)}
                       className="relative aspect-video rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 cursor-zoom-in group"
                     >
@@ -154,7 +160,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                         <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
                       </div>
-                    </div>
+                    </InteractiveCard>
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
@@ -166,7 +172,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
 
           {/* Sidebar Info */}
           <div className="space-y-4">
-            <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-slate-800 sticky top-24">
+            <InteractiveCard tilt={3} lift={2} entrance={false} className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-slate-800 sticky top-24">
               <h3 className="font-bold mb-4">Informasi Project</h3>
 
               <div className="space-y-4 mb-6">
@@ -213,7 +219,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={handleDemoClick}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+                    className="btn-lift btn-shine w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                   >
                     <ExternalLink size={18} /> Live Demo
                   </a>
@@ -224,7 +230,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+                    className="btn-lift w-full border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                   >
                     <Github size={18} /> Source Code
                   </a>
@@ -236,7 +242,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                   portfolioCategory={project.category}
                 />
               </div>
-            </div>
+            </InteractiveCard>
           </div>
         </div>
       </div>

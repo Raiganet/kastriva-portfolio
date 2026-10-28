@@ -35,6 +35,50 @@
   .section-kicker {
     @apply mb-3 inline-flex rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-primary-700 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300;
   }
+  /* Button feedback: gentle lift on hover, press on tap, glow to match the cards. */
+  .btn-lift {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    will-change: transform;
+  }
+  .btn-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -14px rgb(108 92 231 / 0.5);
+  }
+  .btn-lift:active {
+    transform: translateY(0) scale(0.97);
+  }
+  .btn-lift svg {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-lift:hover > svg:last-child {
+    transform: translateX(3px) scale(1.06);
+  }
+  /* A soft band of light sweeps across filled CTAs on hover. */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(110deg, transparent 28%, rgb(255 255 255 / 0.35) 46%, transparent 64%);
+    transform: translateX(-120%);
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-shine:hover::after {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-lift:hover,
+  .btn-lift:active,
+  .btn-lift:hover > svg:last-child { transform: none; }
+  .btn-shine::after { display: none; }
 }
 
 @layer utilities {

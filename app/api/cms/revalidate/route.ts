@@ -16,6 +16,6 @@ export async function POST(request: NextRequest) {
   if (!verifySession(request.cookies.get(cookieName)?.value, "admin")) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
-  revalidateTag("site-content");
+  revalidateTag("site-content", "max");
   return NextResponse.json({ success: true }, { headers: { "Cache-Control": "no-store" } });
 }

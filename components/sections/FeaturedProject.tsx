@@ -7,6 +7,7 @@ import { ImageWithFallback } from "@/components/ui";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { getPortfolioOrderHref } from "@/lib/order/portfolio-reference";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
+import { InteractiveCard } from "@/components/ui";
 
 function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -46,13 +47,12 @@ export default function FeaturedProject() {
 
         <div className="grid md:grid-cols-2 gap-6">
           {featuredProjects.map((project, i) => (
-            <motion.div
+            <InteractiveCard
               key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="group bg-white dark:bg-dark-bg rounded-2xl overflow-hidden border-2 border-yellow-400/50 hover:border-yellow-500 hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300"
+              delay={i * 0.1}
+              tilt={6}
+              spotlightColor="234, 179, 8"
+              className="group overflow-hidden rounded-2xl border-2 border-yellow-400/50 bg-white transition-[border-color,box-shadow] duration-300 hover:border-yellow-500 hover:shadow-2xl hover:shadow-yellow-500/20 dark:bg-dark-bg"
             >
               <Link
                 href={`/portfolio/${generateSlug(project.title)}`}
@@ -104,7 +104,7 @@ export default function FeaturedProject() {
                         e.stopPropagation();
                         PortfolioService.trackDemoClick(project.id, project.title);
                       }}
-                      className="flex-1 text-center py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                      className="btn-lift flex-1 text-center py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
                     >
                       <ExternalLink size={16} /> {site.portfolio.demoLabel}
                     </a>
@@ -112,7 +112,7 @@ export default function FeaturedProject() {
                   <Link
                     href={`/portfolio/${generateSlug(project.title)}`}
                     onClick={() => handleProjectClick(project)}
-                    className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
+                    className="btn-lift flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
                     {site.portfolio.detailLabel} <ArrowRight size={16} />
                   </Link>
@@ -120,12 +120,12 @@ export default function FeaturedProject() {
                 <Link
                   href={getPortfolioOrderHref(project)}
                   onClick={() => PortfolioService.trackOrderClick(project.id, project.title)}
-                  className="mt-3 w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/15"
+                  className="btn-lift btn-shine mt-3 w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/15"
                 >
                   {site.portfolio.orderLabel} <ArrowRight size={16} />
                 </Link>
               </div>
-            </motion.div>
+            </InteractiveCard>
           ))}
         </div>
       </div>
