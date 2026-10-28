@@ -12,7 +12,20 @@ export function pageMetadata(site: SiteContent, page: string, path: string, fall
     description,
     keywords: site.seo.keywords,
     alternates: { canonical },
-    openGraph: { title, description, url: canonical, type: "website", locale: "id_ID", siteName: site.brand.name },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      locale: "id_ID",
+      siteName: site.brand.name,
+      images: [{ url: "/brand/kastriva-brand-system.png", alt: `${site.brand.name} - ${title}` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/brand/kastriva-brand-system.png"],
+    },
   };
 }
