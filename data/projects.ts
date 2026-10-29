@@ -206,7 +206,6 @@ export const projects: PortfolioProject[] = [
     "year": "2026",
     "status": "Completed",
     "featured": false,
-    "sortOrder": 10,
     "problemSolved": "Membuat undangan acara yang personal dan mudah dibagikan sering memerlukan proses desain tersendiri.",
     "solution": "Kastriva Invitation menyediakan pilihan tema undangan yang dapat dilihat melalui demo, lalu dikelola dari dashboard.",
     "features": [
