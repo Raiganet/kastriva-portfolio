@@ -191,7 +191,7 @@ export default function LoginPageClient() {
       <section className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-2xl shadow-black/50 lg:grid lg:grid-cols-[0.95fr_1.05fr]">
         {/* Brand panel */}
         <div
-          className={`relative flex min-h-[330px] flex-col justify-between overflow-hidden p-7 transition-colors duration-500 sm:p-10 lg:min-h-[680px] lg:p-12 ${
+          className={`relative flex min-h-[330px] flex-col overflow-hidden p-7 transition-colors duration-500 sm:p-10 lg:min-h-[680px] lg:p-12 ${
             isAdmin ? "bg-[#0A0A1A]" : "bg-slate-50"
           }`}
         >
@@ -216,7 +216,7 @@ export default function LoginPageClient() {
             </div>
           </div>
 
-          <div className="relative z-10 mt-10 lg:mt-0">
+          <div className="relative z-10 mt-10 lg:mt-16">
             <p className={`mb-3 text-xs font-bold uppercase tracking-[.28em] ${isAdmin ? "text-violet-300" : "text-primary-600"}`}>Digital Studio</p>
             <h1 className={`max-w-xl text-4xl font-black leading-[1.05] sm:text-5xl ${isAdmin ? "text-white" : "text-slate-900"}`}>
               Code. Build. <span className="bg-gradient-to-r from-violet-400 via-primary-500 to-cyan-400 bg-clip-text text-transparent">Solution.</span>
@@ -238,7 +238,7 @@ export default function LoginPageClient() {
             </div>
           </div>
 
-          <div className="relative z-10 mt-8 hidden grid-cols-4 gap-3 sm:grid">
+          <div className="relative z-10 mt-auto hidden grid-cols-4 gap-3 pt-10 sm:grid">
             {features.map((f) => (
               <div key={f.label} className="text-center">
                 <div className={`mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl border ${isAdmin ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"}`}>
