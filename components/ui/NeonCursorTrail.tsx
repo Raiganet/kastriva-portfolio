@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 type Point = { x: number; y: number };
 type LightningBolt = { paths: Path2D[]; born: number; lifetime: number };
 
-/** Brief blue lightning bolts branch out between mouse positions. */
+/** Lightweight blue lightning bolts branch out between mouse positions. */
 export default function NeonCursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -25,7 +25,7 @@ export default function NeonCursorTrail() {
     const bolts: LightningBolt[] = [];
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = Math.round(width * dpr);
@@ -33,13 +33,14 @@ export default function NeonCursorTrail() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      requestDraw();
     };
 
     const buildBolt = (start: Point, end: Point, depth = 0): Path2D[] => {
       const dx = end.x - start.x;
       const dy = end.y - start.y;
       const distance = Math.hypot(dx, dy);
-      const steps = Math.max(3, Math.min(12, Math.ceil(distance / 13)));
+      const steps = Math.max(2, Math.min(6, Math.ceil(distance / 24)));
       const normalX = -dy / Math.max(distance, 1);
       const normalY = dx / Math.max(distance, 1);
       const points: Point[] = [start];
@@ -47,7 +48,7 @@ export default function NeonCursorTrail() {
       for (let step = 1; step < steps; step++) {
         const progress = step / steps;
         const envelope = Math.sin(progress * Math.PI);
-        const jitter = (Math.random() - 0.5) * Math.min(42, distance * 0.55) * envelope;
+        const jitter = (Math.random() - 0.5) * Math.min(20, distance * 0.3) * envelope;
         points.push({
           x: start.x + dx * progress + normalX * jitter,
           y: start.y + dy * progress + normalY * jitter,
@@ -60,12 +61,12 @@ export default function NeonCursorTrail() {
       for (const point of points.slice(1)) path.lineTo(point.x, point.y);
       const paths = [path];
 
-      if (depth < 2 && distance > 20) {
-        const branchChance = depth === 0 ? 0.52 : 0.24;
+      if (depth === 0 && distance > 36) {
+        const branchChance = 0.18;
         points.slice(1, -1).forEach((point, index) => {
           if (index % 2 === 0 && Math.random() < branchChance) {
-            const direction = Math.atan2(dy, dx) + (Math.random() < 0.5 ? -1 : 1) * (0.65 + Math.random() * 0.85);
-            const branchLength = distance * (depth === 0 ? 0.34 : 0.22) * (0.55 + Math.random() * 0.45);
+            const direction = Math.atan2(dy, dx) + (Math.random() < 0.5 ? -1 : 1) * (0.8 + Math.random() * 0.45);
+            const branchLength = distance * 0.2 * (0.6 + Math.random() * 0.35);
             paths.push(...buildBolt(point, {
               x: point.x + Math.cos(direction) * branchLength,
               y: point.y + Math.sin(direction) * branchLength,
@@ -81,19 +82,25 @@ export default function NeonCursorTrail() {
       if (event.pointerType !== "mouse") return;
       const current = { x: event.clientX, y: event.clientY };
       cursorPoint = current;
-      if (lastPoint && Math.hypot(current.x - lastPoint.x, current.y - lastPoint.y) >= 7) {
-        bolts.push({ paths: buildBolt(lastPoint, current), born: performance.now(), lifetime: 360 });
-        if (bolts.length > 24) bolts.shift();
+      if (lastPoint && Math.hypot(current.x - lastPoint.x, current.y - lastPoint.y) >= 12) {
+        bolts.push({ paths: buildBolt(lastPoint, current), born: performance.now(), lifetime: 190 });
+        if (bolts.length > 8) bolts.shift();
       }
       lastPoint = current;
+      requestDraw();
     };
 
     const onPointerLeave = () => {
       cursorPoint = null;
       lastPoint = null;
+      bolts.length = 0;
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      context.clearRect(0, 0, width, height);
     };
 
     const draw = (now: number) => {
+      frame = 0;
       context.clearRect(0, 0, width, height);
       for (let index = bolts.length - 1; index >= 0; index--) {
         const bolt = bolts[index];
@@ -109,17 +116,13 @@ export default function NeonCursorTrail() {
         context.lineJoin = "round";
         context.strokeStyle = "#168bff";
         context.shadowColor = "#168bff";
-        context.shadowBlur = 22;
-        context.lineWidth = 5;
+        context.shadowBlur = 8;
+        context.lineWidth = 2.4;
         bolt.paths.forEach((path) => context.stroke(path));
         context.strokeStyle = "#70c8ff";
         context.shadowColor = "#54b9ff";
-        context.shadowBlur = 10;
-        context.lineWidth = 2;
-        bolt.paths.forEach((path) => context.stroke(path));
-        context.strokeStyle = "#e8f7ff";
-        context.shadowBlur = 4;
-        context.lineWidth = 0.8;
+        context.shadowBlur = 3;
+        context.lineWidth = 1;
         bolt.paths.forEach((path) => context.stroke(path));
         context.restore();
       }
@@ -135,7 +138,7 @@ export default function NeonCursorTrail() {
         context.save();
         context.fillStyle = orb;
         context.shadowColor = "#168bff";
-        context.shadowBlur = 18;
+        context.shadowBlur = 8;
         context.beginPath();
         context.arc(x, y, 10, 0, Math.PI * 2);
         context.fill();
@@ -148,30 +151,21 @@ export default function NeonCursorTrail() {
         context.arc(x, y, 7, 0, Math.PI * 2);
         context.stroke();
 
-        const rotation = now / 1500;
-        context.strokeStyle = "#72caff";
-        context.lineWidth = 1.3;
-        context.lineCap = "round";
-        for (let spark = 0; spark < 4; spark++) {
-          const angle = rotation + spark * (Math.PI / 2);
-          const innerRadius = 10;
-          const outerRadius = spark % 2 === 0 ? 15 : 13;
-          context.beginPath();
-          context.moveTo(x + Math.cos(angle) * innerRadius, y + Math.sin(angle) * innerRadius);
-          context.lineTo(x + Math.cos(angle + 0.16) * (outerRadius - 2), y + Math.sin(angle + 0.16) * (outerRadius - 2));
-          context.lineTo(x + Math.cos(angle + 0.3) * outerRadius, y + Math.sin(angle + 0.3) * outerRadius);
-          context.stroke();
-        }
         context.restore();
       }
-      frame = window.requestAnimationFrame(draw);
+      // Redraw only while a bolt is fading; a stationary cursor needs no continuous animation.
+      if (bolts.length) frame = window.requestAnimationFrame(draw);
+    };
+
+    const requestDraw = () => {
+      if (!frame) frame = window.requestAnimationFrame(draw);
     };
 
     resize();
+    requestDraw();
     window.addEventListener("resize", resize);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerleave", onPointerLeave);
-    frame = window.requestAnimationFrame(draw);
 
     return () => {
       window.cancelAnimationFrame(frame);
