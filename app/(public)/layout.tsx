@@ -5,7 +5,7 @@ import NeonCursorTrail from "@/components/ui/NeonCursorTrail";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="neon-cursor-enabled min-h-screen flex flex-col">
       <a href="#main-content" className="fixed left-4 top-2 z-[100] -translate-y-20 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition focus:translate-y-0">
         Lewati ke konten
       </a>
@@ -17,4 +17,3 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     </div>
   );
 }
-
