@@ -2,9 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
-type TrailPoint = { x: number; y: number; time: number };
+type Point = { x: number; y: number };
+type LightningBolt = { paths: Path2D[]; born: number; lifetime: number };
 
-/** A subtle neon ribbon that follows a mouse without intercepting page input. */
+/** Brief blue lightning bolts branch out between mouse positions. */
 export default function NeonCursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -13,14 +14,14 @@ export default function NeonCursorTrail() {
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
 
-    const media = window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)");
-    if (!media.matches) return;
+    const motionPreference = window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)");
+    if (!motionPreference.matches) return;
 
     let width = 0;
     let height = 0;
     let frame = 0;
-    const points: TrailPoint[] = [];
-    const lifetime = 900;
+    let lastPoint: Point | null = null;
+    const bolts: LightningBolt[] = [];
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -33,52 +34,88 @@ export default function NeonCursorTrail() {
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
+    const buildBolt = (start: Point, end: Point, depth = 0): Path2D[] => {
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const distance = Math.hypot(dx, dy);
+      const steps = Math.max(3, Math.min(12, Math.ceil(distance / 13)));
+      const normalX = -dy / Math.max(distance, 1);
+      const normalY = dx / Math.max(distance, 1);
+      const points: Point[] = [start];
+
+      for (let step = 1; step < steps; step++) {
+        const progress = step / steps;
+        const envelope = Math.sin(progress * Math.PI);
+        const jitter = (Math.random() - 0.5) * Math.min(42, distance * 0.55) * envelope;
+        points.push({
+          x: start.x + dx * progress + normalX * jitter,
+          y: start.y + dy * progress + normalY * jitter,
+        });
+      }
+      points.push(end);
+
+      const path = new Path2D();
+      path.moveTo(start.x, start.y);
+      for (const point of points.slice(1)) path.lineTo(point.x, point.y);
+      const paths = [path];
+
+      if (depth < 2 && distance > 20) {
+        const branchChance = depth === 0 ? 0.52 : 0.24;
+        points.slice(1, -1).forEach((point, index) => {
+          if (index % 2 === 0 && Math.random() < branchChance) {
+            const direction = Math.atan2(dy, dx) + (Math.random() < 0.5 ? -1 : 1) * (0.65 + Math.random() * 0.85);
+            const branchLength = distance * (depth === 0 ? 0.34 : 0.22) * (0.55 + Math.random() * 0.45);
+            paths.push(...buildBolt(point, {
+              x: point.x + Math.cos(direction) * branchLength,
+              y: point.y + Math.sin(direction) * branchLength,
+            }, depth + 1));
+          }
+        });
+      }
+
+      return paths;
+    };
+
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return;
-      const last = points[points.length - 1];
-      if (last && Math.hypot(event.clientX - last.x, event.clientY - last.y) < 3) return;
-      points.push({ x: event.clientX, y: event.clientY, time: performance.now() });
-      if (points.length > 36) points.shift();
+      const current = { x: event.clientX, y: event.clientY };
+      if (lastPoint && Math.hypot(current.x - lastPoint.x, current.y - lastPoint.y) >= 7) {
+        bolts.push({ paths: buildBolt(lastPoint, current), born: performance.now(), lifetime: 360 });
+        if (bolts.length > 24) bolts.shift();
+      }
+      lastPoint = current;
     };
 
     const draw = (now: number) => {
       context.clearRect(0, 0, width, height);
-      while (points.length && now - points[0].time > lifetime) points.shift();
-
-      if (points.length > 1) {
-        const age = now - points[0].time;
-        const fade = Math.max(0, 1 - age / lifetime);
-        const path = new Path2D();
-        path.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length - 1; i++) {
-          const midpointX = (points[i].x + points[i + 1].x) / 2;
-          const midpointY = (points[i].y + points[i + 1].y) / 2;
-          path.quadraticCurveTo(points[i].x, points[i].y, midpointX, midpointY);
+      for (let index = bolts.length - 1; index >= 0; index--) {
+        const bolt = bolts[index];
+        const opacity = Math.max(0, 1 - (now - bolt.born) / bolt.lifetime);
+        if (!opacity) {
+          bolts.splice(index, 1);
+          continue;
         }
-        const last = points[points.length - 1];
-        path.lineTo(last.x, last.y);
-
-        const gradient = context.createLinearGradient(points[0].x, points[0].y, last.x, last.y);
-        gradient.addColorStop(0, "#ff4fd8");
-        gradient.addColorStop(0.48, "#8b5cf6");
-        gradient.addColorStop(1, "#39f5c7");
 
         context.save();
-        context.globalAlpha = fade * 0.72;
+        context.globalAlpha = opacity;
         context.lineCap = "round";
         context.lineJoin = "round";
-        context.strokeStyle = gradient;
-        context.shadowColor = "#a855f7";
-        context.shadowBlur = 18;
+        context.strokeStyle = "#168bff";
+        context.shadowColor = "#168bff";
+        context.shadowBlur = 22;
         context.lineWidth = 5;
-        context.stroke(path);
-        context.globalAlpha = fade * 0.95;
-        context.shadowBlur = 7;
-        context.lineWidth = 1.5;
-        context.stroke(path);
+        bolt.paths.forEach((path) => context.stroke(path));
+        context.strokeStyle = "#70c8ff";
+        context.shadowColor = "#54b9ff";
+        context.shadowBlur = 10;
+        context.lineWidth = 2;
+        bolt.paths.forEach((path) => context.stroke(path));
+        context.strokeStyle = "#e8f7ff";
+        context.shadowBlur = 4;
+        context.lineWidth = 0.8;
+        bolt.paths.forEach((path) => context.stroke(path));
         context.restore();
       }
-
       frame = window.requestAnimationFrame(draw);
     };
 
@@ -96,4 +133,3 @@ export default function NeonCursorTrail() {
 
   return <canvas ref={canvasRef} aria-hidden="true" className="neon-cursor-trail" />;
 }
-
