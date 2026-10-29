@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import NeonCursorTrail from "@/components/ui/NeonCursorTrail";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <main id="main-content" className="public-canvas flex-1">{children}</main>
       <Footer />
       <WhatsAppFloat />
+      <NeonCursorTrail />
     </div>
   );
 }
+
