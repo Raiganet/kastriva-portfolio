@@ -6,6 +6,18 @@
   :root { --background: 0 0% 100%; --foreground: 240 10% 3.9%; }
   .dark { --background: 240 10% 3.9%; --foreground: 0 0% 98%; }
 }
+
+.neon-cursor-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  contain: strict;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .neon-cursor-trail { display: none; }
+}
 @layer base {
   body { @apply bg-white dark:bg-dark-bg text-slate-900 dark:text-slate-50 transition-colors duration-300; }
 }
@@ -200,3 +212,4 @@
     overflow-x: hidden;
   }
 }
+
