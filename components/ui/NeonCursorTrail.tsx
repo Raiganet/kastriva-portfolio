@@ -181,5 +181,5 @@ export default function NeonCursorTrail() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} aria-hidden="true" className="neon-cursor-trail" />;
+  return <canvas ref={canvasRef} aria-hidden="true" className="neon-cursor-trail" style={{ pointerEvents: "none" }} />;
 }
