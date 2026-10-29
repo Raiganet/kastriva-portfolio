@@ -21,7 +21,7 @@ const { mergePortfolio, applyPortfolioUpdates, mergePortfolioForCms } = load('li
 });
 
 test('all portfolio thumbnails refer to exact existing filenames', () => {
-  assert.equal(projects.length, 9);
+  assert.equal(projects.length, 10);
   const names = fs.readdirSync(path.join(root, 'public/portfolio'));
   for (const project of projects) {
     assert.ok(names.includes(project.image.replace('/portfolio/', '')), project.image);
@@ -36,7 +36,7 @@ test('legacy inventory becomes Smart Kasir without duplicate or fictional metada
     demoUrl: 'https://demo.kastriva.com/inventory', githubUrl: 'https://github.com/kastriva/inventory',
     technologies: ['PostgreSQL'], image: '/portfolio/inventory.png' };
   const result = mergePortfolio([old]);
-  assert.equal(result.length, 9);
+  assert.equal(result.length, 10);
   assert.equal(result[0].title, 'Kastriva-Smart Kasir');
   assert.equal(result[0].demoUrl, 'https://kastriva-smart-kasir.vercel.app/');
   assert.equal(result[0].githubUrl, undefined);
@@ -49,15 +49,15 @@ test('CMS project overrides bundled content including thumbnail', () => {
   assert.ok(warung);
   const cms = { ...warung, id: 'cms-warung', image: '/logo-kastriva.png', description: 'CMS description' };
   const result = mergePortfolio([cms]);
-  assert.equal(result.length, 9);
+  assert.equal(result.length, 10);
   assert.equal(result.find((project) => project.id === 'cms-warung').image, '/logo-kastriva.png');
   assert.equal(result.find((project) => project.id === 'cms-warung').description, 'CMS description');
-  assert.equal(mergePortfolio([{ ...cms, published: false }]).length, 8);
+  assert.equal(mergePortfolio([{ ...cms, published: false }]).length, 9);
 });
 
 test('Admin CMS sees all bundled projects even when Firestore is empty', () => {
   const result = mergePortfolioForCms([], true);
-  assert.equal(result.length, 9);
+  assert.equal(result.length, 10);
   assert.ok(result.every((project) => project.cmsSource === 'bundled'));
   assert.equal(result[0].sortOrder, 1);
 });
@@ -67,7 +67,7 @@ test('Persisted CMS record replaces matching bundled record and becomes editable
   assert.ok(lingo);
   const remote = { ...lingo, image: '/portfolio/custom-lingo.jpg', description: 'Edited from CMS', sortOrder: 7, cmsSource: 'cms' };
   const result = mergePortfolioForCms([remote], true);
-  assert.equal(result.length, 9);
+  assert.equal(result.length, 10);
   const edited = result.find((project) => project.id === 'lingospace-pro');
   assert.equal(edited.cmsSource, 'cms');
   assert.equal(edited.image, '/portfolio/custom-lingo.jpg');

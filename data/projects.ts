@@ -193,5 +193,31 @@ export const projects: PortfolioProject[] = [
     "published": true,
     "createdAt": "",
     "updatedAt": ""
+  },
+  {
+    "id": "kastriva-invitation",
+    "title": "Kastriva Invitation",
+    "category": "Undangan Digital",
+    "description": "Platform undangan digital personal dengan 28 tema, demo tanpa login, dan tampilan responsif untuk ponsel maupun desktop.",
+    "shortDescription": "Buat undangan digital personal dari beragam tema yang bisa dicoba tanpa login.",
+    "image": "/portfolio/Kastriva-Invitation.png",
+    "technologies": [],
+    "demoUrl": "https://kastriva-invitation.vercel.app/",
+    "year": "2026",
+    "status": "Completed",
+    "featured": false,
+    "sortOrder": 10,
+    "problemSolved": "Membuat undangan acara yang personal dan mudah dibagikan sering memerlukan proses desain tersendiri.",
+    "solution": "Kastriva Invitation menyediakan pilihan tema undangan yang dapat dilihat melalui demo, lalu dikelola dari dashboard.",
+    "features": [
+      "28 tema undangan",
+      "Demo tema tanpa login",
+      "Tampilan responsif di ponsel dan desktop",
+      "Dashboard untuk membuat undangan"
+    ],
+    "myRole": "Developer",
+    "published": true,
+    "createdAt": "",
+    "updatedAt": ""
   }
 ];
