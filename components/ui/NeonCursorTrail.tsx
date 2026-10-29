@@ -21,6 +21,7 @@ export default function NeonCursorTrail() {
     let height = 0;
     let frame = 0;
     let lastPoint: Point | null = null;
+    let cursorPoint: Point | null = null;
     const bolts: LightningBolt[] = [];
 
     const resize = () => {
@@ -79,11 +80,17 @@ export default function NeonCursorTrail() {
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return;
       const current = { x: event.clientX, y: event.clientY };
+      cursorPoint = current;
       if (lastPoint && Math.hypot(current.x - lastPoint.x, current.y - lastPoint.y) >= 7) {
         bolts.push({ paths: buildBolt(lastPoint, current), born: performance.now(), lifetime: 360 });
         if (bolts.length > 24) bolts.shift();
       }
       lastPoint = current;
+    };
+
+    const onPointerLeave = () => {
+      cursorPoint = null;
+      lastPoint = null;
     };
 
     const draw = (now: number) => {
@@ -116,18 +123,61 @@ export default function NeonCursorTrail() {
         bolt.paths.forEach((path) => context.stroke(path));
         context.restore();
       }
+
+      if (cursorPoint) {
+        const { x, y } = cursorPoint;
+        const orb = context.createRadialGradient(x - 2, y - 2, 0, x, y, 10);
+        orb.addColorStop(0, "#f2fbff");
+        orb.addColorStop(0.24, "#9bdcff");
+        orb.addColorStop(0.62, "#249aff");
+        orb.addColorStop(1, "rgb(36 154 255 / 0)");
+
+        context.save();
+        context.fillStyle = orb;
+        context.shadowColor = "#168bff";
+        context.shadowBlur = 18;
+        context.beginPath();
+        context.arc(x, y, 10, 0, Math.PI * 2);
+        context.fill();
+
+        context.globalAlpha = 0.9;
+        context.strokeStyle = "#c7edff";
+        context.lineWidth = 1.2;
+        context.shadowBlur = 8;
+        context.beginPath();
+        context.arc(x, y, 7, 0, Math.PI * 2);
+        context.stroke();
+
+        const rotation = now / 1500;
+        context.strokeStyle = "#72caff";
+        context.lineWidth = 1.3;
+        context.lineCap = "round";
+        for (let spark = 0; spark < 4; spark++) {
+          const angle = rotation + spark * (Math.PI / 2);
+          const innerRadius = 10;
+          const outerRadius = spark % 2 === 0 ? 15 : 13;
+          context.beginPath();
+          context.moveTo(x + Math.cos(angle) * innerRadius, y + Math.sin(angle) * innerRadius);
+          context.lineTo(x + Math.cos(angle + 0.16) * (outerRadius - 2), y + Math.sin(angle + 0.16) * (outerRadius - 2));
+          context.lineTo(x + Math.cos(angle + 0.3) * outerRadius, y + Math.sin(angle + 0.3) * outerRadius);
+          context.stroke();
+        }
+        context.restore();
+      }
       frame = window.requestAnimationFrame(draw);
     };
 
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave);
     frame = window.requestAnimationFrame(draw);
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
     };
   }, []);
 
