@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, ExternalLink, MessageCircle, Search, Copy, Check } from "lucide-react";
@@ -16,16 +16,6 @@ function SuccessContent() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  useEffect(() => {
-    // Auto open WhatsApp jika ada URL
-    if (whatsappUrl) {
-      const timer = setTimeout(() => {
-        window.open(whatsappUrl, "_blank");
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [whatsappUrl]);
 
   return (
     <div className="pt-32 pb-20 min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-green-900/10 dark:to-dark-bg">
@@ -109,7 +99,7 @@ function SuccessContent() {
               </div>
               <h4 className="font-semibold text-sm mb-1">WhatsApp</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Tab WhatsApp akan terbuka otomatis
+                Buka chat dengan detail order terisi, lalu tekan Kirim untuk memberi tahu admin.
               </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-dark-surface">
@@ -146,7 +136,7 @@ function SuccessContent() {
                 rel="noopener noreferrer"
                 className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
               >
-                <MessageCircle size={18} /> Buka WhatsApp
+                <MessageCircle size={18} /> Kirim detail order ke WhatsApp admin
               </a>
             )}
             {orderNumber && (

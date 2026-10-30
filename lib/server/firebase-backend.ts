@@ -36,8 +36,16 @@ export function allowAdminLoginAttempt(emailInput:any): boolean {
 }
 
 async function mail(to:string|undefined, subject:string, text:string) {
-  const email=String(to||'').trim(); if (!email) return;
-  try { await setDoc('mail', randomUUID(), { to:[email], message:{subject:cleanText(subject,300), text:cleanText(text,12000)}, createdAt:iso(), source:'kastriva-next' }); } catch { /* email is best-effort; Firebase Trigger Email extension may be optional */ }
+  const email=String(to||'').trim();
+  if (!email) { console.error('[email-queue] Recipient is missing; message was not queued.'); return false; }
+  try {
+    await setDoc('mail', randomUUID(), { to:[email], message:{subject:cleanText(subject,300), text:cleanText(text,12000)}, createdAt:iso(), source:'kastriva-next' });
+    return true;
+  } catch (error) {
+    // Keep a mail queue outage from failing an order, but make it visible in server logs.
+    console.error('[email-queue] Could not queue message.', error);
+    return false;
+  }
 }
 
 async function audit(action:string, userId:string, details:any={}) {
