@@ -188,7 +188,7 @@ export default function LoginPageClient() {
       <div className="pointer-events-none absolute -bottom-56 -right-32 h-[560px] w-[560px] rounded-full bg-violet-600/20 blur-[140px]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,.07),transparent_35%)]" />
 
-      <section className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-2xl shadow-black/50 lg:grid lg:grid-cols-[0.95fr_1.05fr]">
+      <section className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-2xl shadow-black/50 lg:grid lg:min-h-[760px] lg:grid-cols-[0.95fr_1.05fr]">
         {/* Brand panel */}
         <div
           className={`relative flex min-h-[330px] flex-col overflow-hidden p-7 transition-colors duration-500 sm:p-10 lg:min-h-[680px] lg:p-12 ${
@@ -274,7 +274,7 @@ export default function LoginPageClient() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
-            className="mx-auto w-full max-w-md"
+            className="mx-auto w-full max-w-md lg:min-h-[475px]"
           >
             <div className="mb-5 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5">
               <div className={`rounded-xl p-2 ${isAdmin ? "bg-primary-100 text-primary-600" : "bg-slate-200 text-slate-700"}`}>
