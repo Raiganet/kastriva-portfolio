@@ -217,3 +217,43 @@
     overflow-x: hidden;
   }
 }
+
+
+/* Kastriva premium tech atmosphere: restrained electric-blue light, with a
+   lightweight SVG hero texture. Content remains above the decoration. */
+.public-canvas {
+  --ambient-violet: 20 116 255 / 0.075;
+  --ambient-plane: 40 120 220 / 0.035;
+  --ambient-line: 20 145 255 / 0.10;
+}
+.dark .public-canvas {
+  --ambient-violet: 20 116 255 / 0.13;
+  --ambient-plane: 30 115 230 / 0.055;
+  --ambient-line: 20 165 255 / 0.12;
+  background-color: #06132f;
+  background-image:
+    url("/brand/kastriva-tech-atmosphere.svg"),
+    radial-gradient(ellipse 70% 520px at 18% 0%, rgb(0 105 255 / 0.10), transparent 85%),
+    radial-gradient(ellipse 55% 520px at 92% 1050px, rgb(0 190 255 / 0.055), transparent 85%);
+  background-size: 100% 920px, 100% 1600px, 100% 1600px;
+  background-position: top center, top center, top center;
+  background-repeat: no-repeat, repeat, repeat;
+}
+.dark .public-canvas .ambient-panel {
+  background-color: rgb(7 20 46 / 0.36);
+  border-color: rgb(35 126 255 / 0.16);
+}
+.dark .public-canvas .ambient-hero::before {
+  background:
+    radial-gradient(ellipse at 28% -18%, rgb(0 111 255 / 0.20), transparent 62%),
+    linear-gradient(180deg, rgb(4 15 39 / 0.10), transparent 70%);
+}
+@media (max-width: 767px) {
+  .dark .public-canvas {
+    background-size: auto 680px, 100% 1100px, 100% 1100px;
+    background-position: 52% top, top center, top center;
+  }
+}
+@media (prefers-reduced-data: reduce) {
+  .dark .public-canvas { background-image: radial-gradient(ellipse at 25% 0%, rgb(0 105 255 / 0.12), transparent 70%); }
+}
