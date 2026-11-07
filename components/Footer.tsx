@@ -16,9 +16,12 @@ import {
 import Link from "next/link";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import BrandLogo from "@/components/BrandLogo";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function Footer() {
   const site = useSiteContent();
+  const { language } = useLanguage();
+  const english = language === "en";
   const socials = [
     { href: site.brand.socials.instagram, label: "Instagram", Icon: Instagram },
     { href: site.brand.socials.tiktok, label: "TikTok", Icon: Music2 },
@@ -47,9 +50,9 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-4">{site.footer.accountTitle}</h4>
             <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-              <li><Link href="/order" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {site.navigation.startProjectLabel}</Link></li>
-              <li><Link href="/order/track" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {site.navigation.trackOrderLabel}</Link></li>
-              {site.footer.showCustomerLogin && <li><Link href="/customer/login" className="hover:text-primary-600 transition-colors flex items-center gap-2"><UserCircle2 size={14} /> Login Customer</Link></li>}
+              <li><Link href="/order" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {english ? "Start a Project" : site.navigation.startProjectLabel}</Link></li>
+              <li><Link href="/order/track" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {english ? "Track Order" : site.navigation.trackOrderLabel}</Link></li>
+              {site.footer.showCustomerLogin && <li><Link href="/customer/login" className="hover:text-primary-600 transition-colors flex items-center gap-2"><UserCircle2 size={14} /> {english ? "Customer Login" : "Login Customer"}</Link></li>}
               {site.footer.showAdminLogin && <li><Link href="/admin/login" className="hover:text-primary-600 transition-colors flex items-center gap-2"><ShieldCheck size={14} /> Login Admin</Link></li>}
               {site.brand.whatsapp && <li className="flex items-center gap-2 pt-2"><MessageCircle size={14} /> {site.brand.whatsapp}</li>}
               {site.brand.email && <li className="flex items-center gap-2"><Mail size={14} /> <a href={`mailto:${site.brand.email}`} className="hover:text-primary-600 transition-colors">{site.brand.email}</a></li>}
@@ -68,14 +71,14 @@ export default function Footer() {
                   <div className="flex flex-wrap items-center gap-2">
                     <h4 className="font-bold text-slate-900 dark:text-white">{site.footer.legalTitle}</h4>
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-900 dark:bg-dark-bg/70 dark:text-emerald-300">
-                      <ShieldCheck size={12} /> Terdaftar OSS
+                      <ShieldCheck size={12} /> {english ? "Registered in Indonesia" : "Terdaftar OSS"}
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{site.footer.legalDescription}</p>
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-left dark:border-slate-700 dark:bg-dark-bg sm:text-right">
-                <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Nomor Induk Berusaha</div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">{english ? "Business Registration Number" : "Nomor Induk Berusaha"}</div>
                 <div className="mt-1 font-mono text-sm font-bold tracking-wider text-slate-900 dark:text-white sm:text-base">NIB {site.footer.nib}</div>
               </div>
             </div>

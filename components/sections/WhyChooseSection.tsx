@@ -3,9 +3,12 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function WhyChooseSection() {
   const site = useSiteContent();
+  const { language } = useLanguage();
+  const english = language === "en";
   if (!site.whyChoose.visible) return null;
   const showProcessPreview = site.whyChoose.showProcessPreview && site.process.items.length > 0;
   return (
@@ -13,8 +16,8 @@ export default function WhyChooseSection() {
       <div className="container mx-auto px-4 md:px-6">
         <div className={`grid gap-12 items-center ${showProcessPreview ? "lg:grid-cols-2" : "max-w-4xl mx-auto"}`}>
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">{site.whyChoose.title}</h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">{site.whyChoose.description}</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{english ? "Why Choose Kastriva?" : site.whyChoose.title}</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">{english ? "We combine thoughtful design and reliable engineering to deliver digital products that support your goals." : site.whyChoose.description}</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {site.whyChoose.items.map((item, i) => (
                 <InteractiveCard
@@ -26,7 +29,7 @@ export default function WhyChooseSection() {
                   className="group flex items-start gap-3 rounded-xl p-3 transition-colors duration-300 hover:bg-white/70 dark:hover:bg-white/5"
                 >
                   <div className="mt-1 bg-green-100 dark:bg-green-900/30 p-1 rounded-full transition-transform duration-300 group-hover:scale-110"><CheckCircle2 size={16} className="text-green-600 dark:text-green-400" /></div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{item}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{english ? ({ "Desain Modern": "Modern Design", "Kualitas Terjamin": "Reliable Quality", "Dukungan Profesional": "Professional Support", "Harga Transparan": "Transparent Pricing" } as Record<string,string>)[item] || item : item}</span>
                 </InteractiveCard>
               ))}
             </div>

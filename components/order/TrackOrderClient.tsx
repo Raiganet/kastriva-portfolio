@@ -10,8 +10,11 @@ import { LoadingSpinner } from "@/components/ui";
 
 import Link from "next/link";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function TrackOrderClient() {
+  const { language } = useLanguage();
+  const en = language === "en";
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   useEffect(() => {
     let active = true;
@@ -34,7 +37,7 @@ export default function TrackOrderClient() {
 
     const trimmed = orderNumber.trim().toUpperCase();
     if (!/^KAS-\d{4}-\d{4,}$/.test(trimmed)) {
-      setError("Format nomor order tidak valid. Contoh: KAS-2026-0001");
+      setError(en ? "Invalid order number format. Example: KAS-2026-0001" : "Format nomor order tidak valid. Contoh: KAS-2026-0001");
       return;
     }
 
@@ -44,10 +47,10 @@ export default function TrackOrderClient() {
       if (data) {
         setResult(data);
       } else {
-        setError("Order tidak ditemukan. Periksa kembali nomor order Anda.");
+        setError(en ? "Order not found. Please check the order number." : "Order tidak ditemukan. Periksa kembali nomor order Anda.");
       }
     } catch (err) {
-      setError("Gagal mengambil data. Silakan coba lagi.");
+      setError(en ? "Could not load order details. Please try again." : "Gagal mengambil data. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +59,7 @@ export default function TrackOrderClient() {
   const history = OrderService.getOrderHistory();
 
   if (authenticated === null) return <div className="pt-32 pb-20 text-center"><LoadingSpinner /></div>;
-  if (!authenticated) return <div className="pt-32 pb-20 px-6 text-center"><h1 className="text-2xl font-bold mb-4">Login untuk melacak order</h1><p className="mb-6">Verifikasi email Anda untuk melihat order dan progres proyek dengan aman.</p><Link href="/login?role=customer" className="rounded-xl bg-primary-600 px-6 py-3 text-white">Masuk sebagai pelanggan</Link></div>;
+  if (!authenticated) return <div className="pt-32 pb-20 px-6 text-center"><h1 className="text-2xl font-bold mb-4">{en ? "Log in to track your order" : "Login untuk melacak order"}</h1><p className="mb-6">{en ? "Verify your email to securely view your orders and project progress." : "Verifikasi email Anda untuk melihat order dan progres proyek dengan aman."}</p><Link href="/login?role=customer" className="rounded-xl bg-primary-600 px-6 py-3 text-white">{en ? "Customer Login" : "Masuk sebagai pelanggan"}</Link></div>;
   return (
     <div className="pt-32 pb-20 min-h-screen bg-slate-50 dark:bg-dark-surface/50">
       <div className="container mx-auto px-4 md:px-6 max-w-4xl">
@@ -76,7 +79,7 @@ export default function TrackOrderClient() {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            Lacak Status Order Anda
+            {en ? "Track Your Order" : "Lacak Status Order Anda"}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -84,7 +87,7 @@ export default function TrackOrderClient() {
             transition={{ delay: 0.2 }}
             className="text-lg text-slate-600 dark:text-slate-400"
           >
-            Masukkan nomor order untuk melihat progress project Anda
+            {en ? "Enter your order number to view your project progress." : "Masukkan nomor order untuk melihat progress project Anda"}
           </motion.p>
         </div>
 
@@ -118,7 +121,7 @@ export default function TrackOrderClient() {
               ) : (
                 <Search size={20} />
               )}
-              Lacak Order
+              {en ? "Track Order" : "Lacak Order"}
             </button>
           </div>
 

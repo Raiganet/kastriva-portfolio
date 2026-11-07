@@ -4,19 +4,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function FAQSection() {
   const [open, setOpen] = useState<number | null>(0);
   const { faq } = useSiteContent();
+  const { language } = useLanguage();
+  const english = language === "en";
   const items = faq.items.filter((item) => item.published);
   if (!faq.visible || items.length === 0) return null;
   return (
     <section className="ambient-panel py-20">
       <div className="container mx-auto px-4 md:px-6 max-w-3xl">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 mb-4"><HelpCircle size={16} />{faq.eyebrow}</div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{faq.title}</h2>
-          {faq.subtitle && <p className="text-slate-600 dark:text-slate-400">{faq.subtitle}</p>}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 mb-4"><HelpCircle size={16} />{english ? "FAQ" : faq.eyebrow}</div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{english ? "Frequently Asked Questions" : faq.title}</h2>
+          {faq.subtitle && <p className="text-slate-600 dark:text-slate-400">{english ? "Quick answers to common questions about our services and process." : faq.subtitle}</p>}
         </div>
         <div className="space-y-3">
           {items.map((item, i) => (
@@ -28,13 +31,13 @@ export default function FAQSection() {
               className="rounded-2xl border border-slate-200 bg-white overflow-hidden transition-[border-color,box-shadow] duration-300 hover:border-primary-300 hover:shadow-lg hover:shadow-primary-900/5 dark:border-slate-800 dark:bg-dark-bg"
             >
               <button onClick={() => setOpen(open === i ? null : i)} className="group w-full flex items-center justify-between p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors" aria-expanded={open === i}>
-                <span className="font-semibold pr-4">{item.question}</span>
+                <span className="font-semibold pr-4">{english ? "How do I get started with a project?" : item.question}</span>
                 <motion.span animate={{ rotate: open === i ? 180 : 0 }} transition={{ duration: 0.2 }} className="flex-shrink-0 text-primary-500"><ChevronDown size={20} /></motion.span>
               </button>
               <AnimatePresence initial={false}>
                 {open === i && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}>
-                    <p className="px-5 pb-5 text-slate-600 dark:text-slate-400 leading-relaxed">{item.answer}</p>
+                    <p className="px-5 pb-5 text-slate-600 dark:text-slate-400 leading-relaxed">{english ? "Submit the project form with your requirements. Our team will review it and contact you to discuss the next steps." : item.answer}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
