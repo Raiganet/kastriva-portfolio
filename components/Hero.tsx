@@ -4,9 +4,14 @@ import { CheckCircle2, ArrowRight, Code2 } from "lucide-react";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
 import Link from "next/link";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function Hero() {
   const { hero } = useSiteContent();
+  const { language } = useLanguage();
+  const english = language === "en";
+  const headline = english ? "Build. Launch. Grow your business." : hero.headline;
+  const subheadline = english ? "We build modern websites and custom applications that help businesses grow with a fast, responsive digital experience." : hero.subheadline;
   if (!hero.visible) return null;
   return (
     <section id="home" className="ambient-hero relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
@@ -15,13 +20,13 @@ export default function Hero() {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-6 border border-primary-100 dark:border-primary-800">
               <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span></span>
-              {hero.eyebrow}
+              {english ? "Digital solutions for growing businesses" : hero.eyebrow}
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">{hero.headline}</h1>
-            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-xl">{hero.subheadline}</p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">{headline}</h1>
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-xl">{subheadline}</p>
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Link href={hero.ctaPrimaryHref} className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-xl hover:shadow-primary-600/20 hover:-translate-y-1">{hero.ctaPrimary} <ArrowRight size={20} /></Link>
-              <Link href={hero.ctaSecondaryHref} className="btn-lift glass hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-slate-700">{hero.ctaSecondary}</Link>
+              <Link href={hero.ctaPrimaryHref} className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-xl hover:shadow-primary-600/20 hover:-translate-y-1">{english ? "Start a Project" : hero.ctaPrimary} <ArrowRight size={20} /></Link>
+              <Link href={hero.ctaSecondaryHref} className="btn-lift glass hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-slate-700">{english ? "View Portfolio" : hero.ctaSecondary}</Link>
             </div>
             <div className="flex flex-wrap gap-4 md:gap-6">
               {hero.badges.map((badge, i) => (<div key={i} className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400"><CheckCircle2 size={16} className="text-primary-500" /> {badge}</div>))}

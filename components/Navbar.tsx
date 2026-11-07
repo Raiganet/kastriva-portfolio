@@ -19,6 +19,7 @@ import BrandLogo from "@/components/BrandLogo";
 import { usePathname } from "next/navigation";
 import { AdminAuthService } from "@/lib/services/auth.service";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -27,6 +28,8 @@ export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const site = useSiteContent();
+  const { language, setLanguage } = useLanguage();
+  const english = language === "en";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -45,7 +48,7 @@ export default function Navbar() {
     return () => { active = false; };
   }, [pathname]);
 
-  const navLinks = site.navigation.links.map((link) => ({ name: link.label, href: link.href }));
+  const navLinks = site.navigation.links.map((link) => ({ name: english ? ({ Beranda: "Home", Layanan: "Services", Portfolio: "Portfolio", Proses: "Process", Tentang: "About", Kontak: "Contact" } as Record<string, string>)[link.label] || link.label : link.label, href: link.href }));
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -95,6 +98,7 @@ export default function Navbar() {
 
         {/* ===== KANAN ATAS: Login selalu terlihat ===== */}
         <div className="hidden md:flex items-center gap-3">
+          <button onClick={() => setLanguage(english ? "id" : "en")} className="rounded-full border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200" aria-label={english ? "Switch to Indonesian" : "Switch to English"}>{english ? "EN" : "ID"} <span className="opacity-50">|</span> {english ? "ID" : "EN"}</button>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -125,11 +129,12 @@ export default function Navbar() {
             href="/order"
             className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-primary-600/20"
           >
-            {site.navigation.startProjectLabel} <ArrowRight size={16} />
+            {english ? "Start a Project" : site.navigation.startProjectLabel} <ArrowRight size={16} />
           </Link>
         </div>
 
         <div className="flex md:hidden items-center gap-3">
+          <button onClick={() => setLanguage(english ? "id" : "en")} className="rounded-full border border-slate-200 dark:border-slate-700 px-2.5 py-1.5 text-xs font-bold" aria-label={english ? "Switch to Indonesian" : "Switch to English"}>{english ? "EN" : "ID"} | {english ? "ID" : "EN"}</button>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2"
@@ -193,7 +198,7 @@ export default function Navbar() {
                 href="/order"
                 className="btn-lift btn-shine bg-primary-600 text-white text-center py-3 rounded-lg font-semibold mt-2"
               >
-                {site.navigation.startProjectLabel}
+                {english ? "Start a Project" : site.navigation.startProjectLabel}
               </Link>
             </nav>
           </motion.div>

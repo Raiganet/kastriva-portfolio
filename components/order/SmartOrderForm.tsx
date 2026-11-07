@@ -10,6 +10,7 @@ import Link from "next/link";
 import { readOrderDraft, saveOrderDraft, startNewOrder, isOrderDraftStorageEvent, OrderDraft } from "@/lib/order/draft";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import type { PortfolioProject } from "@/lib/types/portfolio";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import {
   PROJECT_TYPES,
   getPortfolioReference,
@@ -18,6 +19,8 @@ import {
 } from "@/lib/order/portfolio-reference";
 
 function OrderFormContent() {
+  const { language } = useLanguage();
+  const english = language === "en";
   const searchParams = useSearchParams();
   const router = useRouter();
   const portfolioId = searchParams.get("portfolio");
@@ -207,7 +210,7 @@ function OrderFormContent() {
 
   return (
     <div className="container mx-auto px-4 md:px-6 max-w-4xl">
-      {!ready && <p role="status">Memuat draf...</p>}
+      {!ready && <p role="status">{english ? "Loading draft..." : "Memuat draf..."}</p>}
       {draftError && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{draftError}</p>}
       {!online && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-amber-900">Anda sedang offline. Isian tetap disimpan; pengiriman dapat dilanjutkan setelah online.</p>}
       {ready && !draftError && <div className="mb-4 rounded-xl border p-4 text-sm">
@@ -217,11 +220,11 @@ function OrderFormContent() {
       </div>}
       {/* Quick Track Link */}
       <div className="flex justify-end mb-4">
-        <Link
+       <Link
           href="/order/track"
           className="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
         >
-          <Package size={16} /> Sudah order? Lacak status di sini
+          <Package size={16} /> {english ? "Already placed an order? Track it here" : "Sudah order? Lacak status di sini"}
         </Link>
       </div>
 
@@ -254,9 +257,9 @@ function OrderFormContent() {
       )}
 
       <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Mulai Project Anda</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">{english ? "Start Your Project" : "Mulai Project Anda"}</h2>
         <p className="text-slate-600 dark:text-slate-400">
-          Isi form di bawah ini untuk mendiskusikan kebutuhan digital Anda.
+          {english ? "Tell us what you need and we will get back to you." : "Isi form di bawah ini untuk mendiskusikan kebutuhan digital Anda."}
         </p>
       </div>
 
@@ -276,7 +279,7 @@ function OrderFormContent() {
         <fieldset disabled={submitting || locked || !!draft?.receipt || !ready || !!draftError} className="space-y-5">
         <div className="grid md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium mb-2">Nama Lengkap *</label>
+            <label className="block text-sm font-medium mb-2">{english ? "Full Name *" : "Nama Lengkap *"}</label>
             <input
               required
               name="name"
@@ -290,7 +293,7 @@ function OrderFormContent() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Nama Bisnis</label>
+            <label className="block text-sm font-medium mb-2">{english ? "Business Name" : "Nama Bisnis"}</label>
             <input
               name="business"
               type="text"
@@ -334,7 +337,7 @@ function OrderFormContent() {
 
         <div className="grid md:grid-cols-3 gap-5">
           <div>
-            <label className="block text-sm font-medium mb-2">Jenis Project *</label>
+            <label className="block text-sm font-medium mb-2">{english ? "Project Type *" : "Jenis Project *"}</label>
             <select
               required
               name="type"
@@ -350,26 +353,26 @@ function OrderFormContent() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Budget</label>
+            <label className="block text-sm font-medium mb-2">{english ? "Budget" : "Budget"}</label>
             <select
               name="budget"
               className={inputClass("budget")}
               value={formData.budget}
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
             >
-              <option value="">Pilih Range</option>
-              <option value="< 5 Juta">{"<"} 5 Juta</option>
-              <option value="5 - 15 Juta">5 - 15 Juta</option>
-              <option value="15 - 50 Juta">15 - 50 Juta</option>
-              <option value="> 50 Juta">{">"} 50 Juta</option>
+              <option value="">{english ? "Select a range" : "Pilih Range"}</option>
+              <option value="< 5 Juta">{"<"} 5 {english ? "million IDR" : "Juta"}</option>
+              <option value="5 - 15 Juta">5 - 15 {english ? "million IDR" : "Juta"}</option>
+              <option value="15 - 50 Juta">15 - 50 {english ? "million IDR" : "Juta"}</option>
+              <option value="> 50 Juta">{">"} 50 {english ? "million IDR" : "Juta"}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Deadline</label>
+            <label className="block text-sm font-medium mb-2">{english ? "Deadline" : "Deadline"}</label>
             <input
               name="deadline"
               type="text"
-              placeholder="Contoh: 1 bulan"
+              placeholder={english ? "Example: 1 month" : "Contoh: 1 bulan"}
               className={inputClass("deadline")}
               value={formData.deadline}
               onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
@@ -378,13 +381,13 @@ function OrderFormContent() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Deskripsi *</label>
+          <label className="block text-sm font-medium mb-2">{english ? "Project Description *" : "Deskripsi *"}</label>
           <textarea
             required
             name="description"
             rows={4}
             className={inputClass("description")}
-            placeholder="Jelaskan kebutuhan Anda (minimal 20 karakter)..."
+            placeholder={english ? "Describe your requirements (at least 20 characters)..." : "Jelaskan kebutuhan Anda (minimal 20 karakter)..."}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           />
@@ -394,12 +397,12 @@ function OrderFormContent() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Fitur yang Dibutuhkan</label>
+          <label className="block text-sm font-medium mb-2">{english ? "Required Features" : "Fitur yang Dibutuhkan"}</label>
           <input
             name="features"
             type="text"
             className={inputClass("features")}
-            placeholder="Contoh: Login, Payment Gateway"
+            placeholder={english ? "Example: Login, Payment Gateway" : "Contoh: Login, Payment Gateway"}
             value={formData.features}
             onChange={(e) => setFormData({ ...formData, features: e.target.value })}
           />
@@ -429,11 +432,11 @@ function OrderFormContent() {
           ) : (
             <Send size={20} />
           )}
-          {submitting ? "Memastikan order tersimpan..." : locked ? "Coba kirim kembali dengan aman" : "Kirim Permintaan Project"}
+          {submitting ? (english ? "Saving your request..." : "Memastikan order tersimpan...") : locked ? (english ? "Retry safely" : "Coba kirim kembali dengan aman") : english ? "Send Project Request" : "Kirim Permintaan Project"}
         </button>
 
         <p className="text-xs text-center text-slate-500 mt-4">
-          *Data Anda aman. Kami akan membalas dalam waktu 1x24 jam pada hari kerja.
+          {english ? "*Your information is secure. We will reply within one business day." : "*Data Anda aman. Kami akan membalas dalam waktu 1x24 jam pada hari kerja."}
         </p>
       </motion.form>
     </div>

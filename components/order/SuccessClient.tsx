@@ -4,12 +4,15 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, ExternalLink, MessageCircle, Search, Copy, Check } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber") || "";
   const whatsappUrl = searchParams.get("wa") || "";
   const [copied, setCopied] = useState(false);
+  const { language } = useLanguage();
+  const english = language === "en";
 
   const copyOrderNumber = () => {
     navigator.clipboard.writeText(orderNumber);
@@ -41,7 +44,7 @@ function SuccessContent() {
             transition={{ delay: 0.3 }}
             className="text-3xl md:text-4xl font-bold mb-3"
           >
-            Order Berhasil Dikirim! 🎉
+            {english ? "Project Request Sent! 🎉" : "Order Berhasil Dikirim! 🎉"}
           </motion.h1>
 
           <motion.p
@@ -50,7 +53,7 @@ function SuccessContent() {
             transition={{ delay: 0.4 }}
             className="text-slate-600 dark:text-slate-400 mb-8"
           >
-            Terima kasih! Tim kami akan menghubungi Anda dalam 1x24 jam.
+            {english ? "Thank you! Our team will contact you within one business day." : "Terima kasih! Tim kami akan menghubungi Anda dalam 1x24 jam."}
           </motion.p>
 
           {/* Order Number Card */}
@@ -62,7 +65,7 @@ function SuccessContent() {
               className="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 rounded-2xl p-6 mb-8 border-2 border-primary-200 dark:border-primary-800"
             >
               <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                Nomor Order Anda
+                {english ? "Your Order Number" : "Nomor Order Anda"}
               </div>
               <div className="flex items-center justify-center gap-3 mb-4">
                 <span className="font-mono text-2xl md:text-3xl font-bold text-primary-600 dark:text-primary-400">
@@ -81,7 +84,7 @@ function SuccessContent() {
                 </button>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                💡 Simpan nomor ini untuk melacak status order Anda
+                {english ? "💡 Save this number to track your order status" : "💡 Simpan nomor ini untuk melacak status order Anda"}
               </p>
             </motion.div>
           )}
@@ -99,16 +102,16 @@ function SuccessContent() {
               </div>
               <h4 className="font-semibold text-sm mb-1">WhatsApp</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Buka chat dengan detail order terisi, lalu tekan Kirim untuk memberi tahu admin.
+                {english ? "Open the chat with your order details filled in, then tap Send to notify our team." : "Buka chat dengan detail order terisi, lalu tekan Kirim untuk memberi tahu admin."}
               </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-dark-surface">
               <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
                 <CheckCircle2 size={16} className="text-blue-600" />
               </div>
-              <h4 className="font-semibold text-sm mb-1">Konfirmasi</h4>
+              <h4 className="font-semibold text-sm mb-1">{english ? "Follow-up" : "Konfirmasi"}</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Kami balas dalam 1x24 jam kerja
+                {english ? "We will reply within one business day." : "Kami balas dalam 1x24 jam kerja"}
               </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-dark-surface">
@@ -117,7 +120,7 @@ function SuccessContent() {
               </div>
               <h4 className="font-semibold text-sm mb-1">Tracking</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Pantau progress order kapan saja
+                {english ? "Check your order progress at any time" : "Pantau progress order kapan saja"}
               </p>
             </div>
           </motion.div>
@@ -136,7 +139,7 @@ function SuccessContent() {
                 rel="noopener noreferrer"
                 className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
               >
-                <MessageCircle size={18} /> Kirim detail order ke WhatsApp admin
+                <MessageCircle size={18} /> {english ? "Send order details to us on WhatsApp" : "Kirim detail order ke WhatsApp admin"}
               </a>
             )}
             {orderNumber && (
@@ -144,14 +147,14 @@ function SuccessContent() {
                 href={`/order/track?orderNumber=${orderNumber}`}
                 className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
               >
-                <Search size={18} /> Lacak Order
+                <Search size={18} /> {english ? "Track Order" : "Lacak Order"}
               </Link>
             )}
             <Link
               href="/"
               className="flex-1 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
             >
-              Kembali ke Beranda
+              {english ? "Back to Home" : "Kembali ke Beranda"}
             </Link>
           </motion.div>
         </motion.div>
