@@ -6,6 +6,7 @@ import { CustomerAuthService } from "@/lib/services/customer-auth.service";
 import { ErrorState, LoadingSpinner } from "@/components/ui";
 import OrderStatusBadge from "@/components/order/OrderStatusBadge";
 import { OrderStatus } from "@/lib/types/order";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import {
   BadgeDollarSign,
   CheckCircle2,
@@ -36,6 +37,9 @@ const rupiah = (n: number) => "Rp " + Number(n || 0).toLocaleString("id-ID");
 const invoicePill = (status: string) => status === "Paid" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : status === "Overdue" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" : status === "Partial" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300";
 
 export default function CustomerDashboardPage() {
+  const { language } = useLanguage();
+  const english = language === "en";
+  const label = (id: string, en: string) => english ? en : id;
   const [data, setData] = useState<MyDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,7 +57,7 @@ export default function CustomerDashboardPage() {
     setLoading(true); setError("");
     const token = CustomerAuthService.getToken();
     const res = await gasGet<MyDashboard>("getMyDashboard", { token: token || "" });
-    if (res.success && res.data) setData(res.data); else setError(res.error || "Gagal memuat data");
+    if (res.success && res.data) setData(res.data); else setError(res.error || label("Gagal memuat data", "Failed to load data"));
     setLoading(false);
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -63,7 +67,7 @@ export default function CustomerDashboardPage() {
     setResponding(quoteAction.q.id);
     const res = await gasPost({ action: "respondQuotation", token: CustomerAuthService.getToken(), quotationId: quoteAction.q.id, response: quoteAction.response, customerNote: quoteNote });
     setResponding("");
-    if (!res.success) return alert(res.error || "Respons gagal dikirim");
+    if (!res.success) return alert(res.error || label("Respons gagal dikirim", "Could not send your response"));
     setQuoteAction(null); setQuoteNote(""); await load();
   };
 
@@ -72,16 +76,16 @@ export default function CustomerDashboardPage() {
     setRevisionSaving(true);
     const res = await gasPost({ action: "requestRevision", token: CustomerAuthService.getToken(), projectId: revisionProject.id, title: revisionTitle, description: revisionDescription, priority: revisionPriority });
     setRevisionSaving(false);
-    if (!res.success) return alert(res.error || "Gagal mengirim revisi");
+    if (!res.success) return alert(res.error || label("Gagal mengirim revisi", "Could not submit the revision request"));
     setRevisionProject(null); setRevisionTitle(""); setRevisionDescription(""); setRevisionPriority("Normal"); await load();
   };
 
   const acceptHandover = async (h: MyHandover) => {
-    if (!confirm("Saya sudah memeriksa hasil project dan menerima serah terima ini. Lanjutkan?")) return;
+    if (!confirm(label("Saya sudah memeriksa hasil project dan menerima serah terima ini. Lanjutkan?", "I have reviewed the project and accept this handover. Continue?"))) return;
     setResponding(h.id);
     const res = await gasPost({ action: "respondHandover", token: CustomerAuthService.getToken(), handoverId: h.id, response: "Accepted" });
     setResponding("");
-    if (!res.success) return alert(res.error || "Gagal menerima serah terima");
+    if (!res.success) return alert(res.error || label("Gagal menerima serah terima", "Could not accept the handover"));
     await load();
   };
 
@@ -93,14 +97,14 @@ export default function CustomerDashboardPage() {
   const pendingActions = safe.quotations.filter(q => (q.displayStatus || q.status) === "sent").length + safe.handovers.filter(h => h.status === "Sent").length;
   const unpaid = safe.invoices.filter(i => i.paymentStatus !== "Paid" && i.paymentStatus !== "Cancelled").length;
   const cards = [
-    { label: "Order Saya", value: safe.orders.length, icon: Package, color: "bg-primary-100 dark:bg-primary-900/30 text-primary-600" },
-    { label: "Project Aktif", value: activeProjects.length, icon: FolderKanban, color: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600" },
-    { label: "Perlu Tindakan", value: pendingActions, icon: CheckCircle2, color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600" },
-    { label: "Invoice Belum Lunas", value: unpaid, icon: BadgeDollarSign, color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600" },
+    { label: label("Order Saya", "My Orders"), value: safe.orders.length, icon: Package, color: "bg-primary-100 dark:bg-primary-900/30 text-primary-600" },
+    { label: label("Project Aktif", "Active Projects"), value: activeProjects.length, icon: FolderKanban, color: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600" },
+    { label: label("Perlu Tindakan", "Needs Attention"), value: pendingActions, icon: CheckCircle2, color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600" },
+    { label: label("Invoice Belum Lunas", "Unpaid Invoices"), value: unpaid, icon: BadgeDollarSign, color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600" },
   ];
 
   return <div>
-    <div className="mb-8"><h1 className="text-3xl font-bold mb-1">Halo, {session ? session.name : "Customer"} 👋</h1><p className="text-slate-600 dark:text-slate-400">Pantau penawaran, invoice, revisi, progress, dan serah terima project Anda.</p></div>
+    <div className="mb-8"><h1 className="text-3xl font-bold mb-1">{label("Halo", "Hello")}, {session ? session.name : "Customer"} 👋</h1><p className="text-slate-600 dark:text-slate-400">{label("Pantau penawaran, invoice, revisi, progress, dan serah terima project Anda.", "Track your quotations, invoices, revisions, project progress, and handovers.")}</p></div>
 
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">{cards.map((c, i) => <div key={i} className="bg-white dark:bg-dark-surface p-5 rounded-2xl border border-slate-200 dark:border-slate-800"><div className={`inline-flex p-2.5 rounded-xl mb-3 ${c.color}`}><c.icon size={20}/></div><div className="text-3xl font-bold mb-1">{c.value}</div><div className="text-sm text-slate-500">{c.label}</div></div>)}</div>
 
