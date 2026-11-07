@@ -18,7 +18,7 @@ export default function CustomerNav() {
   const session = CustomerAuthService.getSession();
 
   const handleLogout = async () => {
-    if (!(await CustomerAuthService.logout())) { alert("Logout belum berhasil. Periksa koneksi lalu coba lagi."); return; }
+    if (!(await CustomerAuthService.logout())) { alert(english ? "Could not log out. Check your connection and try again." : "Logout belum berhasil. Periksa koneksi lalu coba lagi."); return; }
     router.push("/customer/login");
   };
 
