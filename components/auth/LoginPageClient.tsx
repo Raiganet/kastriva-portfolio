@@ -25,6 +25,7 @@ import { CustomerAuthService } from "@/lib/services/customer-auth.service";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { buildWhatsAppLink } from "@/lib/contact";
 import BrandLogo from "@/components/BrandLogo";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 type Role = "admin" | "customer";
 
@@ -49,8 +50,11 @@ export default function LoginPageClient() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const site = useSiteContent();
+  const { language, setLanguage } = useLanguage();
 
   const isAdmin = role === "admin";
+  const english = !isAdmin && language === "en";
+  const label = (id: string, en: string) => english ? en : id;
 
   useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get("role");
@@ -78,7 +82,7 @@ export default function LoginPageClient() {
 
   const requestCode = async () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError("Format email tidak valid");
+      setError(label("Format email tidak valid", "Invalid email format"));
       return;
     }
     setLoading(true);
@@ -91,10 +95,10 @@ export default function LoginPageClient() {
       setCooldown(res.data.retryAfter);
       setNotice(
         res.message ||
-          "Jika email terdaftar, kode telah dikirim. Periksa inbox dan spam. Kode berlaku 10 menit.",
+          label("Jika email terdaftar, kode telah dikirim. Periksa inbox dan spam. Kode berlaku 10 menit.", "If the email is registered, a code has been sent. Check your inbox and spam folder. The code expires in 10 minutes."),
       );
     } else {
-      setError(res.error || "Tidak dapat meminta kode.");
+      setError(res.error || label("Tidak dapat meminta kode.", "Could not request a code."));
     }
   };
 
@@ -106,11 +110,11 @@ export default function LoginPageClient() {
       return;
     }
     if (!isAdmin && !/^\d{8}$/.test(code)) {
-      setError("Masukkan 8 digit kode verifikasi.");
+      setError(label("Masukkan 8 digit kode verifikasi.", "Enter the 8-digit verification code."));
       return;
     }
     if (isAdmin && (!email.trim() || !password)) {
-      setError("Email dan password wajib diisi.");
+      setError(label("Email dan password wajib diisi.", "Email and password are required."));
       return;
     }
 
@@ -122,7 +126,7 @@ export default function LoginPageClient() {
     setLoading(false);
 
     if (res.success) router.push(isAdmin ? "/admin" : "/customer");
-    else setError(res.error || "Login gagal");
+    else setError(res.error || label("Login gagal", "Login failed"));
   };
 
   const RoleToggle = () => (
@@ -165,11 +169,16 @@ export default function LoginPageClient() {
             />
           </Link>
 
+          {!isAdmin && <div className="flex items-center rounded-lg border border-white/20 p-0.5 text-xs font-semibold" aria-label={english ? "Select language" : "Pilih bahasa"}>
+            <button type="button" onClick={() => setLanguage("id")} aria-pressed={language === "id"} className={`rounded-md px-2 py-1 ${language === "id" ? "bg-primary-600 text-white" : "text-slate-300"}`}>ID</button>
+            <button type="button" onClick={() => setLanguage("en")} aria-pressed={language === "en"} className={`rounded-md px-2 py-1 ${language === "en" ? "bg-primary-600 text-white" : "text-slate-300"}`}>EN</button>
+          </div>}
+
           <nav className="hidden items-center gap-6 lg:flex" aria-label="Navigasi login">
-            <Link href="/services" className="text-sm font-medium text-slate-300 transition hover:text-white">Layanan</Link>
+            <Link href="/services" className="text-sm font-medium text-slate-300 transition hover:text-white">{label("Layanan", "Services")}</Link>
             <Link href="/portfolio" className="text-sm font-medium text-slate-300 transition hover:text-white">Portfolio</Link>
             <Link href="/order/track" className="flex items-center gap-1.5 text-sm font-medium text-slate-300 transition hover:text-white">
-              <Package size={15} /> Lacak Order
+              <Package size={15} /> {label("Lacak Order", "Track Order")}
             </Link>
           </nav>
 
@@ -178,8 +187,8 @@ export default function LoginPageClient() {
             className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-primary-400/50 hover:bg-primary-600/15 sm:px-4"
           >
             <Home size={16} />
-            <span className="hidden sm:inline">Kembali ke Beranda</span>
-            <span className="sm:hidden">Beranda</span>
+            <span className="hidden sm:inline">{label("Kembali ke Beranda", "Back to Home")}</span>
+            <span className="sm:hidden">{label("Beranda", "Home")}</span>
           </Link>
         </div>
       </header>
@@ -222,7 +231,7 @@ export default function LoginPageClient() {
               Code. Build. <span className="bg-gradient-to-r from-violet-400 via-primary-500 to-cyan-400 bg-clip-text text-transparent">Solution.</span>
             </h1>
             <p className={`mt-5 max-w-lg text-sm leading-7 sm:text-base ${isAdmin ? "text-slate-300" : "text-slate-600"}`}>
-              Kelola project, portfolio, dan layanan Kastriva dari satu tempat dengan tampilan yang sederhana dan profesional.
+              {label("Kelola project, portfolio, dan layanan Kastriva dari satu tempat dengan tampilan yang sederhana dan profesional.", "Manage Kastriva projects, portfolio, and services in one simple, professional workspace.")}
             </p>
 
             <div className={`mt-8 rounded-2xl border p-4 backdrop-blur ${isAdmin ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"}`}>
@@ -232,7 +241,7 @@ export default function LoginPageClient() {
                 </div>
                 <div>
                   <p className={`text-sm font-semibold ${isAdmin ? "text-white" : "text-slate-900"}`}>Modern. Fast. Reliable.</p>
-                  <p className={`mt-0.5 text-xs ${isAdmin ? "text-slate-400" : "text-slate-500"}`}>Digital experience yang dibuat dengan detail.</p>
+                  <p className={`mt-0.5 text-xs ${isAdmin ? "text-slate-400" : "text-slate-500"}`}>{label("Digital experience yang dibuat dengan detail.", "Digital experiences crafted with care.")}</p>
                 </div>
               </div>
             </div>
@@ -265,7 +274,7 @@ export default function LoginPageClient() {
                 {isAdmin ? <ShieldCheck size={25} /> : <UserCircle2 size={25} />}
               </div>
               <h2 className="text-3xl font-black tracking-tight text-slate-900">Welcome Back!</h2>
-              <p className="mt-2 text-sm text-slate-500">{isAdmin ? `Masuk ke dashboard admin ${site.brand.name}` : "Lacak dan kelola project Anda"}</p>
+              <p className="mt-2 text-sm text-slate-500">{isAdmin ? `Masuk ke dashboard admin ${site.brand.name}` : label("Lacak dan kelola project Anda", "Track and manage your projects")}</p>
             </motion.div>
           </div>
 
@@ -282,7 +291,7 @@ export default function LoginPageClient() {
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-900">{isAdmin ? "Admin Login" : "Customer Login"}</p>
-                <p className="text-xs text-slate-500">{isAdmin ? "Akses pengelolaan website & CMS" : "Masuk dengan kode verifikasi email"}</p>
+                <p className="text-xs text-slate-500">{isAdmin ? "Akses pengelolaan website & CMS" : label("Masuk dengan kode verifikasi email", "Sign in with an email verification code")}</p>
               </div>
             </div>
 
@@ -338,7 +347,7 @@ export default function LoginPageClient() {
                 </div>
               ) : challengeId ? (
                 <div>
-                  <label htmlFor="otp" className="mb-1.5 block text-sm font-semibold text-slate-700">Kode verifikasi email</label>
+                  <label htmlFor="otp" className="mb-1.5 block text-sm font-semibold text-slate-700">{label("Kode verifikasi email", "Email verification code")}</label>
                   <input
                     id="otp"
                     type="text"
@@ -347,12 +356,12 @@ export default function LoginPageClient() {
                     maxLength={8}
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                    placeholder="8 digit kode"
+                    placeholder={label("8 digit kode", "8-digit code")}
                     className="login-input w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 font-mono text-slate-900 outline-none transition focus:border-primary-500 focus:bg-white focus:ring-4 focus:ring-primary-500/10"
                   />
                   <div className="mt-3 flex justify-between text-xs text-primary-700">
                     <button type="button" disabled={loading || cooldown > 0} onClick={requestCode} className="font-semibold disabled:text-slate-400">
-                      {cooldown > 0 ? `Kirim ulang (${cooldown}s)` : "Kirim ulang kode"}
+                      {cooldown > 0 ? `${label("Kirim ulang", "Resend")} (${cooldown}s)` : label("Kirim ulang kode", "Resend code")}
                     </button>
                     <button
                       type="button"
@@ -365,12 +374,12 @@ export default function LoginPageClient() {
                         setError("");
                       }}
                     >
-                      Ganti email
+                      {label("Ganti email", "Change email")}
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm leading-6 text-slate-500">Gunakan email yang digunakan saat memesan. Kode akan dikirim ke email tersebut.</p>
+                <p className="text-sm leading-6 text-slate-500">{label("Gunakan email yang digunakan saat memesan. Kode akan dikirim ke email tersebut.", "Use the email address you used when placing your order. We will send a verification code to that address.")}</p>
               )}
 
               <div className="flex items-center justify-between gap-3 pt-1 text-sm">
@@ -381,7 +390,7 @@ export default function LoginPageClient() {
                     onChange={(e) => setRemember(e.target.checked)}
                     className="h-4 w-4 rounded accent-primary-600"
                   />
-                  Remember me
+                  {label("Remember me", "Remember me")}
                 </label>
                 <a
                   href={buildWhatsAppLink(site.brand.whatsapp, `Halo ${site.brand.name}, saya butuh bantuan untuk login.`)}
@@ -389,7 +398,7 @@ export default function LoginPageClient() {
                   rel="noopener noreferrer"
                   className="font-semibold text-primary-600 transition hover:text-primary-700 hover:underline"
                 >
-                  Butuh bantuan?
+                  {label("Butuh bantuan?", "Need help?")}
                 </a>
               </div>
 
@@ -403,7 +412,7 @@ export default function LoginPageClient() {
                 }`}
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
-                {loading ? "Memverifikasi..." : isAdmin ? "Masuk sebagai Admin" : challengeId ? "Verifikasi & Masuk" : "Kirim kode ke email"}
+                {loading ? label("Memverifikasi...", "Verifying...") : isAdmin ? "Masuk sebagai Admin" : challengeId ? label("Verifikasi & Masuk", "Verify & Sign In") : label("Kirim kode ke email", "Send code by email")}
               </button>
             </form>
           </motion.div>
@@ -413,7 +422,7 @@ export default function LoginPageClient() {
             <span aria-hidden="true">·</span>
             <span>Secure Access</span>
             <span aria-hidden="true">·</span>
-            <Link href="/" className="font-medium text-slate-500 transition hover:text-primary-600">Kembali ke website</Link>
+            <Link href="/" className="font-medium text-slate-500 transition hover:text-primary-600">{label("Kembali ke website", "Back to website")}</Link>
           </div>
         </div>
       </section>
