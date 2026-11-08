@@ -38,7 +38,7 @@ export default function Footer() {
             <Link href="/" className="mb-5 inline-flex items-center" aria-label={`Beranda ${site.brand.name}`}>
               <BrandLogo alt={`Logo ${site.brand.name}`} className="w-[190px] sm:w-[215px]" />
             </Link>
-            <p className="text-slate-600 dark:text-slate-400 max-w-sm mb-6">{site.footer.description}</p>
+            <p className="text-slate-600 dark:text-slate-400 max-w-sm mb-6">{english && site.footer.description === "Solusi Digital Modern untuk Bisnis Anda. Fokus pada kualitas kode, desain modern, dan kepuasan klien." ? "Modern digital solutions for your business. Focused on code quality, contemporary design, and client satisfaction." : site.footer.description}</p>
             {socials.length > 0 && <div className="flex flex-wrap gap-3">{socials.map(({ href, label, Icon }) => <a key={label} aria-label={`${label} ${site.brand.name}`} href={href} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white dark:bg-dark-bg border border-slate-200 dark:border-slate-700 hover:-translate-y-0.5 hover:text-primary-600 transition-all"><Icon size={19} /></a>)}</div>}
           </div>
           <div>
@@ -53,7 +53,7 @@ export default function Footer() {
               <li><Link href="/order" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {english ? "Start a Project" : site.navigation.startProjectLabel}</Link></li>
               <li><Link href="/order/track" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {english ? "Track Order" : site.navigation.trackOrderLabel}</Link></li>
               {site.footer.showCustomerLogin && <li><Link href="/customer/login" className="hover:text-primary-600 transition-colors flex items-center gap-2"><UserCircle2 size={14} /> {english ? "Customer Login" : "Login Customer"}</Link></li>}
-              {site.footer.showAdminLogin && <li><Link href="/admin/login" className="hover:text-primary-600 transition-colors flex items-center gap-2"><ShieldCheck size={14} /> Login Admin</Link></li>}
+              {site.footer.showAdminLogin && <li><Link href="/admin/login" className="hover:text-primary-600 transition-colors flex items-center gap-2"><ShieldCheck size={14} /> {english ? "Admin Login" : "Login Admin"}</Link></li>}
               {site.brand.whatsapp && <li className="flex items-center gap-2 pt-2"><MessageCircle size={14} /> {site.brand.whatsapp}</li>}
               {site.brand.email && <li className="flex items-center gap-2"><Mail size={14} /> <a href={`mailto:${site.brand.email}`} className="hover:text-primary-600 transition-colors">{site.brand.email}</a></li>}
               {site.brand.address && <li className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 shrink-0" /> <span>{site.brand.address}</span></li>}
@@ -69,12 +69,12 @@ export default function Footer() {
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="font-bold text-slate-900 dark:text-white">{site.footer.legalTitle}</h4>
+                    <h4 className="font-bold text-slate-900 dark:text-white">{english && site.footer.legalTitle === "Legalitas Usaha" ? "Business Registration" : site.footer.legalTitle}</h4>
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-900 dark:bg-dark-bg/70 dark:text-emerald-300">
                       <ShieldCheck size={12} /> {english ? "Registered in Indonesia" : "Terdaftar OSS"}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{site.footer.legalDescription}</p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{english && site.footer.legalDescription === "Usaha terdaftar melalui OSS Republik Indonesia" ? "Registered business in Indonesia through the OSS system." : site.footer.legalDescription}</p>
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-left dark:border-slate-700 dark:bg-dark-bg sm:text-right">

@@ -45,7 +45,7 @@ export default function Hero() {
                 <div><span className="text-purple-400">export default function</span> <span className="text-blue-400">Dashboard</span>() {'{'}</div>
                 <div className="pl-4"><span className="text-purple-400">return</span> (</div>
                 <div className="pl-8"><span className="text-slate-500">&lt;!-- Premium Kastriva Interface --&gt;</span></div>
-                <div className="pl-8"><span className="text-blue-400">&lt;Success</span> <span className="text-sky-300">message</span>=<span className="text-green-400">"Project Siap Digunakan"</span> <span className="text-blue-400">/&gt;</span></div>
+                <div className="pl-8"><span className="text-blue-400">&lt;Success</span> <span className="text-sky-300">message</span>=<span className="text-green-400">"{english ? "Project Ready to Use" : "Project Siap Digunakan"}"</span> <span className="text-blue-400">/&gt;</span></div>
                 <div className="pl-4">);</div><div>{'}'}</div>
               </div>
             </InteractiveCard>
