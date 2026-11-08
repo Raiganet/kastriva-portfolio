@@ -74,7 +74,7 @@ function SuccessContent() {
                 <button
                   onClick={copyOrderNumber}
                   className="p-2 rounded-lg bg-white dark:bg-dark-bg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  aria-label="Copy order number"
+                  aria-label={english ? "Copy order number" : "Salin nomor order"}
                 >
                   {copied ? (
                     <Check size={18} className="text-green-500" />

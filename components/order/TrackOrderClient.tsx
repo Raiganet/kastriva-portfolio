@@ -11,10 +11,14 @@ import { LoadingSpinner } from "@/components/ui";
 import Link from "next/link";
 import { CustomerAuthService } from "@/lib/services/customer-auth.service";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
 
 export default function TrackOrderClient() {
   const { language } = useLanguage();
   const en = language === "en";
+  const label = (id: string, english: string) => en ? english : id;
+  const projectTypeLabel = (value: string) => translateKnown(value, en, { "Sistem Informasi": "Information System" });
+  const budgetLabel = (value: string) => translateKnown(value, en, { "< 5 Juta": "Under 5 million IDR", "5 - 15 Juta": "5–15 million IDR", "15 - 50 Juta": "15–50 million IDR", "> 50 Juta": "Over 50 million IDR" });
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   useEffect(() => {
     let active = true;
@@ -71,7 +75,7 @@ export default function TrackOrderClient() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 mb-4"
           >
             <Search size={16} />
-            Order Tracking
+              {label("Lacak Order", "Order Tracking")}
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -149,7 +153,7 @@ export default function TrackOrderClient() {
             className="bg-white dark:bg-dark-bg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6"
           >
             <h3 className="font-semibold mb-3 text-slate-700 dark:text-slate-300">
-              Order Terakhir Anda (di perangkat ini)
+              {label("Order Terakhir Anda (di perangkat ini)", "Recent Orders (on this device)")}
             </h3>
             <div className="space-y-2">
               {history.slice(0, 5).map((item) => (
@@ -163,11 +167,11 @@ export default function TrackOrderClient() {
                       {item.orderNumber}
                     </div>
                     <div className="text-xs text-slate-500">
-                      {item.projectType}
+                      {projectTypeLabel(item.projectType)}
                     </div>
                   </div>
                   <div className="text-xs text-slate-500">
-                    {new Date(item.timestamp).toLocaleDateString("id-ID")}
+                      {new Date(item.timestamp).toLocaleDateString(en ? "en-GB" : "id-ID")}
                   </div>
                 </button>
               ))}
@@ -189,7 +193,7 @@ export default function TrackOrderClient() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">
-                      Nomor Order
+                      {label("Nomor Order", "Order Number")}
                     </div>
                     <div className="font-mono text-2xl font-bold text-primary-600 dark:text-primary-400">
                       {result.order.orderNumber}
@@ -201,34 +205,34 @@ export default function TrackOrderClient() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   <div>
                     <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
-                      <Calendar size={12} /> Tanggal Order
+                      <Calendar size={12} /> {label("Tanggal Order", "Order Date")}
                     </div>
                     <div className="text-sm font-medium">
                       {new Date(result.order.createdAt).toLocaleDateString(
-                        "id-ID",
+                        en ? "en-GB" : "id-ID",
                         { day: "numeric", month: "long", year: "numeric" }
                       )}
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
-                      <Package size={12} /> Jenis Project
+                      <Package size={12} /> {label("Jenis Project", "Project Type")}
                     </div>
                     <div className="text-sm font-medium">
-                      {result.order.projectType}
+                      {projectTypeLabel(result.order.projectType)}
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
-                      <Clock size={12} /> Deadline
+                      <Clock size={12} /> {label("Deadline", "Deadline")}
                     </div>
                     <div className="text-sm font-medium">
-                      {result.order.deadline || "Fleksibel"}
+                      {result.order.deadline || label("Fleksibel", "Flexible")}
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
-                      <CheckCircle2 size={12} /> Customer
+                      <CheckCircle2 size={12} /> {label("Customer", "Customer")}
                     </div>
                     <div className="text-sm font-medium">
                       {result.order.name}
@@ -239,10 +243,10 @@ export default function TrackOrderClient() {
 
               {/* Order Details */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-                <h3 className="font-bold mb-4 text-lg">Detail Order</h3>
+                <h3 className="font-bold mb-4 text-lg">{label("Detail Order", "Order Details")}</h3>
                 <div className="space-y-4">
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Deskripsi</div>
+                    <div className="text-xs text-slate-500 mb-1">{label("Deskripsi", "Description")}</div>
                     <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
                       {result.order.description}
                     </p>
@@ -250,7 +254,7 @@ export default function TrackOrderClient() {
                   {result.order.features && (
                     <div>
                       <div className="text-xs text-slate-500 mb-1">
-                        Fitur yang Diminta
+                        {label("Fitur yang Diminta", "Requested Features")}
                       </div>
                       <p className="text-slate-700 dark:text-slate-300">
                         {result.order.features}
@@ -261,7 +265,7 @@ export default function TrackOrderClient() {
                     <div>
                       <div className="text-xs text-slate-500 mb-1">Budget</div>
                       <p className="text-slate-700 dark:text-slate-300">
-                        {result.order.budget}
+                        {budgetLabel(result.order.budget)}
                       </p>
                     </div>
                   )}
@@ -270,14 +274,14 @@ export default function TrackOrderClient() {
 
               {/* Timeline */}
               <div className="p-6">
-                <h3 className="font-bold mb-6 text-lg">Progress Order</h3>
+                <h3 className="font-bold mb-6 text-lg">{label("Progress Order", "Order Progress")}</h3>
                 <OrderTimeline currentStatus={result.order.status} />
               </div>
 
               {/* Project Updates (if any) */}
               {result.updates && result.updates.length > 0 && (
                 <div className="p-6 border-t border-slate-200 dark:border-slate-800">
-                  <h3 className="font-bold mb-4 text-lg">Update Terbaru</h3>
+                  <h3 className="font-bold mb-4 text-lg">{label("Update Terbaru", "Latest Updates")}</h3>
                   <div className="space-y-3">
                     {result.updates.slice(0, 5).map((update) => (
                       <div
@@ -288,7 +292,7 @@ export default function TrackOrderClient() {
                           <h4 className="font-semibold">{update.title}</h4>
                           <span className="text-xs text-slate-500">
                             {new Date(update.createdAt).toLocaleDateString(
-                              "id-ID"
+                              en ? "en-GB" : "id-ID"
                             )}
                           </span>
                         </div>

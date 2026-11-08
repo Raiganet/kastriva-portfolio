@@ -2,12 +2,15 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { ORDER_STATUS_FLOW, OrderStatus, STATUS_LABELS } from "@/lib/types/order";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface OrderTimelineProps {
   currentStatus: OrderStatus;
 }
 
 export default function OrderTimeline({ currentStatus }: OrderTimelineProps) {
+  const { language } = useLanguage();
+  const english = language === "en";
   const currentIndex = ORDER_STATUS_FLOW.indexOf(currentStatus);
   const isCancelled = currentStatus === "Cancelled";
 
@@ -72,15 +75,15 @@ export default function OrderTimeline({ currentStatus }: OrderTimelineProps) {
                     : "text-slate-500 dark:text-slate-500"
                 }`}
               >
-                {STATUS_LABELS[status]}
+                {english ? englishStatusLabels[status] : STATUS_LABELS[status]}
                 {isCurrent && (
                   <span className="ml-2 text-xs font-normal text-primary-500">
-                    (Sedang berlangsung)
+                    ({english ? "In progress" : "Sedang berlangsung"})
                   </span>
                 )}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
-                {getStepDescription(status)}
+                {english ? englishStepDescriptions[status] : getStepDescription(status)}
               </p>
             </div>
           </motion.div>
@@ -94,13 +97,32 @@ export default function OrderTimeline({ currentStatus }: OrderTimelineProps) {
           className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
         >
           <p className="text-sm text-red-700 dark:text-red-300 font-medium">
-            Order ini telah dibatalkan
+            {english ? "This order has been cancelled." : "Order ini telah dibatalkan"}
           </p>
         </motion.div>
       )}
     </div>
   );
 }
+
+const englishStatusLabels: Record<OrderStatus, string> = {
+  Submitted: "Received", Reviewing: "Under Review", Discussing: "Discussion",
+  Quotation: "Quotation", Approved: "Approved", "In Progress": "In Progress",
+  Revision: "Revision", Handover: "Handover", Completed: "Completed", Cancelled: "Cancelled",
+};
+
+const englishStepDescriptions: Record<OrderStatus, string> = {
+  Submitted: "Your order has been received and queued for review.",
+  Reviewing: "Our team is reviewing your project requirements.",
+  Discussing: "We are clarifying the project scope with you.",
+  Quotation: "Your formal quotation is ready for review.",
+  Approved: "The project is approved and ready to begin.",
+  "In Progress": "Our development team is working on your project.",
+  Revision: "Your project is being revised based on your feedback.",
+  Handover: "The project is being reviewed before handover acceptance.",
+  Completed: "The project is complete and ready to use.",
+  Cancelled: "The order has been cancelled.",
+};
 
 function getStepDescription(status: OrderStatus): string {
   const descriptions: Record<OrderStatus, string> = {
