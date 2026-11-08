@@ -92,7 +92,7 @@ export default function Navbar() {
                 : "text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400"
             }`}
           >
-            <Package size={14} /> {site.navigation.trackOrderLabel}
+            <Package size={14} /> {english ? "Track Order" : site.navigation.trackOrderLabel}
           </Link>
         </nav>
 
@@ -102,7 +102,7 @@ export default function Navbar() {
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            aria-label="Toggle theme"
+            aria-label={english ? "Toggle theme" : "Ganti tema"}
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -145,7 +145,7 @@ export default function Navbar() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2"
-            aria-label="Menu"
+            aria-label={english ? "Menu" : "Buka menu"}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -176,7 +176,7 @@ export default function Navbar() {
                 href="/order/track"
                 className="text-base font-medium py-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2"
               >
-                <Package size={16} /> {site.navigation.trackOrderLabel}
+                <Package size={16} /> {english ? "Track Order" : site.navigation.trackOrderLabel}
               </Link>
               <InstallPWAButton compact />
               {auth ? (

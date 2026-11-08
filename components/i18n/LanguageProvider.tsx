@@ -11,6 +11,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem("kastriva-language");
     if (saved === "id" || saved === "en") setLanguage(saved);
   }, []);
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   const changeLanguage = (value: Language) => {
     localStorage.setItem("kastriva-language", value);
     setLanguage(value);

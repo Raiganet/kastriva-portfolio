@@ -42,13 +42,13 @@ export default function Footer() {
             {socials.length > 0 && <div className="flex flex-wrap gap-3">{socials.map(({ href, label, Icon }) => <a key={label} aria-label={`${label} ${site.brand.name}`} href={href} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white dark:bg-dark-bg border border-slate-200 dark:border-slate-700 hover:-translate-y-0.5 hover:text-primary-600 transition-all"><Icon size={19} /></a>)}</div>}
           </div>
           <div>
-            <h4 className="font-bold mb-4">{site.footer.navigationTitle}</h4>
+            <h4 className="font-bold mb-4">{english && site.footer.navigationTitle === "Navigasi" ? "Navigation" : site.footer.navigationTitle}</h4>
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-              {site.navigation.links.map((link) => <li key={`${link.href}-${link.label}`}><Link href={link.href} className="hover:text-primary-600 transition-colors">{link.label}</Link></li>)}
+              {site.navigation.links.map((link) => <li key={`${link.href}-${link.label}`}><Link href={link.href} className="hover:text-primary-600 transition-colors">{english ? ({ Beranda: "Home", Layanan: "Services", Portfolio: "Portfolio", Proses: "Process", Tentang: "About", Kontak: "Contact" } as Record<string, string>)[link.label] || link.label : link.label}</Link></li>)}
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-4">{site.footer.accountTitle}</h4>
+            <h4 className="font-bold mb-4">{english && site.footer.accountTitle === "Customer & Admin" ? "Customer & Admin" : site.footer.accountTitle}</h4>
             <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
               <li><Link href="/order" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {english ? "Start a Project" : site.navigation.startProjectLabel}</Link></li>
               <li><Link href="/order/track" className="hover:text-primary-600 transition-colors flex items-center gap-2"><Package size={14} /> {english ? "Track Order" : site.navigation.trackOrderLabel}</Link></li>
