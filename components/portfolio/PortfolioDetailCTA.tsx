@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { inferPortfolioProjectType } from "@/lib/order/portfolio-reference";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface PortfolioDetailCTAProps {
   portfolioId: string;
@@ -17,6 +18,8 @@ export default function PortfolioDetailCTA({
   portfolioCategory,
 }: PortfolioDetailCTAProps) {
   const { portfolio } = useSiteContent();
+  const { language } = useLanguage();
+  const orderLabel = language === "en" && portfolio.orderLabel === "Buat Project Serupa" ? "Build a Similar Project" : portfolio.orderLabel;
   const params = new URLSearchParams();
   params.set("portfolio", portfolioId);
   params.set(
@@ -30,7 +33,7 @@ export default function PortfolioDetailCTA({
       onClick={() => PortfolioService.trackOrderClick(portfolioId, portfolioTitle)}
       className="btn-lift btn-shine w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/20"
     >
-      {portfolio.orderLabel} <ArrowRight size={18} />
+      {orderLabel} <ArrowRight size={18} />
     </Link>
   );
 }

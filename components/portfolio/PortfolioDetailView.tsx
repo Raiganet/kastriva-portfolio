@@ -16,6 +16,7 @@ import { Lightbox, ImageWithFallback, InteractiveCard } from "@/components/ui";
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import { PortfolioProject } from "@/lib/types/portfolio";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface PortfolioDetailViewProps {
   project: PortfolioProject;
@@ -23,6 +24,10 @@ interface PortfolioDetailViewProps {
 
 export default function PortfolioDetailView({ project }: PortfolioDetailViewProps) {
   const { portfolio } = useSiteContent();
+  const { language } = useLanguage();
+  const english = language === "en";
+  const label = (id: string, en: string) => english ? en : id;
+  const cmsLabel = (value: string, id: string, en: string) => english && value === id ? en : value;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -46,7 +51,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 mb-8 transition-colors"
         >
           <ArrowLeft size={16} />
-          {portfolio.backLabel}
+          {cmsLabel(portfolio.backLabel, "Kembali ke Portfolio", "Back to Portfolio")}
         </Link>
 
         {/* Hero Image */}
@@ -68,7 +73,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-dark-bg/90 px-6 py-3 rounded-full flex items-center gap-2 font-semibold">
               <Maximize2 size={20} />
-              {portfolio.fullscreenLabel}
+              {cmsLabel(portfolio.fullscreenLabel, "Lihat Fullscreen", "View Fullscreen")}
             </div>
           </div>
         </InteractiveCard>
@@ -87,7 +92,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
             </span>
             {project.featured && (
               <span className="px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold flex items-center gap-1">
-                ⭐ Featured Project
+              ⭐ {label("Featured Project", "Featured Project")}
               </span>
             )}
           </div>
@@ -104,17 +109,17 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
             <InteractiveCard tilt={4} lift={3} entrance={false} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-colors hover:border-primary-300 dark:border-slate-800 dark:bg-dark-surface">
               <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                 <CheckCircle2 className="text-red-500" size={20} />
-                Masalah yang Diselesaikan
+                {label("Masalah yang Diselesaikan", "Problem Solved")}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                {project.problemSolved || "Informasi studi kasus belum ditambahkan."}
+                {project.problemSolved || label("Informasi studi kasus belum ditambahkan.", "Case study details have not been added yet.")}
               </p>
             </InteractiveCard>
 
             <InteractiveCard tilt={4} lift={3} entrance={false} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition-colors hover:border-primary-300 dark:border-slate-800 dark:bg-dark-surface">
               <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                 <CheckCircle2 className="text-green-500" size={20} />
-                Solusi yang Diberikan
+                {label("Solusi yang Diberikan", "Solution Provided")}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                 {project.solution || project.description}
@@ -124,7 +129,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
             {/* Features */}
             {project.features && project.features.length > 0 && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Fitur Utama</h3>
+                <h3 className="text-xl font-bold mb-4">{label("Fitur Utama", "Key Features")}</h3>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {project.features.map((feature, i) => (
                     <div key={i} className="flex items-center gap-2">
@@ -139,7 +144,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
             {/* Gallery */}
             {allImages.length > 1 && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Galeri Project</h3>
+                <h3 className="text-xl font-bold mb-4">{label("Galeri Project", "Project Gallery")}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {allImages.map((img, i) => (
                     <InteractiveCard
@@ -164,7 +169,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
-                  💡 Klik gambar untuk melihat fullscreen
+                  💡 {label("Klik gambar untuk melihat fullscreen", "Click an image to view it fullscreen")}
                 </p>
               </div>
             )}
@@ -173,15 +178,15 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
           {/* Sidebar Info */}
           <div className="space-y-4">
             <InteractiveCard tilt={3} lift={2} entrance={false} className="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-slate-800 sticky top-24">
-              <h3 className="font-bold mb-4">Informasi Project</h3>
+              <h3 className="font-bold mb-4">{label("Informasi Project", "Project Details")}</h3>
 
               <div className="space-y-4 mb-6">
                 <div>
                   <div className="text-xs text-slate-500 mb-1 flex items-center gap-1">
-                    <Code2 size={12} /> Teknologi
+                    <Code2 size={12} /> {label("Teknologi", "Technologies")}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {project.technologies.length === 0 && <span className="text-sm text-slate-500">Belum dicantumkan</span>}
+                    {project.technologies.length === 0 && <span className="text-sm text-slate-500">{label("Belum dicantumkan", "Not specified")}</span>}
                     {project.technologies.map((tech, i) => (
                       <span
                         key={i}
@@ -195,7 +200,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
 
                 <div>
                   <div className="text-xs text-slate-500 mb-1 flex items-center gap-1">
-                    <User size={12} /> Peran Saya
+                    <User size={12} /> {label("Peran Saya", "My Role")}
                   </div>
                   <p className="text-sm text-slate-700 dark:text-slate-300">
                     {project.myRole}
@@ -204,7 +209,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
 
                 <div>
                   <div className="text-xs text-slate-500 mb-1 flex items-center gap-1">
-                    <Calendar size={12} /> Tahun
+                    <Calendar size={12} /> {label("Tahun", "Year")}
                   </div>
                   <p className="text-sm text-slate-700 dark:text-slate-300">
                     {project.year}
