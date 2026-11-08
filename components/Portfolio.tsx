@@ -9,6 +9,14 @@ import { PortfolioProject } from "@/lib/types/portfolio";
 import { getPortfolioOrderHref } from "@/lib/order/portfolio-reference";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
+
+const categoryTranslations: Record<string, string> = {
+  Semua: "All",
+  Pendidikan: "Education",
+  "Aplikasi Bisnis": "Business Applications",
+  Utilitas: "Utilities",
+};
 
 function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -60,7 +68,7 @@ export default function Portfolio() {
     return (
       <section id="portfolio" className="ambient-panel py-20">
         <div className="container mx-auto px-4 md:px-6">
-          <ErrorState message={error} onRetry={refresh} />
+            <ErrorState message={translateKnown(error, english, { "Gagal memuat portfolio": "Could not load the portfolio." })} onRetry={refresh} />
         </div>
       </section>
     );
@@ -70,9 +78,9 @@ export default function Portfolio() {
     <section id="portfolio" className="ambient-panel py-20">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{site.portfolio.title}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{translateKnown(site.portfolio.title, english, { "Project yang Pernah Saya Buat": "Our Portfolio" })}</h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            {site.portfolio.subtitle}
+            {translateKnown(site.portfolio.subtitle, english, { "Beberapa hasil kerja terbaik yang telah membantu klien mencapai tujuan digital mereka.": "Selected projects that have helped clients reach their digital goals." })}
           </p>
         </div>
 
@@ -89,7 +97,7 @@ export default function Portfolio() {
                     : "bg-white dark:bg-dark-bg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
                 }`}
               >
-                {cat.name} {cat.count > 0 && `(${cat.count})`}
+                {translateKnown(cat.name, english, categoryTranslations)} {cat.count > 0 && `(${cat.count})`}
               </button>
             ))}
           </div>
@@ -160,7 +168,7 @@ export default function Portfolio() {
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
                       <span className="text-xs font-semibold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded-md">
-                        {project.category}
+                        {translateKnown(project.category, english, categoryTranslations)}
                       </span>
                       <span className="text-xs text-slate-500 flex items-center gap-1">
                         <Calendar size={12} /> {project.year || (english ? "Completed" : "Selesai")}

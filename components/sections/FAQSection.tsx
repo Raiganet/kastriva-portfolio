@@ -39,9 +39,9 @@ export default function FAQSection() {
     <section className="ambient-panel py-20">
       <div className="container mx-auto px-4 md:px-6 max-w-3xl">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 mb-4"><HelpCircle size={16} />{english ? "FAQ" : faq.eyebrow}</div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{english ? "Frequently Asked Questions" : faq.title}</h2>
-          {faq.subtitle && <p className="text-slate-600 dark:text-slate-400">{english ? "Quick answers to common questions about our services and process." : faq.subtitle}</p>}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 mb-4"><HelpCircle size={16} />{translateKnown(faq.eyebrow, english, { FAQ: "FAQ" })}</div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{translateKnown(faq.title, english, { "Pertanyaan yang Sering Diajukan": "Frequently Asked Questions" })}</h2>
+          {faq.subtitle && <p className="text-slate-600 dark:text-slate-400">{translateKnown(faq.subtitle, english, { "Jawaban singkat untuk hal yang paling sering ditanyakan sebelum memulai project.": "Quick answers to common questions before starting a project." })}</p>}
         </div>
         <div className="space-y-3">
           {items.map((item, i) => (

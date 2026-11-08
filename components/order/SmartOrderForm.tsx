@@ -11,6 +11,7 @@ import { readOrderDraft, saveOrderDraft, startNewOrder, isOrderDraftStorageEvent
 import { PortfolioService } from "@/lib/services/portfolio.service";
 import type { PortfolioProject } from "@/lib/types/portfolio";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
 import {
   PROJECT_TYPES,
   getPortfolioReference,
@@ -21,6 +22,40 @@ import {
 function OrderFormContent() {
   const { language } = useLanguage();
   const english = language === "en";
+  const localize = (text: string, translations: Record<string, string>) => translateKnown(text, english, translations);
+  const formMessages: Record<string, string> = {
+    "Draf tidak dapat dibaca.": "Could not read the saved draft.",
+    "Draf tidak dapat dibaca. Jangan kirim ulang sebelum memeriksa order sebelumnya.": "Could not read the saved draft. Check whether the previous order was received before submitting again.",
+    "Draf rusak. Hubungi admin untuk memastikan order sebelumnya sebelum menghapus data browser.": "The saved draft is damaged. Contact support to confirm your previous order before clearing browser data.",
+    "Penyimpanan draf tidak tersedia. Aktifkan penyimpanan situs di browser sebelum mengirim.": "Draft storage is unavailable. Enable site storage in your browser before submitting.",
+    "Pastikan hasil permintaan sebelumnya dengan tombol coba lagi.": "Confirm the previous request using the retry button.",
+    "Pengiriman masih berlangsung.": "Your request is still being submitted.",
+    "Gagal mengirim order": "Could not submit the order.",
+    "Data order tidak valid.": "The project request details are invalid.",
+    "Terlalu banyak permintaan. Coba kembali setelah batas waktu berakhir.": "Too many requests. Please try again after the limit resets.",
+    "Permintaan sedang diproses. Coba lagi dengan permintaan yang sama.": "Your request is still processing. Retry with the same request.",
+    "Permintaan ini sudah digunakan dengan isi berbeda. Periksa order sebelumnya.": "This request has already been used with different details. Check your previous order.",
+    "Nama minimal 2 karakter": "Name must be at least 2 characters.",
+    "Nama maksimal 100 karakter": "Name must be 100 characters or fewer.",
+    "Format email tidak valid": "Enter a valid email address.",
+    "Nomor WhatsApp minimal 10 digit": "WhatsApp number must contain at least 10 digits.",
+    "Nomor WhatsApp maksimal 20 digit": "WhatsApp number must contain 20 digits or fewer.",
+    "Nomor hanya boleh berisi angka": "Use only numbers in the phone number.",
+    "Pilih jenis project": "Select a project type.",
+    "Deskripsi minimal 20 karakter agar kami paham kebutuhan Anda": "Description must be at least 20 characters so we can understand your needs.",
+    "Deskripsi maksimal 2000 karakter": "Description must be 2,000 characters or fewer.",
+    "Referensi portfolio tidak ditemukan. Form tetap bisa digunakan sebagai order umum.": "The portfolio reference could not be found. You can still use this as a general project request.",
+    "Referensi portfolio belum dapat dimuat. Form tetap bisa digunakan sebagai order umum.": "The portfolio reference could not be loaded. You can still use this as a general project request.",
+    "Anda sedang offline. Isian tetap disimpan; pengiriman dapat dilanjutkan setelah online.": "You are offline. Your entries are saved and you can submit when you are back online.",
+    "Order": "Order", "sudah tersimpan.": "has been saved.",
+    "Lihat konfirmasi": "View confirmation", "Buat permintaan baru": "Start a new request",
+    "Permintaan sebelumnya belum dikonfirmasi. Gunakan tombol coba lagi untuk memeriksa atau menyimpan permintaan yang sama. Isian dikunci agar tidak membuat order berbeda.": "Your previous request is awaiting confirmation. Retry to check or save the same request. The form is locked to prevent creating a duplicate order.",
+    "Draf disimpan di browser ini. Draf yang belum dikirim berlaku 7 hari.": "Your draft is saved in this browser and will be kept for 7 days.",
+    "Penyimpanan browser tidak tersedia. Jangan tutup halaman; aktifkan penyimpanan situs sebelum mengirim.": "Browser storage is unavailable. Keep this page open and enable site storage before submitting.",
+    "Hapus draf": "Clear draft", "Memuat referensi portfolio...": "Loading portfolio reference...",
+    "Referensi Project": "Project reference", "Form sudah diisi otomatis berdasarkan project ini": "The form was prefilled based on this project",
+    "Website": "Website", "Landing Page": "Landing Page", "Company Profile": "Company Profile", "Web App": "Web App", "Dashboard": "Dashboard", "Sistem Informasi": "Information System", "Android App": "Android App", "Custom": "Custom",
+  };
   const searchParams = useSearchParams();
   const router = useRouter();
   const portfolioId = searchParams.get("portfolio");
@@ -211,12 +246,12 @@ function OrderFormContent() {
   return (
     <div className="container mx-auto px-4 md:px-6 max-w-4xl">
       {!ready && <p role="status">{english ? "Loading draft..." : "Memuat draf..."}</p>}
-      {draftError && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{draftError}</p>}
-      {!online && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-amber-900">Anda sedang offline. Isian tetap disimpan; pengiriman dapat dilanjutkan setelah online.</p>}
+      {draftError && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-red-700">{localize(draftError, formMessages)}</p>}
+      {!online && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-amber-900">{localize("Anda sedang offline. Isian tetap disimpan; pengiriman dapat dilanjutkan setelah online.", formMessages)}</p>}
       {ready && !draftError && <div className="mb-4 rounded-xl border p-4 text-sm">
-        {draft?.receipt ? <><p>Order <b>{draft.receipt.orderNumber}</b> sudah tersimpan.</p><Link className="mr-4 text-primary-600" href={`/order/success?orderNumber=${encodeURIComponent(draft.receipt.orderNumber)}`}>Lihat konfirmasi</Link><button type="button" disabled={submitting} onClick={async()=>{try{const d=await startNewOrder(defaults);setDraft(d);setFormData(defaults);reset();}catch{restore();}}}>Buat permintaan baru</button></>
-        : locked ? <p>Permintaan sebelumnya belum dikonfirmasi. Gunakan tombol coba lagi untuk memeriksa atau menyimpan permintaan yang sama. Isian dikunci agar tidak membuat order berbeda.</p>
-        : <><p>{persisted ? "Draf disimpan di browser ini. Draf yang belum dikirim berlaku 7 hari." : "Penyimpanan browser tidak tersedia. Jangan tutup halaman; aktifkan penyimpanan situs sebelum mengirim."}</p><button type="button" className="mt-2 text-primary-600" disabled={submitting} onClick={async()=>{try{const d=await startNewOrder(defaults);setDraft(d);setFormData(defaults);reset();}catch{restore();}}}>Hapus draf</button></>}
+        {draft?.receipt ? <><p>{localize("Order", formMessages)} <b>{draft.receipt.orderNumber}</b> {localize("sudah tersimpan.", formMessages)}</p><Link className="mr-4 text-primary-600" href={`/order/success?orderNumber=${encodeURIComponent(draft.receipt.orderNumber)}`}>{localize("Lihat konfirmasi", formMessages)}</Link><button type="button" disabled={submitting} onClick={async()=>{try{const d=await startNewOrder(defaults);setDraft(d);setFormData(defaults);reset();}catch{restore();}}}>{localize("Buat permintaan baru", formMessages)}</button></>
+        : locked ? <p>{localize("Permintaan sebelumnya belum dikonfirmasi. Gunakan tombol coba lagi untuk memeriksa atau menyimpan permintaan yang sama. Isian dikunci agar tidak membuat order berbeda.", formMessages)}</p>
+        : <><p>{persisted ? localize("Draf disimpan di browser ini. Draf yang belum dikirim berlaku 7 hari.", formMessages) : localize("Penyimpanan browser tidak tersedia. Jangan tutup halaman; aktifkan penyimpanan situs sebelum mengirim.", formMessages)}</p><button type="button" className="mt-2 text-primary-600" disabled={submitting} onClick={async()=>{try{const d=await startNewOrder(defaults);setDraft(d);setFormData(defaults);reset();}catch{restore();}}}>{localize("Hapus draf", formMessages)}</button></>}
       </div>}
       {/* Quick Track Link */}
       <div className="flex justify-end mb-4">
@@ -230,13 +265,13 @@ function OrderFormContent() {
 
       {portfolioLoading && (
         <div className="mb-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
-          <Loader2 className="animate-spin" size={18} /> Memuat referensi portfolio...
+          <Loader2 className="animate-spin" size={18} /> {localize("Memuat referensi portfolio...", formMessages)}
         </div>
       )}
 
       {portfolioLoadError && !portfolioProject && (
         <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-200">
-          {portfolioLoadError}
+          {localize(portfolioLoadError, formMessages)}
         </div>
       )}
 
@@ -246,10 +281,10 @@ function OrderFormContent() {
             <CheckCircle className="text-primary-600 dark:text-primary-400 flex-shrink-0" size={20} />
             <div>
               <p className="text-sm font-semibold text-primary-900 dark:text-primary-100">
-                Referensi Project: {portfolioProject.title}
+                {localize("Referensi Project", formMessages)}: {portfolioProject.title}
               </p>
               <p className="text-xs text-primary-700 dark:text-primary-300">
-                Form sudah diisi otomatis berdasarkan project ini
+                {localize("Form sudah diisi otomatis berdasarkan project ini", formMessages)}
               </p>
             </div>
           </div>
@@ -272,7 +307,7 @@ function OrderFormContent() {
         {lastResult?.error && (
           <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl flex items-center gap-3 border border-red-200 dark:border-red-800">
             <AlertCircle size={20} />
-            <p>{lastResult.error}</p>
+            <p>{localize(lastResult.error, formMessages)}</p>
           </div>
         )}
 
@@ -289,7 +324,7 @@ function OrderFormContent() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
             {fieldErrors.name && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>
+              <p className="text-xs text-red-500 mt-1">{localize(fieldErrors.name, formMessages)}</p>
             )}
           </div>
           <div>
@@ -316,7 +351,7 @@ function OrderFormContent() {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
             {fieldErrors.email && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.email}</p>
+              <p className="text-xs text-red-500 mt-1">{localize(fieldErrors.email, formMessages)}</p>
             )}
           </div>
           <div>
@@ -330,7 +365,7 @@ function OrderFormContent() {
               onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
             />
             {fieldErrors.whatsapp && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.whatsapp}</p>
+              <p className="text-xs text-red-500 mt-1">{localize(fieldErrors.whatsapp, formMessages)}</p>
             )}
           </div>
         </div>
@@ -347,7 +382,7 @@ function OrderFormContent() {
             >
               {PROJECT_TYPES.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {localize(t, formMessages)}
                 </option>
               ))}
             </select>
@@ -392,7 +427,7 @@ function OrderFormContent() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           />
           {fieldErrors.description && (
-            <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>
+              <p className="text-xs text-red-500 mt-1">{localize(fieldErrors.description, formMessages)}</p>
           )}
         </div>
 

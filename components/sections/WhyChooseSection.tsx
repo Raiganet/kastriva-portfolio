@@ -41,8 +41,8 @@ export default function WhyChooseSection() {
       <div className="container mx-auto px-4 md:px-6">
         <div className={`grid gap-12 items-center ${showProcessPreview ? "lg:grid-cols-2" : "max-w-4xl mx-auto"}`}>
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">{english ? "Why Choose Kastriva?" : site.whyChoose.title}</h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">{english ? "We combine thoughtful design and reliable engineering to deliver digital products that support your goals." : site.whyChoose.description}</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{translateKnown(site.whyChoose.title, english, { [`Kenapa Memilih ${site.brand.name}?`]: `Why Choose ${site.brand.name}?` })}</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">{translateKnown(site.whyChoose.description, english, { "Saya tidak hanya menulis kode, tetapi memberikan solusi bisnis yang berkelanjutan. Setiap project dikerjakan dengan standar profesional tinggi.": "We do more than write code. We build sustainable business solutions and deliver every project to a high professional standard." })}</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {site.whyChoose.items.map((item, i) => (
                 <InteractiveCard

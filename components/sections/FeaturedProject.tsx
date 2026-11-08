@@ -9,6 +9,7 @@ import { getPortfolioOrderHref } from "@/lib/order/portfolio-reference";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
 
 function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -38,13 +39,13 @@ export default function FeaturedProject() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold mb-4 shadow-lg"
           >
             <Star size={18} fill="currentColor" />
-            {english ? "Featured Work" : site.featured.badge}
+            {translateKnown(site.featured.badge, english, { "Project Unggulan": "Featured Work" })}
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {english ? "Featured Projects" : site.featured.title}
+            {translateKnown(site.featured.title, english, { "Karya Terbaik Kami": "Featured Projects" })}
           </h2>
           <p className="text-slate-600 dark:text-slate-400">
-            {english ? "A selection of digital products we have built for our clients." : site.featured.subtitle}
+            {translateKnown(site.featured.subtitle, english, { "Beberapa project terbaik yang pernah saya kerjakan.": "A selection of digital projects we have delivered for clients." })}
           </p>
         </div>
 
@@ -76,7 +77,7 @@ export default function FeaturedProject() {
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <span className="inline-block px-3 py-1 rounded-full bg-white/90 dark:bg-dark-surface/90 text-sm font-semibold mb-2">
-                    {project.category}
+                    {project.category === "Pendidikan" && english ? "Education" : project.category === "Aplikasi Bisnis" && english ? "Business Applications" : project.category === "Utilitas" && english ? "Utilities" : project.category}
                   </span>
                   <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-300 transition-colors">
                     {project.title}

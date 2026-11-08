@@ -5,13 +5,14 @@ import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
 import Link from "next/link";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
 
 export default function Hero() {
   const { hero } = useSiteContent();
   const { language } = useLanguage();
   const english = language === "en";
-  const headline = english ? "Build. Launch. Grow your business." : hero.headline;
-  const subheadline = english ? "We build modern websites and custom applications that help businesses grow with a fast, responsive digital experience." : hero.subheadline;
+  const headline = translateKnown(hero.headline, english, { "Bangun Website & Aplikasi Profesional untuk Mengembangkan Bisnis Anda": "Build Professional Websites & Apps to Grow Your Business" });
+  const subheadline = translateKnown(hero.subheadline, english, { "Saya membantu bisnis, UMKM, organisasi, dan personal membangun website serta aplikasi custom yang modern, cepat, responsif, dan sesuai kebutuhan.": "We help businesses, organizations, and individuals build modern, fast, responsive websites and custom applications tailored to their needs." });
   if (!hero.visible) return null;
   return (
     <section id="home" className="ambient-hero relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
@@ -20,16 +21,16 @@ export default function Hero() {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium mb-6 border border-primary-100 dark:border-primary-800">
               <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span></span>
-              {english ? "Digital solutions for growing businesses" : hero.eyebrow}
+              {translateKnown(hero.eyebrow, english, { "Siap menerima project baru": "Available for new projects" })}
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">{headline}</h1>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-xl">{subheadline}</p>
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Link href={hero.ctaPrimaryHref} className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-xl hover:shadow-primary-600/20 hover:-translate-y-1">{english ? "Start a Project" : hero.ctaPrimary} <ArrowRight size={20} /></Link>
-              <Link href={hero.ctaSecondaryHref} className="btn-lift glass hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-slate-700">{english ? "View Portfolio" : hero.ctaSecondary}</Link>
+              <Link href={hero.ctaPrimaryHref} className="btn-lift btn-shine bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-xl hover:shadow-primary-600/20 hover:-translate-y-1">{translateKnown(hero.ctaPrimary, english, { "Mulai Project": "Start a Project" })} <ArrowRight size={20} /></Link>
+              <Link href={hero.ctaSecondaryHref} className="btn-lift glass hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-slate-700">{translateKnown(hero.ctaSecondary, english, { "Lihat Portfolio": "View Portfolio" })}</Link>
             </div>
             <div className="flex flex-wrap gap-4 md:gap-6">
-              {hero.badges.map((badge, i) => (<div key={i} className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400"><CheckCircle2 size={16} className="text-primary-500" /> {badge}</div>))}
+              {hero.badges.map((badge, i) => (<div key={i} className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400"><CheckCircle2 size={16} className="text-primary-500" /> {translateKnown(badge, english, { "Desain Modern": "Modern Design", "Custom Development": "Custom Development", "Fast Performance": "Fast Performance" })}</div>))}
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.2 }} className="relative">

@@ -17,6 +17,7 @@ import { PortfolioService } from "@/lib/services/portfolio.service";
 import { PortfolioProject } from "@/lib/types/portfolio";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
 
 interface PortfolioDetailViewProps {
   project: PortfolioProject;
@@ -82,7 +83,7 @@ export default function PortfolioDetailView({ project }: PortfolioDetailViewProp
         <div className="mb-10">
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="px-3 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-semibold">
-              {project.category}
+              {translateKnown(project.category, english, { Pendidikan: "Education", "Aplikasi Bisnis": "Business Applications", Utilitas: "Utilities" })}
             </span>
             <span className="px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold flex items-center gap-1">
               <CheckCircle2 size={14} /> {project.status}

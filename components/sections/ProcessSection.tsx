@@ -29,7 +29,7 @@ export default function ProcessSection() {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4 md:px-6 max-w-4xl">
-        <div className="text-center mb-12"><h2 className="text-3xl md:text-4xl font-bold mb-4">{english ? "How We Work" : process.title}</h2><p className="text-slate-600 dark:text-slate-400">{english ? "A clear process from the first conversation to launch." : process.subtitle}</p></div>
+        <div className="text-center mb-12"><h2 className="text-3xl md:text-4xl font-bold mb-4">{translateKnown(process.title, english, { "Bagaimana Project Anda Dikerjakan?": "How We Work" })}</h2><p className="text-slate-600 dark:text-slate-400">{translateKnown(process.subtitle, english, { "Proses terstruktur untuk hasil terbaik": "A structured process for the best results" })}</p></div>
         <div className="relative"><div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800 md:left-1/2 md:-translate-x-1/2" />
           {process.items.map((step, i) => (
             <motion.div key={`${step.step}-${i}`} initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className={`relative flex items-center mb-12 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}>

@@ -3,6 +3,7 @@ import { Star, Quote } from "lucide-react";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
 
 export default function TestimonialSection() {
   const { testimonials } = useSiteContent();
@@ -13,8 +14,8 @@ export default function TestimonialSection() {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4 md:px-6 max-w-5xl">
-        <div className="text-center mb-12"><h2 className="text-3xl md:text-4xl font-bold mb-4">{english ? "What Our Clients Say" : testimonials.title}</h2>{testimonials.subtitle && <p className="text-slate-600 dark:text-slate-400">{english ? "Experiences shared by clients we have worked with." : testimonials.subtitle}</p>}</div>
-        {items.length === 0 ? <div className="p-10 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center"><Quote size={32} className="text-slate-300 dark:text-slate-700 mx-auto mb-4" /><p className="text-slate-500 dark:text-slate-400 font-medium">{english ? "Client stories are coming soon" : testimonials.emptyTitle}</p><p className="text-sm text-slate-400 dark:text-slate-500 mt-2">{english ? "Check back later for client experiences." : testimonials.emptyText}</p></div> : (
+        <div className="text-center mb-12"><h2 className="text-3xl md:text-4xl font-bold mb-4">{translateKnown(testimonials.title, english, { "Apa Kata Customer?": "What Our Clients Say" })}</h2>{testimonials.subtitle && <p className="text-slate-600 dark:text-slate-400">{translateKnown(testimonials.subtitle, english, { "Testimoni asli dari customer yang telah menggunakan layanan Kastriva.": "Feedback from clients who have used Kastriva services." })}</p>}</div>
+        {items.length === 0 ? <div className="p-10 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center"><Quote size={32} className="text-slate-300 dark:text-slate-700 mx-auto mb-4" /><p className="text-slate-500 dark:text-slate-400 font-medium">{translateKnown(testimonials.emptyTitle, english, { "Testimonial customer akan ditampilkan di sini.": "Client stories are coming soon." })}</p><p className="text-sm text-slate-400 dark:text-slate-500 mt-2">{translateKnown(testimonials.emptyText, english, { "Kami hanya menampilkan testimoni asli dari customer yang telah menyelesaikan project.": "We only share feedback from clients who have completed a project." })}</p></div> : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((t, i) => (
               <InteractiveCard
