@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface InstallPWAButtonProps {
   compact?: boolean;
 }
 
 export default function InstallPWAButton({ compact = false }: InstallPWAButtonProps) {
+  const { language } = useLanguage();
+  const english = language === "en";
   const [available, setAvailable] = useState(false);
 
   useEffect(() => {
@@ -42,9 +45,9 @@ export default function InstallPWAButton({ compact = false }: InstallPWAButtonPr
       className={compact
         ? "flex items-center gap-2 py-2 text-base font-medium"
         : "inline-flex items-center gap-2 rounded-full border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:text-primary-600 dark:border-slate-700 dark:text-slate-200 dark:hover:text-primary-400"}
-      aria-label="Instal Kastriva sebagai aplikasi"
+      aria-label={english ? "Install Kastriva as an app" : "Instal Kastriva sebagai aplikasi"}
     >
-      <Download size={compact ? 16 : 15} /> Instal App
+      <Download size={compact ? 16 : 15} /> {english ? "Install App" : "Instal App"}
     </button>
   );
 }
