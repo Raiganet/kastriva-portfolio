@@ -3,6 +3,23 @@ import { motion } from "framer-motion";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
+
+const processTranslations: Record<string, string> = {
+  Konsultasi: "Consultation",
+  "Analisis Kebutuhan": "Requirements Analysis",
+  Perencanaan: "Planning",
+  "Desain & Pengembangan": "Design & Development",
+  "UI/UX Design": "UI/UX Design",
+  Development: "Development",
+  Peluncuran: "Launch",
+  "Testing & Deployment": "Testing & Deployment",
+  "Diskusi kebutuhan, tujuan bisnis, dan fitur yang diinginkan.": "Discuss your needs, business goals, and desired features.",
+  "Penyusunan scope of work, timeline, dan penawaran harga.": "Define the project scope, timeline, and quotation.",
+  "Pembuatan wireframe dan mockup desain untuk disetujui.": "Create wireframes and design mockups for your approval.",
+  "Proses coding dan integrasi sistem sesuai desain yang disetujui.": "Build and integrate the system according to the approved design.",
+  "Quality assurance, revisi final, dan peluncuran website.": "Complete quality assurance, final revisions, and website launch.",
+};
 
 export default function ProcessSection() {
   const { process } = useSiteContent();
@@ -23,8 +40,8 @@ export default function ProcessSection() {
                   entrance={false}
                   className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary-300 hover:shadow-lg hover:shadow-primary-900/5 dark:border-slate-800 dark:bg-dark-surface"
                 >
-                  <h3 className="text-xl font-bold mb-2 transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">{english ? ({ Konsultasi: "Consultation", Perencanaan: "Planning", "Desain & Pengembangan": "Design & Development", Peluncuran: "Launch" } as Record<string, string>)[step.title] || step.title : step.title}</h3>
-                  <p className="text-slate-600 dark:text-slate-400">{english ? "We work closely with you to shape the project scope, build the solution, and prepare it for launch." : step.description}</p>
+                  <h3 className="text-xl font-bold mb-2 transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">{translateKnown(step.title, english, processTranslations)}</h3>
+                  <p className="text-slate-600 dark:text-slate-400">{translateKnown(step.description, english, processTranslations)}</p>
                 </InteractiveCard>
               </div>
               <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-16 h-16 rounded-full bg-primary-600 text-white font-bold flex items-center justify-center text-lg border-4 border-white dark:border-dark-bg shadow-lg">{step.step}</div>

@@ -4,6 +4,31 @@ import { CheckCircle2 } from "lucide-react";
 import { useSiteContent } from "@/components/cms/SiteContentProvider";
 import { InteractiveCard } from "@/components/ui";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { translateKnown } from "@/components/i18n/translateKnown";
+
+const benefitTranslations: Record<string, string> = {
+  "Desain Modern & Premium": "Modern, Premium Design",
+  "100% Responsive": "100% Responsive",
+  "Performa Cepat (Core Web Vitals)": "Fast Performance (Core Web Vitals)",
+  "Struktur Kode Rapi & Scalable": "Clean, Scalable Code",
+  "Konsultasi Gratis Sebelum Mulai": "Free Consultation Before We Start",
+  "Support & Maintenance Setelah Project": "Support & Maintenance After Launch",
+};
+const processTranslations: Record<string, string> = {
+  Konsultasi: "Consultation",
+  "Analisis Kebutuhan": "Requirements Analysis",
+  Perencanaan: "Planning",
+  "Desain & Pengembangan": "Design & Development",
+  "UI/UX Design": "UI/UX Design",
+  Development: "Development",
+  Peluncuran: "Launch",
+  "Testing & Deployment": "Testing & Deployment",
+  "Diskusi kebutuhan, tujuan bisnis, dan fitur yang diinginkan.": "Discuss your needs, business goals, and desired features.",
+  "Penyusunan scope of work, timeline, dan penawaran harga.": "Define the project scope, timeline, and quotation.",
+  "Pembuatan wireframe dan mockup desain untuk disetujui.": "Create wireframes and design mockups for your approval.",
+  "Proses coding dan integrasi sistem sesuai desain yang disetujui.": "Build and integrate the system according to the approved design.",
+  "Quality assurance, revisi final, dan peluncuran website.": "Complete quality assurance, final revisions, and website launch.",
+};
 
 export default function WhyChooseSection() {
   const site = useSiteContent();
@@ -29,7 +54,7 @@ export default function WhyChooseSection() {
                   className="group flex items-start gap-3 rounded-xl p-3 transition-colors duration-300 hover:bg-white/70 dark:hover:bg-white/5"
                 >
                   <div className="mt-1 bg-green-100 dark:bg-green-900/30 p-1 rounded-full transition-transform duration-300 group-hover:scale-110"><CheckCircle2 size={16} className="text-green-600 dark:text-green-400" /></div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{english ? ({ "Desain Modern": "Modern Design", "Kualitas Terjamin": "Reliable Quality", "Dukungan Profesional": "Professional Support", "Harga Transparan": "Transparent Pricing" } as Record<string,string>)[item] || item : item}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{translateKnown(item, english, benefitTranslations)}</span>
                 </InteractiveCard>
               ))}
             </div>
@@ -43,8 +68,8 @@ export default function WhyChooseSection() {
                     <div key={i} className="group flex gap-4">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-bold flex items-center justify-center text-sm transition-transform duration-300 group-hover:scale-110">{step.step}</div>
                       <div>
-                        <h4 className="font-bold mb-1">{step.title}</h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{step.description}</p>
+                        <h4 className="font-bold mb-1">{translateKnown(step.title, english, processTranslations)}</h4>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{translateKnown(step.description, english, processTranslations)}</p>
                       </div>
                     </div>
                   ))}

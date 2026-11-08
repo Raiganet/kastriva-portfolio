@@ -21,7 +21,7 @@ export default function StatsSection() {
               className="rounded-2xl p-3 transition-colors duration-300 hover:bg-white/70 dark:hover:bg-white/5"
             >
               <div className="text-3xl md:text-4xl font-bold text-primary-600 mb-1">{stat.value}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{english ? ({ "Project Selesai": "Completed Projects", "Website & Web App": "Websites & Web Apps", Client: "Clients", Teknologi: "Technologies" } as Record<string, string>)[stat.label] || stat.label : stat.label}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{english ? ({ "Project Selesai": "Completed Projects", "Website & Web App": "Websites & Web Apps", "Client": "Clients", "Teknologi": "Technologies" } as Record<string, string>)[stat.label] || stat.label : stat.label}</div>
             </InteractiveCard>
           ))}
         </div>
